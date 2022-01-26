@@ -21,7 +21,6 @@
     "@prisma/client": "^3.8.1",
     "dotenv": "^14.3.2",
     "ethers": "^5.5.3",
-    "express": "^4.17.2",
     "xpnet-web3-contracts": "git@github.com:XP-NETWORK/XP.network-HECO-Migration.git"
   }
 }
