@@ -1,10 +1,14 @@
-// import express from "express";
+import express from "express";
 import { ethers } from "ethers";
 import {
   contractTransferEventService,
   contractUnfreezeEventService,
 } from "./service";
 import config from "./config";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+const app = express();
 
 async function main() {
   const velasProvider = new ethers.providers.JsonRpcProvider(config.velas.node);
@@ -174,3 +178,11 @@ async function main() {
 }
 
 main();
+
+app.get("/", async (req, res) => {
+  const events = await prisma.event.findMany();
+  res.json(events);
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Listening on port ${port}`));
