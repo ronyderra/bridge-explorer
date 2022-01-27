@@ -37,9 +37,9 @@ async function main() {
   ).listen();
   contractUnfreezeEventService(
     velasProvider,
-    config.bsc.contract,
+    config.velas.contract,
     "VELAS",
-    config.bsc.nonce
+    config.velas.nonce
   ).listen();
 
   contractTransferEventService(
