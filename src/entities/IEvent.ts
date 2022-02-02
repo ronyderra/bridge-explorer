@@ -6,4 +6,9 @@ export interface IEvent {
   actionId: string;
   txFees: string;
   eventId?: string;
+  status: "pending" | "success";
+  fromHash: string;
+  toHash?: string;
+  senderAddress: string;
+  targetAddress?: string;
 }

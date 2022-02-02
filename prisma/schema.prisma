@@ -12,12 +12,17 @@ datasource db {
 }
 
 model Event {
-  id        String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  chainName String?
-  type      String?
-  fromChain String?
-  toChain   String?
-  actionId  String?
-  txFees    String?
-  eventId   String?
+  id            String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  chainName     String?
+  type          String?
+  fromChain     String?
+  toChain       String?
+  actionId      String?
+  txFees        String?
+  eventId       String?
+  status        String  @default("pending")
+  fromHash      String?
+  toHash        String?
+  targetAddress String?
+  senderAddress String?
 }
