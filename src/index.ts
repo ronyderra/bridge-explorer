@@ -25,7 +25,20 @@ async function main() {
 main();
 
 app.get("/", async (req, res) => {
-  const events = await prisma.event.findMany();
+  let events: any;
+
+  if (req.query["from"]) {
+    events = await prisma.event.findMany({
+      where: { fromChain: req.query["from"] as string },
+    });
+  } else if (req.query["to"]) {
+    events = await prisma.event.findMany({
+      where: { toChain: req.query["to"] as string },
+    });
+  } else {
+    events = await prisma.event.findMany();
+  }
+
   res.json(events);
 });
 
