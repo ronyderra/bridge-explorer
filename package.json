@@ -12,6 +12,8 @@
   "author": "Rishabh Kumar",
   "devDependencies": {
     "@types/express": "^4.17.13",
+    "@types/js-base64": "^3.3.1",
+    "@types/ws": "^8.2.2",
     "nodemon": "^2.0.15",
     "prisma": "^3.8.1",
     "ts-node": "^10.4.0",
@@ -19,9 +21,11 @@
   },
   "dependencies": {
     "@prisma/client": "^3.8.1",
+    "@taquito/taquito": "^11.1.0",
     "dotenv": "^14.3.2",
     "ethers": "^5.5.3",
     "express": "^4.17.2",
+    "ws": "^8.4.2",
     "xpnet-web3-contracts": "git@github.com:XP-NETWORK/XP.network-HECO-Migration.git"
   }
 }
