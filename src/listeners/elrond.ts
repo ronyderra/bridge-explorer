@@ -4,6 +4,7 @@ import BigNumber from "bignumber.js";
 import { IContractEventListener } from "./web3";
 import { EvResp } from "../entities/EvResp";
 
+// TODO: Save bridge events to db
 export function elrondEventListener(
   rpc: string,
   contract: string
