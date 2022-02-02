@@ -1,6 +1,6 @@
 import { providers } from "ethers";
 import { Minter__factory } from "xpnet-web3-contracts";
-import { PrismaClient } from ".prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { IEventRepo } from "../db/repo";
 
 const prisma = new PrismaClient();

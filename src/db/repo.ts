@@ -4,7 +4,11 @@ import { IEvent } from "../entities/IEvent";
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<void>;
   findEvent(targetAddress: string): Promise<Event | null>;
-  updateEvent(actionId: string, targetHash: string): Promise<Event>;
+  updateEvent(
+    actionId: string,
+    chainNonce: string,
+    toHash: string
+  ): Promise<Event>;
 }
 
 export default function createEventRepo(prisma: PrismaClient): IEventRepo {
@@ -16,10 +20,10 @@ export default function createEventRepo(prisma: PrismaClient): IEventRepo {
     async findEvent(targetAddress) {
       return await prisma.event.findFirst({ where: { targetAddress } });
     },
-    async updateEvent(id, targetHash) {
+    async updateEvent(actionId, chainNonce, toHash) {
       return await prisma.event.update({
-        where: { id },
-        data: { toHash: targetHash, status: "success" },
+        where: { actionId, chainNonce },
+        data: { toHash, status: "success" },
       });
     },
   };
