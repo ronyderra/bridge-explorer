@@ -1,5 +1,5 @@
 import { providers } from "ethers";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
+import { Minter__factory } from "xpnet-web3-contracts";
 import { PrismaClient } from ".prisma/client";
 import { IEventRepo } from "../db/repo";
 
@@ -12,7 +12,6 @@ export interface IContractEventListener {
 export function contractEventService(
   provider: providers.Provider,
   minterAddress: string,
-  userNftMinterAddress: string,
   chainName: string,
   chainNonce: string,
   eventRepo: IEventRepo
@@ -20,20 +19,9 @@ export function contractEventService(
   return {
     listen: () => {
       const contract = Minter__factory.connect(minterAddress, provider);
-      const xpnft = UserNftMinter__factory.connect(
-        userNftMinterAddress,
-        provider
-      );
-      const mintEvent = xpnft.filters.Transfer();
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
-      xpnft.on(mintEvent, async (from, to, id, event) => {
-        const ev = await eventRepo.findEvent(to);
-        if (ev) {
-          await eventRepo.updateEvent(ev.id, event.transactionHash);
-        }
-      });
       contract.on(
         transferEvent,
         async (actionId, targetNonce, txFees, to, tokenId, contract, event) => {
