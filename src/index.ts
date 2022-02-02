@@ -1,12 +1,14 @@
 import express from "express";
-import { ethers, providers } from "ethers";
+import { providers } from "ethers";
 import { contractEventService } from "./listeners/web3";
 import config from "./config";
 import { PrismaClient } from "@prisma/client";
+import cors from "cors";
 import createEventRepo from "./db/repo";
 const prisma = new PrismaClient();
 
 const app = express();
+app.use(cors());
 
 async function main() {
   config.web3.map((chain) => {
