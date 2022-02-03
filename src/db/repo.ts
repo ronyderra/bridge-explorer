@@ -27,9 +27,13 @@ export default function createEventRepo({
       return await em.findOne(BridgeEvent, { targetAddress });
     },
     async updateEvent(actionId, chainNonce, toHash) {
-      const event = await em.findOne(BridgeEvent, { actionId, chainNonce });
+      const event = await em.findOne(BridgeEvent, {
+        actionId,
+        fromChain: chainNonce,
+      });
       if (!event) throw new Error("Event not found");
-      wrap(event).assign({ toHash, status: "success" });
+      wrap(event).assign({ toHash, status: "success" }, { em });
+      await em.flush();
       return event;
     },
   };
