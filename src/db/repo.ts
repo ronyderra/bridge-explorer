@@ -1,30 +1,36 @@
-import { PrismaClient, Event } from ".prisma/client";
-import { IEvent } from "../entities/IEvent";
+import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
+import { BridgeEvent, IEvent } from "../entities/IEvent";
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<void>;
-  findEvent(targetAddress: string): Promise<Event | null>;
+  findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   updateEvent(
     actionId: string,
     chainNonce: string,
     toHash: string
-  ): Promise<Event>;
+  ): Promise<BridgeEvent>;
+  getAllEvents(fromChain?: string, toChain?: string): Promise<BridgeEvent[]>;
 }
 
-export default function createEventRepo(prisma: PrismaClient): IEventRepo {
+export default function createEventRepo({
+  em,
+}: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
+    async getAllEvents(fromChain = undefined, toChain = undefined) {
+      const events = await em.find(BridgeEvent, { fromChain, toChain });
+      return events;
+    },
     async createEvent(e) {
-      await prisma.event.create({ data: e });
-      return;
+      return await em.persistAndFlush(new BridgeEvent(e));
     },
     async findEvent(targetAddress) {
-      return await prisma.event.findFirst({ where: { targetAddress } });
+      return await em.findOne(BridgeEvent, { targetAddress });
     },
     async updateEvent(actionId, chainNonce, toHash) {
-      return await prisma.event.update({
-        where: { actionId, chainNonce },
-        data: { toHash, status: "success" },
-      });
+      const event = await em.findOne(BridgeEvent, { actionId, chainNonce });
+      if (!event) throw new Error("Event not found");
+      wrap(event).assign({ toHash, status: "success" });
+      return event;
     },
   };
 }

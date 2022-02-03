@@ -1,9 +1,6 @@
 import { providers } from "ethers";
 import { Minter__factory } from "xpnet-web3-contracts";
-import { PrismaClient } from "@prisma/client";
 import { IEventRepo } from "../db/repo";
-
-const prisma = new PrismaClient();
 
 export interface IContractEventListener {
   listen(): void;
@@ -28,7 +25,7 @@ export function contractEventService(
           await eventRepo.createEvent({
             actionId: actionId.toString(),
             chainName,
-            eventId: tokenId.toString(),
+            tokenId: tokenId.toString(),
             fromChain: chainNonce,
             toChain: targetNonce.toString(),
             fromHash: event.transactionHash,
@@ -48,7 +45,7 @@ export function contractEventService(
         await eventRepo.createEvent({
           actionId: actionId.toString(),
           chainName,
-          eventId: undefined,
+          tokenId: undefined,
           fromChain: undefined,
           toChain: chainNonce,
           txFees: txFees.toString(),

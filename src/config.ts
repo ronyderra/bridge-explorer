@@ -86,4 +86,6 @@ export default {
     node: getOrThrow("ELROND_NODE_URL"),
     contract: getOrThrow("ELROND_CONTRACT_ADDRESS"),
   },
+  db: getOrThrow("DB_URL"),
+  port: parseInt(getOrThrow("PORT"), 10),
 };
