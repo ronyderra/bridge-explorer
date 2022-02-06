@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node build/index.js",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "prestart": "npm run build"
@@ -15,10 +15,10 @@
     "@types/js-base64": "^3.3.1",
     "@types/ws": "^8.2.2",
     "nodemon": "^2.0.15",
-    "prisma": "^3.8.1",
-    "ts-node": "^10.4.0"
+    "prisma": "^3.8.1"
   },
   "dependencies": {
+    "ts-node": "^10.4.0",
     "typescript": "^4.5.5",
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/mongodb": "^4.5.10",
