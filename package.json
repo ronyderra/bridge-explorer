@@ -16,10 +16,10 @@
     "@types/ws": "^8.2.2",
     "nodemon": "^2.0.15",
     "prisma": "^3.8.1",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+    "ts-node": "^10.4.0"
   },
   "dependencies": {
+    "typescript": "^4.5.5",
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/mongodb": "^4.5.10",
     "@taquito/taquito": "^11.1.0",
