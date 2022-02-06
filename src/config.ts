@@ -18,13 +18,13 @@ export default {
       contract: getOrThrow("BSC_CONTRACT_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
     },
-    {
-      name: "ETHEREUM",
+    // {
+    //   name: "ETHEREUM",
 
-      node: getOrThrow("ETHEREUM_RPC_URL"),
-      contract: getOrThrow("ETHEREUM_CONTRACT_ADDRESS"),
-      nonce: getOrThrow("ETHEREUM_NONCE"),
-    },
+    //   node: getOrThrow("ETHEREUM_RPC_URL"),
+    //   contract: getOrThrow("ETHEREUM_CONTRACT_ADDRESS"),
+    //   nonce: getOrThrow("ETHEREUM_NONCE"),
+    // },
     {
       name: "VELAS",
 
@@ -51,18 +51,18 @@ export default {
       contract: getOrThrow("FANTOM_CONTRACT_ADDRESS"),
       nonce: getOrThrow("FANTOM_NONCE"),
     },
-    {
-      name: "CELO",
-      node: getOrThrow("CELO_RPC_URL"),
-      contract: getOrThrow("CELO_CONTRACT_ADDRESS"),
-      nonce: getOrThrow("CELO_NONCE"),
-    },
-    {
-      name: "HARMONY",
-      node: getOrThrow("HARMONY_RPC_URL"),
-      contract: getOrThrow("HARMONY_CONTRACT_ADDRESS"),
-      nonce: getOrThrow("HARMONY_NONCE"),
-    },
+    // {
+    //   name: "CELO",
+    //   node: getOrThrow("CELO_RPC_URL"),
+    //   contract: getOrThrow("CELO_CONTRACT_ADDRESS"),
+    //   nonce: getOrThrow("CELO_NONCE"),
+    // },
+    // {
+    //   name: "HARMONY",
+    //   node: getOrThrow("HARMONY_RPC_URL"),
+    //   contract: getOrThrow("HARMONY_CONTRACT_ADDRESS"),
+    //   nonce: getOrThrow("HARMONY_NONCE"),
+    // },
     {
       name: "XDAI",
       node: getOrThrow("XDAI_RPC_URL"),
@@ -75,12 +75,12 @@ export default {
       contract: getOrThrow("FUSE_CONTRACT_ADDRESS"),
       nonce: getOrThrow("FUSE_NONCE"),
     },
-    {
-      name: "UNIQUE",
-      node: getOrThrow("UNIQUE_RPC_URL"),
-      contract: getOrThrow("UNIQUE_CONTRACT_ADDRESS"),
-      nonce: getOrThrow("UNIQUE_NONCE"),
-    },
+    // {
+    //   name: "UNIQUE",
+    //   node: getOrThrow("UNIQUE_RPC_URL"),
+    //   contract: getOrThrow("UNIQUE_CONTRACT_ADDRESS"),
+    //   nonce: getOrThrow("UNIQUE_NONCE"),
+    // },
   ],
   elrond: {
     node: getOrThrow("ELROND_NODE_URL"),
