@@ -29,6 +29,6 @@ import DBConf from "./mikro-orm.config";
   });
 
   app.listen(config.port, () =>
-    console.log(`Listening on port ${config.port}`)
+    console.log(`Listening on port ${process.env.PORT}`)
   );
 })();
