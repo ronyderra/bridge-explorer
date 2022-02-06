@@ -83,7 +83,7 @@ export default {
     // },
   ],
   elrond: {
-    node: getOrThrow("ELROND_NODE_URL"),
+    node: getOrThrow("ELROND_RPC_URL"),
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
   },
   db: getOrThrow("DB_URL"),
