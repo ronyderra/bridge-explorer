@@ -87,5 +87,5 @@ export default {
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
   },
   db: getOrThrow("DB_URL"),
-  port: parseInt(getOrThrow("PORT"), 10),
+  port: getOrThrow("PORT"),
 };
