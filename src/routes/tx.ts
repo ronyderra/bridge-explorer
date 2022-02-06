@@ -4,9 +4,9 @@ import { IEventRepo } from "../db/repo";
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
 
-  router.get("/", (req, res) => {
+  router.get("/", async (req, res) => {
     try {
-      const events = repo.getAllEvents(
+      const events = await repo.getAllEvents(
         req.query.from?.toString(),
         req.query.to?.toString()
       );
@@ -16,10 +16,10 @@ export const txRouter = (repo: IEventRepo): Router => {
     }
   });
 
-  router.get("/tx_event", (req, res) => {
+  router.get("/tx_event", async (req, res) => {
     try {
       const { chain_nonce, action_id, tx_hash } = req.body;
-      const event = repo.updateEvent(action_id, chain_nonce, tx_hash);
+      const event = await repo.updateEvent(action_id, chain_nonce, tx_hash);
       res.status(200).json(event);
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
