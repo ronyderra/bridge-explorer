@@ -13,6 +13,7 @@ export interface IEvent {
   toHash?: string;
   senderAddress: string;
   targetAddress?: string;
+  nftUri: string;
 }
 
 @Entity()
