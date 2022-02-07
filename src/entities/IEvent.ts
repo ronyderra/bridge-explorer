@@ -13,7 +13,6 @@ export interface IEvent {
   toHash?: string;
   senderAddress: string;
   targetAddress?: string;
-  createdAt?: Date;
 }
 
 @Entity()
@@ -73,7 +72,6 @@ export class BridgeEvent {
     fromChain,
     targetAddress,
     toHash,
-    createdAt,
   }: IEvent) {
     this.actionId = actionId;
     this.chainName = chainName;
@@ -87,6 +85,5 @@ export class BridgeEvent {
     this.fromChain = fromChain;
     this.targetAddress = targetAddress;
     this.toHash = toHash;
-    this.createdAt = createdAt!;
   }
 }
