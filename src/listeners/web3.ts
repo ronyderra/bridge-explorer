@@ -11,15 +11,13 @@ export function contractEventService(
   minterAddress: string,
   chainName: string,
   chainNonce: string,
+  erc721: string,
   eventRepo: IEventRepo
 ): IContractEventListener {
   return {
     listen: () => {
       const contract = Minter__factory.connect(minterAddress, provider);
-      const NFTcontract = UserNftMinter__factory.connect(
-        minterAddress,
-        provider
-      );
+      const NFTcontract = UserNftMinter__factory.connect(erc721, provider);
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
@@ -27,6 +25,7 @@ export function contractEventService(
         transferEvent,
         async (actionId, targetNonce, txFees, to, tokenId, contract, event) => {
           const nftUri = await NFTcontract.tokenURI(tokenId);
+          console.log(nftUri);
           await eventRepo.createEvent({
             actionId: actionId.toString(),
             chainName,
