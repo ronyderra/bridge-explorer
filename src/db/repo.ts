@@ -9,20 +9,30 @@ export interface IEventRepo {
     chainNonce: string,
     toHash: string
   ): Promise<BridgeEvent>;
-  getAllEvents(fromChain?: string, toChain?: string): Promise<BridgeEvent[]>;
+  getAllEvents(
+    fromChain?: string,
+    toChain?: string,
+    fromHash?: string
+  ): Promise<BridgeEvent[]>;
 }
 
 export default function createEventRepo({
   em,
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
-    async getAllEvents(fromChain = undefined, toChain = undefined) {
+    async getAllEvents(
+      fromChain = undefined,
+      toChain = undefined,
+      fromHash = undefined
+    ) {
       let events = await em.find(BridgeEvent, {});
 
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (toChain) {
         events = await em.find(BridgeEvent, { toChain });
+      } else if (fromHash) {
+        events = await em.find(BridgeEvent, { fromHash });
       }
       console.log(events);
       return events;
