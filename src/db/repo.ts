@@ -17,7 +17,14 @@ export default function createEventRepo({
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
     async getAllEvents(fromChain = undefined, toChain = undefined) {
-      const events = await em.find(BridgeEvent, { fromChain, toChain });
+      let events = await em.find(BridgeEvent, {});
+
+      if (fromChain) {
+        events = await em.find(BridgeEvent, { fromChain });
+      } else if (toChain) {
+        events = await em.find(BridgeEvent, { toChain });
+      }
+      console.log(events);
       return events;
     },
     async createEvent(e) {
