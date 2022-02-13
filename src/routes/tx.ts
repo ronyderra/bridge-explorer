@@ -17,7 +17,7 @@ export const txRouter = (repo: IEventRepo): Router => {
     }
   });
 
-  router.get("/tx_event", async (req, res) => {
+  router.post("/tx_event", async (req, res) => {
     try {
       const { chain_nonce, action_id, tx_hash } = req.body;
       const event = await repo.updateEvent(action_id, chain_nonce, tx_hash);
