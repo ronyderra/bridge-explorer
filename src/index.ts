@@ -25,7 +25,6 @@ import axios from "axios";
       chain.contract,
       chain.name,
       chain.nonce,
-      chain.erc721,
       createEventRepo(orm),
       axios
     ).listen();

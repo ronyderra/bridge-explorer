@@ -13,7 +13,6 @@ export function contractEventService(
   minterAddress: string,
   chainName: string,
   chainNonce: string,
-  erc721: string,
   eventRepo: IEventRepo,
   axios: AxiosInstance
 ): IContractEventListener {
