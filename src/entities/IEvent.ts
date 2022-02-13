@@ -57,6 +57,9 @@ export class BridgeEvent {
   @Property({ nullable: true })
   senderAddress?: string;
 
+  @Property({ nullable: true })
+  nftUri?: string;
+
   @Property()
   createdAt: Date = new Date();
 
@@ -73,6 +76,7 @@ export class BridgeEvent {
     fromChain,
     targetAddress,
     toHash,
+    nftUri,
   }: IEvent) {
     this.actionId = actionId;
     this.chainName = chainName;
@@ -86,5 +90,6 @@ export class BridgeEvent {
     this.fromChain = fromChain;
     this.targetAddress = targetAddress;
     this.toHash = toHash;
+    this.nftUri = nftUri;
   }
 }
