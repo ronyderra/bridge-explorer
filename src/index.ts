@@ -7,6 +7,7 @@ import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
 import DBConf from "./mikro-orm.config";
+import axios from "axios";
 
 (async function main() {
   const app = express();
@@ -25,7 +26,8 @@ import DBConf from "./mikro-orm.config";
       chain.name,
       chain.nonce,
       chain.erc721,
-      createEventRepo(orm)
+      createEventRepo(orm),
+      axios
     ).listen();
   });
 

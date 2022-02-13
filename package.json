@@ -17,16 +17,17 @@
     "prisma": "^3.8.1"
   },
   "dependencies": {
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5",
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/mongodb": "^4.5.10",
     "@taquito/taquito": "^11.1.0",
     "@types/cors": "^2.8.12",
+    "axios": "^0.26.0",
     "cors": "^2.8.5",
     "dotenv": "^14.3.2",
     "ethers": "^5.5.3",
     "express": "^4.17.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5",
     "ws": "^8.4.2",
     "xpnet-web3-contracts": "git+https://github.com/XP-NETWORK/XP.network-HECO-Migration.git"
   }

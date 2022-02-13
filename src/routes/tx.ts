@@ -17,11 +17,13 @@ export const txRouter = (repo: IEventRepo): Router => {
     }
   });
 
-  router.post("/tx_event", async (req, res) => {
+  router.put("/tx_event", async (req, res) => {
     try {
       const { chain_nonce, action_id, tx_hash } = req.body;
-      const event = await repo.updateEvent(action_id, chain_nonce, tx_hash);
-      res.status(200).json(event);
+
+      await repo.updateEvent(action_id, chain_nonce, tx_hash);
+
+      return res.status(200).json({ status: "ok" });
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }

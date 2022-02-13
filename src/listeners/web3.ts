@@ -1,6 +1,8 @@
+import { AxiosInstance } from "axios";
 import { providers } from "ethers";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { IEventRepo } from "../db/repo";
+import { IERC721WrappedMeta } from "../entities/ERCMeta";
 
 export interface IContractEventListener {
   listen(): void;
@@ -12,18 +14,22 @@ export function contractEventService(
   chainName: string,
   chainNonce: string,
   erc721: string,
-  eventRepo: IEventRepo
+  eventRepo: IEventRepo,
+  axios: AxiosInstance
 ): IContractEventListener {
   return {
     listen: () => {
       const contract = Minter__factory.connect(minterAddress, provider);
-      const NFTcontract = UserNftMinter__factory.connect(erc721, provider);
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
       contract.on(
         transferEvent,
         async (actionId, targetNonce, txFees, to, tokenId, contract, event) => {
+          const NFTcontract = UserNftMinter__factory.connect(
+            contract,
+            provider
+          );
           const nftUri = await NFTcontract.tokenURI(tokenId);
           await eventRepo.createEvent({
             actionId: actionId.toString(),
@@ -34,9 +40,9 @@ export function contractEventService(
             fromHash: event.transactionHash,
             txFees: txFees.toString(),
             type: "Transfer",
-            status: "Completed",
+            status: "Pending",
             toHash: undefined,
-            senderAddress: event.address,
+            senderAddress: (await event.getTransaction()).from,
             targetAddress: to,
             nftUri,
           });
@@ -47,22 +53,24 @@ export function contractEventService(
         }
       );
       contract.on(unfreezeEvent, async (actionId, txFees, to, value, event) => {
+        const wrappedData = await axios
+          .get<IERC721WrappedMeta>(value)
+          .catch((e: any) => console.log("Could not fetch data"));
         await eventRepo.createEvent({
           actionId: actionId.toString(),
           chainName,
-          tokenId: undefined,
-          fromChain: undefined,
-          toChain: chainNonce,
+          tokenId: wrappedData?.data?.wrapped.tokenId,
+          fromChain: chainNonce,
+          toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
           txFees: txFees.toString(),
           type: "Unfreeze",
-          status: "Completed",
+          status: "Pending",
           fromHash: event.transactionHash,
           toHash: undefined,
-          senderAddress: event.address,
-          targetAddress: undefined,
+          senderAddress: (await event.getTransaction()).from,
+          targetAddress: to,
           nftUri: value,
         });
-        console.log("Unfreez", value);
         console.log(
           `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
         );
