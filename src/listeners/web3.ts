@@ -25,7 +25,6 @@ export function contractEventService(
         transferEvent,
         async (actionId, targetNonce, txFees, to, tokenId, contract, event) => {
           const nftUri = await NFTcontract.tokenURI(tokenId);
-          console.log(nftUri);
           await eventRepo.createEvent({
             actionId: actionId.toString(),
             chainName,
@@ -35,12 +34,13 @@ export function contractEventService(
             fromHash: event.transactionHash,
             txFees: txFees.toString(),
             type: "Transfer",
-            status: "pending",
+            status: "Completed",
             toHash: undefined,
             senderAddress: event.address,
             targetAddress: to,
             nftUri,
           });
+          console.log("Transfer", nftUri);
           console.log(
             `${chainName} ${chainNonce}  ${targetNonce} ${actionId} ${txFees} ${to} ${tokenId} ${contract}`
           );
@@ -55,13 +55,14 @@ export function contractEventService(
           toChain: chainNonce,
           txFees: txFees.toString(),
           type: "Unfreeze",
-          status: "success",
+          status: "Completed",
           fromHash: event.transactionHash,
           toHash: undefined,
           senderAddress: event.address,
           targetAddress: undefined,
           nftUri: value,
         });
+        console.log("Unfreez", value);
         console.log(
           `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
         );

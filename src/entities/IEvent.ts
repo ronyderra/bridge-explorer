@@ -8,7 +8,7 @@ export interface IEvent {
   actionId: string;
   txFees: string;
   tokenId?: string;
-  status: "pending" | "success";
+  status: "Pending" | "Completed";
   fromHash: string;
   toHash?: string;
   senderAddress: string;
