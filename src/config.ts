@@ -91,7 +91,7 @@ const config = {
 
 export function chainNonceToName(nonce: string) {
   const chain = config.web3.find((chain) => chain.nonce === nonce);
-  return chain?.name;
+  return chain?.name ?? "UNKNOWN";
 }
 
 console.log(chainNonceToName("4"));

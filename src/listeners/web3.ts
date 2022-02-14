@@ -1,6 +1,7 @@
 import { AxiosInstance } from "axios";
 import { providers } from "ethers";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
+import { chainNonceToName } from "../config";
 import { IEventRepo } from "../db/repo";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 
@@ -34,8 +35,8 @@ export function contractEventService(
             actionId: actionId.toString(),
             chainName,
             tokenId: tokenId.toString(),
-            fromChain: chainNonce,
-            toChain: targetNonce.toString(),
+            fromChain: chainNonceToName(chainNonce),
+            toChain: chainNonceToName(targetNonce.toString()),
             fromHash: event.transactionHash,
             txFees: txFees.toString(),
             type: "Transfer",
@@ -59,8 +60,10 @@ export function contractEventService(
           actionId: actionId.toString(),
           chainName,
           tokenId: wrappedData?.data?.wrapped.tokenId,
-          fromChain: chainNonce,
-          toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
+          fromChain: chainNonceToName(chainNonce),
+          toChain: chainNonceToName(
+            wrappedData?.data?.wrapped?.origin ?? "N/A"
+          ),
           txFees: txFees.toString(),
           type: "Unfreeze",
           status: "Pending",
