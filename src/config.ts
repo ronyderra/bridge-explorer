@@ -1,6 +1,6 @@
-import { config } from "dotenv";
+import dotenv from "dotenv";
 
-config();
+dotenv.config();
 
 function getOrThrow(key: string): string {
   const value = process.env[key];
@@ -10,7 +10,12 @@ function getOrThrow(key: string): string {
   return value;
 }
 
-export default {
+export function chainNonceToName(nonce: string) {
+  const chain = config.web3.find((chain) => chain.nonce === nonce);
+  return chain?.name;
+}
+
+const config = {
   web3: [
     {
       name: "BSC",
@@ -88,3 +93,5 @@ export default {
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
 };
+
+export default config;
