@@ -10,11 +10,6 @@ function getOrThrow(key: string): string {
   return value;
 }
 
-export function chainNonceToName(nonce: string) {
-  const chain = config.web3.find((chain) => chain.nonce === nonce);
-  return chain?.name;
-}
-
 const config = {
   web3: [
     {
@@ -93,5 +88,12 @@ const config = {
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
 };
+
+export function chainNonceToName(nonce: string) {
+  const chain = config.web3.find((chain) => chain.nonce === nonce);
+  return chain?.name;
+}
+
+console.log(chainNonceToName("4"));
 
 export default config;
