@@ -4,7 +4,9 @@ export interface IEvent {
   chainName: string;
   type: "Transfer" | "Unfreeze";
   fromChain?: string;
-  toChain: string;
+  toChain?: string;
+  fromChainName?: string;
+  toChainName?: string;
   actionId: string;
   txFees: string;
   tokenId?: string;
@@ -32,6 +34,12 @@ export class BridgeEvent {
 
   @Property({ nullable: true })
   toChain?: string;
+
+  @Property({ nullable: true })
+  fromChainName?: string;
+
+  @Property({ nullable: true })
+  toChainName?: string;
 
   @Property({ nullable: true })
   actionId?: string;
@@ -77,6 +85,8 @@ export class BridgeEvent {
     targetAddress,
     toHash,
     nftUri,
+    fromChainName,
+    toChainName,
   }: IEvent) {
     this.actionId = actionId;
     this.chainName = chainName;
@@ -91,5 +101,7 @@ export class BridgeEvent {
     this.targetAddress = targetAddress;
     this.toHash = toHash;
     this.nftUri = nftUri;
+    this.fromChainName = fromChainName;
+    this.toChainName = toChainName;
   }
 }

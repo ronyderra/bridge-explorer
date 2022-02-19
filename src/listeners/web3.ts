@@ -35,8 +35,10 @@ export function contractEventService(
             actionId: actionId.toString(),
             chainName,
             tokenId: tokenId.toString(),
-            fromChain: chainNonceToName(chainNonce),
-            toChain: chainNonceToName(targetNonce.toString()),
+            fromChain: chainNonce,
+            toChain: targetNonce.toString(),
+            fromChainName: chainNonceToName(chainNonce),
+            toChainName: chainNonceToName(targetNonce.toString()),
             fromHash: event.transactionHash,
             txFees: txFees.toString(),
             type: "Transfer",
@@ -60,8 +62,10 @@ export function contractEventService(
           actionId: actionId.toString(),
           chainName,
           tokenId: wrappedData?.data?.wrapped.tokenId,
-          fromChain: chainNonceToName(chainNonce),
-          toChain: chainNonceToName(
+          fromChain: chainNonce,
+          toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
+          fromChainName: chainNonceToName(chainNonce),
+          toChainName: chainNonceToName(
             wrappedData?.data?.wrapped?.origin ?? "N/A"
           ),
           txFees: txFees.toString(),
