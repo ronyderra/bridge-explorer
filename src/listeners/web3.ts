@@ -58,7 +58,7 @@ export function contractEventService(
           );
         }
       );
-      // TODO: fix
+      // NOTE: will work when the only when the new bridge is used
       socket.on(
         "tx_executed_event",
         async (
