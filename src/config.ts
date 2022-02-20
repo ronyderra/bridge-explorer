@@ -87,6 +87,7 @@ const config = {
   },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
+  socketUrl: getOrThrow("SOCKET_URL"),
 };
 
 export function chainNonceToName(nonce: string) {

@@ -16,17 +16,5 @@ export const txRouter = (repo: IEventRepo): Router => {
       res.status(500).json({ message: e.toString() });
     }
   });
-
-  router.put("/tx_event", async (req, res) => {
-    try {
-      const { chain_nonce, action_id, tx_hash } = req.body;
-
-      await repo.updateEvent(action_id, chain_nonce, tx_hash);
-
-      return res.status(200).json({ status: "ok" });
-    } catch (e: any) {
-      res.status(500).json({ message: e.toString() });
-    }
-  });
   return router;
 };

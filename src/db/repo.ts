@@ -6,7 +6,8 @@ export interface IEventRepo {
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   updateEvent(
     actionId: string,
-    chainNonce: string,
+    fromChain: string,
+    toChain: string,
     toHash: string
   ): Promise<BridgeEvent>;
   getAllEvents(
@@ -43,13 +44,13 @@ export default function createEventRepo({
     async findEvent(targetAddress) {
       return await em.findOne(BridgeEvent, { targetAddress });
     },
-    async updateEvent(actionId, chainNonce, toHash) {
+    async updateEvent(actionId, fromChain, toChain, toHash) {
       const event = await em.findOne(BridgeEvent, {
         actionId,
-        fromChain: chainNonce,
+        fromChain,
       });
       if (!event) throw new Error("Event not found");
-      wrap(event).assign({ toHash, status: "success" }, { em });
+      wrap(event).assign({ toHash, status: "success", toChain }, { em });
       await em.flush();
       return event;
     },

@@ -4,10 +4,14 @@ import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { chainNonceToName } from "../config";
 import { IEventRepo } from "../db/repo";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
+import { io } from "socket.io-client";
+import config from "../config";
 
 export interface IContractEventListener {
   listen(): void;
 }
+
+const socket = io(config.socketUrl);
 
 export function contractEventService(
   provider: providers.Provider,
@@ -52,6 +56,30 @@ export function contractEventService(
           console.log(
             `${chainName} ${chainNonce}  ${targetNonce} ${actionId} ${txFees} ${to} ${tokenId} ${contract}`
           );
+        }
+      );
+      // TODO: fix
+      socket.on(
+        "tx_executed_event",
+        async (
+          toChain: number,
+          fromChain: number,
+          action_id: string,
+          hash: string
+        ) => {
+          // chain is targetChain
+          // action id is well, action id
+          // hash is the transaction hash
+          try {
+            await eventRepo.updateEvent(
+              action_id,
+              fromChain.toString(),
+              toChain.toString(),
+              hash
+            );
+          } catch (e: any) {
+            console.error(e);
+          }
         }
       );
       contract.on(unfreezeEvent, async (actionId, txFees, to, value, event) => {
