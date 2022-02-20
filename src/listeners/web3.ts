@@ -71,11 +71,15 @@ export function contractEventService(
           // action id is well, action id
           // hash is the transaction hash
           try {
-            await eventRepo.updateEvent(
-              action_id,
-              fromChain.toString(),
-              toChain.toString(),
-              hash
+            console.log(
+              await eventRepo.updateEvent(
+                action_id,
+                fromChain.toString(),
+                toChain.toString(),
+                hash
+              ),
+              "socket",
+              { action_id, fromChain, toChain, hash }
             );
           } catch (e: any) {
             console.error(e);
