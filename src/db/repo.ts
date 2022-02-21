@@ -43,7 +43,6 @@ export default function createEventRepo({
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       } else if (chainName) {
-        events = await em.find(BridgeEvent, {});
         // events where the chainName is a substring of the fromChainName or toChainName
         events = events.filter((event) => {
           return (
