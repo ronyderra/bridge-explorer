@@ -1,4 +1,10 @@
-import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
+import {
+  MikroORM,
+  IDatabaseDriver,
+  Connection,
+  wrap,
+  Filter,
+} from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 
 export interface IEventRepo {
@@ -13,7 +19,8 @@ export interface IEventRepo {
   getAllEvents(
     fromChain?: string,
     toChain?: string,
-    fromHash?: string
+    fromHash?: string,
+    chainName?: string
   ): Promise<BridgeEvent[]>;
 }
 
@@ -24,7 +31,8 @@ export default function createEventRepo({
     async getAllEvents(
       fromChain = undefined,
       toChain = undefined,
-      fromHash = undefined
+      fromHash = undefined,
+      chainName = undefined
     ) {
       let events = await em.find(BridgeEvent, {});
 
@@ -34,12 +42,22 @@ export default function createEventRepo({
         events = await em.find(BridgeEvent, { toChain });
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
+      } else if (chainName) {
+        events = await em.find(BridgeEvent, {});
+        // events where the chainName is a substring of the fromChainName or toChainName
+        events = events.filter((event) => {
+          return (
+            event?.toChainName?.includes(chainName) ||
+            event?.fromChainName?.includes(chainName)
+          );
+        });
       }
       console.log(events);
       return events;
     },
     async createEvent(e) {
       return await em.persistAndFlush(new BridgeEvent(e));
+      // await em.create(BridgeEvent, e);
     },
     async findEvent(targetAddress) {
       return await em.findOne(BridgeEvent, { targetAddress });
