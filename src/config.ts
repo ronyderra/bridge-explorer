@@ -18,12 +18,12 @@ const config = {
       contract: getOrThrow("BSC_MINTER_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
     },
-    {
-      name: "ETHEREUM",
-      node: getOrThrow("ETHEREUM_RPC_URL"),
-      contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
-      nonce: getOrThrow("ETHEREUM_NONCE"),
-    },
+    // {
+    //   name: "ETHEREUM",
+    //   node: getOrThrow("ETHEREUM_RPC_URL"),
+    //   contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
+    //   nonce: getOrThrow("ETHEREUM_NONCE"),
+    // },
     {
       name: "VELAS",
       node: getOrThrow("VELAS_RPC_URL"),

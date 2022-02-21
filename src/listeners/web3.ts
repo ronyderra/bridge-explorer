@@ -29,7 +29,17 @@ export function contractEventService(
       const unfreezeEvent = contract.filters.UnfreezeNft();
       contract.on(
         transferEvent,
-        async (actionId, targetNonce, txFees, to, tokenId, contract, event) => {
+        async (
+          actionId,
+          targetNonce,
+          txFees,
+          to,
+          tokenId,
+          contract,
+          tokenData,
+          mintWith,
+          event
+        ) => {
           const NFTcontract = UserNftMinter__factory.connect(
             contract,
             provider
@@ -86,33 +96,45 @@ export function contractEventService(
           }
         }
       );
-      contract.on(unfreezeEvent, async (actionId, txFees, to, value, event) => {
-        const wrappedData = await axios
-          .get<IERC721WrappedMeta>(value)
-          .catch((e: any) => console.log("Could not fetch data"));
-        await eventRepo.createEvent({
-          actionId: actionId.toString(),
-          chainName,
-          tokenId: wrappedData?.data?.wrapped.tokenId,
-          fromChain: chainNonce,
-          toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
-          fromChainName: chainNonceToName(chainNonce),
-          toChainName: chainNonceToName(
-            wrappedData?.data?.wrapped?.origin ?? "N/A"
-          ),
-          txFees: txFees.toString(),
-          type: "Unfreeze",
-          status: "Pending",
-          fromHash: event.transactionHash,
-          toHash: undefined,
-          senderAddress: (await event.getTransaction()).from,
-          targetAddress: to,
-          nftUri: value,
-        });
-        console.log(
-          `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
-        );
-      });
+      contract.on(
+        unfreezeEvent,
+        async (
+          actionId,
+          txFees,
+          to,
+          value,
+          burner,
+          tokenId,
+          baseUri,
+          event
+        ) => {
+          const wrappedData = await axios
+            .get<IERC721WrappedMeta>(value)
+            .catch((e: any) => console.log("Could not fetch data"));
+          await eventRepo.createEvent({
+            actionId: actionId.toString(),
+            chainName,
+            tokenId: wrappedData?.data?.wrapped.tokenId,
+            fromChain: chainNonce,
+            toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
+            fromChainName: chainNonceToName(chainNonce),
+            toChainName: chainNonceToName(
+              wrappedData?.data?.wrapped?.origin ?? "N/A"
+            ),
+            txFees: txFees.toString(),
+            type: "Unfreeze",
+            status: "Pending",
+            fromHash: event.transactionHash,
+            toHash: undefined,
+            senderAddress: (await event.getTransaction()).from,
+            targetAddress: to.toString(),
+            nftUri: value,
+          });
+          console.log(
+            `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
+          );
+        }
+      );
     },
   };
 }
