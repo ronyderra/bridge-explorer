@@ -47,8 +47,8 @@ export default function createEventRepo({
         // events where the chainName is a substring of the fromChainName or toChainName
         events = events.filter((event) => {
           return (
-            event?.toChainName?.includes(chainName) ||
-            event?.fromChainName?.includes(chainName)
+            event?.toChainName?.includes(chainName.toUpperCase()) ||
+            event?.fromChainName?.includes(chainName.toUpperCase())
           );
         });
       }
