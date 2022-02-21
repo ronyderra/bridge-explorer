@@ -18,13 +18,12 @@ const config = {
       contract: getOrThrow("BSC_MINTER_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
     },
-    // {
-    //   name: "ETHEREUM",
-
-    //   node: getOrThrow("ETHEREUM_RPC_URL"),
-    //   contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("ETHEREUM_NONCE"),
-    // },
+    {
+      name: "ETHEREUM",
+      node: getOrThrow("ETHEREUM_RPC_URL"),
+      contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
+      nonce: getOrThrow("ETHEREUM_NONCE"),
+    },
     {
       name: "VELAS",
       node: getOrThrow("VELAS_RPC_URL"),
@@ -44,12 +43,12 @@ const config = {
       contract: getOrThrow("AVALANCHE_MINTER_ADDRESS"),
       nonce: getOrThrow("AVALANCHE_NONCE"),
     },
-    {
-      name: "FANTOM",
-      node: getOrThrow("FANTOM_RPC_URL"),
-      contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
-      nonce: getOrThrow("FANTOM_NONCE"),
-    },
+    // {
+    //   name: "FANTOM",
+    //   node: getOrThrow("FANTOM_RPC_URL"),
+    //   contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
+    //   nonce: getOrThrow("FANTOM_NONCE"),
+    // },
     // {
     //   name: "CELO",
     //   node: getOrThrow("CELO_RPC_URL"),
@@ -68,12 +67,12 @@ const config = {
       contract: getOrThrow("XDAI_MINTER_ADDRESS"),
       nonce: getOrThrow("XDAI_NONCE"),
     },
-    {
-      name: "FUSE",
-      node: getOrThrow("FUSE_RPC_URL"),
-      contract: getOrThrow("FUSE_MINTER_ADDRESS"),
-      nonce: getOrThrow("FUSE_NONCE"),
-    },
+    // {
+    //   name: "FUSE",
+    //   node: getOrThrow("FUSE_RPC_URL"),
+    //   contract: getOrThrow("FUSE_MINTER_ADDRESS"),
+    //   nonce: getOrThrow("FUSE_NONCE"),
+    // },
     // {
     //   name: "UNIQUE",
     //   node: getOrThrow("UNIQUE_RPC_URL"),
@@ -81,10 +80,10 @@ const config = {
     //   nonce: getOrThrow("UNIQUE_NONCE"),
     // },
   ],
-  elrond: {
-    node: getOrThrow("ELROND_RPC_URL"),
-    contract: getOrThrow("ELROND_MINTER_ADDRESS"),
-  },
+  // elrond: {
+  //   node: getOrThrow("ELROND_RPC_URL"),
+  //   contract: getOrThrow("ELROND_MINTER_ADDRESS"),
+  // },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
   socketUrl: getOrThrow("SOCKET_URL"),
