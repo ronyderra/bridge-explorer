@@ -34,7 +34,11 @@ export default function createEventRepo({
       fromHash = undefined,
       chainName = undefined
     ) {
-      let events = await em.find(BridgeEvent, {});
+      let events = await em.find(
+        BridgeEvent,
+        {},
+        { cache: true, orderBy: { createdAt: "DESC" } }
+      );
 
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
