@@ -8,6 +8,7 @@ import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
 import DBConf from "./mikro-orm.config";
 import axios from "axios";
+const WebSocket = require("ws");
 
 (async function main() {
   const app = express();
@@ -30,7 +31,17 @@ import axios from "axios";
     ).listen();
   });
 
-  app.listen(config.port, () =>
+  const server = app.listen(config.port, () =>
     console.log(`Listening on port ${process.env.PORT}`)
   );
+
+  const wss = new WebSocket.Server({ server });
+
+  wss.on("open", function open() {
+    wss.send("something");
+  });
+
+  wss.on("connection", async function connection(ws: any, request: any) {
+    console.log("conn");
+  });
 })();

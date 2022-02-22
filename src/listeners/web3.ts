@@ -23,6 +23,7 @@ export function contractEventService(
 ): IContractEventListener {
   return {
     listen: () => {
+      console.log("listen");
       const contract = Minter__factory.connect(minterAddress, provider);
 
       const transferEvent = contract.filters.TransferErc721();
@@ -45,7 +46,7 @@ export function contractEventService(
             provider
           );
           const nftUri = await NFTcontract.tokenURI(tokenId);
-          await eventRepo.createEvent({
+          /*await eventRepo.createEvent({
             actionId: actionId.toString(),
             chainName,
             tokenId: tokenId.toString(),
@@ -61,7 +62,7 @@ export function contractEventService(
             senderAddress: (await event.getTransaction()).from,
             targetAddress: to,
             nftUri,
-          });
+          });*/
           console.log("Transfer", nftUri);
           console.log(
             `${chainName} ${chainNonce}  ${targetNonce} ${actionId} ${txFees} ${to} ${tokenId} ${contract}`
@@ -81,7 +82,14 @@ export function contractEventService(
           // action id is well, action id
           // hash is the transaction hash
           try {
-            console.log(
+            console.log("socket");
+            console.log({
+              toChain,
+              fromChain,
+              action_id,
+              hash,
+            });
+            /*console.log(
               await eventRepo.updateEvent(
                 action_id,
                 fromChain.toString(),
@@ -90,7 +98,7 @@ export function contractEventService(
               ),
               "socket",
               { action_id, fromChain, toChain, hash }
-            );
+            );*/
           } catch (e: any) {
             console.error(e);
           }
@@ -111,7 +119,7 @@ export function contractEventService(
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(value)
             .catch((e: any) => console.log("Could not fetch data"));
-          await eventRepo.createEvent({
+          /*  await eventRepo.createEvent({
             actionId: actionId.toString(),
             chainName,
             tokenId: wrappedData?.data?.wrapped.tokenId,
@@ -129,7 +137,8 @@ export function contractEventService(
             senderAddress: (await event.getTransaction()).from,
             targetAddress: to.toString(),
             nftUri: value,
-          });
+          });*/
+          console.log("unfreeze");
           console.log(
             `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
           );

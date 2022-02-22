@@ -17,5 +17,17 @@ export const txRouter = (repo: IEventRepo): Router => {
       res.status(500).json({ message: e.toString() });
     }
   });
+
+  router.get("/dashboard", async (req, res) => {
+    try {
+      const { period } = req.query;
+
+      const number = await repo.getDashboard(Number(period));
+
+      res.status(200).json(number);
+    } catch (e: any) {
+      res.status(500).json({ message: e.toString() });
+    }
+  });
   return router;
 };
