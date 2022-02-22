@@ -8,7 +8,8 @@ import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
 import DBConf from "./mikro-orm.config";
 import axios from "axios";
-const WebSocket = require("ws");
+import http from "http";
+import { Server } from "socket.io";
 
 (async function main() {
   const app = express();
@@ -18,30 +19,34 @@ const WebSocket = require("ws");
 
   const txRoutes = txRouter(createEventRepo(orm));
 
-  app.use("/", txRoutes);
+  let io: any = null;
 
-  config.web3.map((chain) => {
-    return contractEventService(
-      new providers.JsonRpcProvider(chain.node),
-      chain.contract,
-      chain.name,
-      chain.nonce,
-      createEventRepo(orm),
-      axios
-    ).listen();
-  });
-
-  const server = app.listen(config.port, () =>
-    console.log(`Listening on port ${process.env.PORT}`)
+  app.use(
+    "/",
+    (req: any, res, next) => {
+      req.io = io;
+      next();
+    },
+    txRoutes
   );
 
-  const wss = new WebSocket.Server({ server });
+  false &&
+    config.web3.map((chain) => {
+      return contractEventService(
+        new providers.JsonRpcProvider(chain.node),
+        chain.contract,
+        chain.name,
+        chain.nonce,
+        createEventRepo(orm),
+        axios
+      ).listen();
+    });
 
-  wss.on("open", function open() {
-    wss.send("something");
-  });
+  const server = http.createServer(app);
 
-  wss.on("connection", async function connection(ws: any, request: any) {
-    console.log("conn");
+  server.listen(config.port, () => {
+    console.log(`Listening on port ${process.env.PORT}`);
+
+    io = new Server(server);
   });
 })();

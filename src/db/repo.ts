@@ -55,7 +55,7 @@ export default function createEventRepo({
           );
         });
       }
-      console.log(events);
+
       return events;
     },
     async createEvent(e) {
