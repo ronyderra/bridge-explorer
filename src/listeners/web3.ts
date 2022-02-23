@@ -7,7 +7,7 @@ import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { io } from "socket.io-client";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
-import { debounce } from "../helpers";
+
 import config from "../config";
 
 export interface IContractEventListener {
