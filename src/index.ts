@@ -22,20 +22,18 @@ export default (async function main() {
 
   app.use("/", txRoutes);
 
-  const eventRepo = createEventRepo(orm);
-
   config.web3.map((chain) => {
     return contractEventService(
       new providers.JsonRpcProvider(chain.node),
       chain.contract,
       chain.name,
       chain.nonce,
-      eventRepo,
+      createEventRepo(orm),
       axios
     ).listen();
   });
 
-  EventService(eventRepo).listen();
+  EventService(createEventRepo(orm)).listen();
 
   const server = http.createServer(app);
 

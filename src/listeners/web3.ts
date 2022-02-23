@@ -128,7 +128,7 @@ export function contractEventService(
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
-          console.log(wrappedData, "wrapped");
+          //console.log(wrappedData, "wrapped");
 
           //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
 
