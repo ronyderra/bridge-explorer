@@ -19,6 +19,7 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.get("/dashboard", async (req: any, res) => {
+    //req.app.get("io").emit("msg", "alef");
     try {
       const { period } = req.query;
 

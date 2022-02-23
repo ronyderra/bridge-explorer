@@ -4,7 +4,7 @@ import { BridgeEvent, IEvent } from "../entities/IEvent";
 import moment from "moment";
 
 export interface IEventRepo {
-  createEvent(e: IEvent): Promise<void>;
+  createEvent(e: IEvent): Promise<BridgeEvent | null>;
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   updateEvent(
     actionId: string,
@@ -59,8 +59,9 @@ export default function createEventRepo({
       return events;
     },
     async createEvent(e) {
-      return await em.persistAndFlush(new BridgeEvent(e));
-      // await em.create(BridgeEvent, e);
+      const event = new BridgeEvent(e);
+      await em.persistAndFlush(new BridgeEvent(e));
+      return event;
     },
     async findEvent(targetAddress) {
       return await em.findOne(BridgeEvent, { targetAddress });
