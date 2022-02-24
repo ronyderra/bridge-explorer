@@ -37,7 +37,7 @@ export default function createEventRepo({
       let events = await em.find(
         BridgeEvent,
         {},
-        { cache: true, orderBy: { createdAt: "DESC" } }
+        { cache: true, orderBy: { createdAt: "DESC" }, limit: 12 }
       );
 
       if (fromChain) {
@@ -67,27 +67,40 @@ export default function createEventRepo({
       return await em.findOne(BridgeEvent, { targetAddress });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
-      let event = await em.findOne(BridgeEvent, {
-        $and: [
-          { actionId: actionId.toString() },
-          { fromChain: fromChain.toString() },
-        ],
-      });
-      
-      const interval = setInterval(async () => {
-        if (event) clearInterval(interval)
-        console.log("waiting for event", actionId, fromChain, toChain);
-        event = await em.findOne(BridgeEvent, {
+
+      const waitEvent = await new Promise<BridgeEvent>(async (resolve, reject) => {
+
+        let event = await em.findOne(BridgeEvent, {
           $and: [
             { actionId: actionId.toString() },
             { fromChain: fromChain.toString() },
           ],
         });
-      }, 100)
+  
 
-      setTimeout(() => {
-        clearInterval(interval)
-      }, 4000)
+        const interval = setInterval(async () => {
+          if (event) {
+            clearInterval(interval)
+            resolve(event)
+            return;
+          }
+          console.log("waiting for event", actionId, fromChain, toChain);
+          event = await em.findOne(BridgeEvent, {
+            $and: [
+              { actionId: actionId.toString() },
+              { fromChain: fromChain.toString() },
+            ],
+          });
+        }, 100)
+  
+        setTimeout(() => {
+          clearInterval(interval)
+          reject('no promise')
+        }, 20000)
+
+      })
+      
+      
 
      /* while (!event) {
         console.log("waiting for event", actionId, fromChain, toChain);
@@ -98,10 +111,10 @@ export default function createEventRepo({
           ],
         });
       }*/
-      if (!event) throw new Error("Event not found");
-      wrap(event).assign({ toHash, status: "Completed", toChain }, { em });
+      //if (waitEvent) throw new Error("Event not found");
+      wrap(waitEvent).assign({ toHash, status: "Completed", toChain }, { em });
       await em.flush();
-      return event;
+      return waitEvent;
     },
     async getDashboard(period) {
       console.log(period);

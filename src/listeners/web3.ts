@@ -17,6 +17,7 @@ export interface IContractEventListener {
 
 const socket = io(config.socketUrl);
 
+
 export function EventService(eventRepo: IEventRepo): IContractEventListener {
   return {
     listen: () => {
@@ -34,6 +35,7 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
 
   
             try {
+              console.log('dsds')
               const updated = await eventRepo.updateEvent(
                 action_id,
                 fromChain.toString(),
@@ -134,7 +136,11 @@ export function contractEventService(
           baseUri,
           event
         ) => {
-     
+          
+          console.log(await event.getTransaction(), 'trx');
+          console.log(await event.getBlock(),'block');
+          console.log(await event.getTransactionReceipt(),'receipt');
+         if (event.decode)  console.log(event.decode(event.data), 'decode')
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
@@ -144,6 +150,7 @@ export function contractEventService(
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
 
+      
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -161,7 +168,7 @@ export function contractEventService(
             toHash: undefined,
             senderAddress: (await event.getTransaction()).from,
             targetAddress: to.toString(),
-            nftUri: wrappedData?.data?.image,
+            nftUri: wrappedData?.data?.wrapped?.original_uri,
             //imgUri:  wrappedData?.data?.image,
           };
       

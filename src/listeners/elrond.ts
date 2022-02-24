@@ -9,8 +9,9 @@ export function elrondEventListener(
   rpc: string,
   contract: string
 ): IContractEventListener {
+  console.log(rpc);
   const ws = new WebSocket(rpc);
-  ws.send(
+  /*ws.send(
     JSON.stringify({
       subscriptionEntries: [
         {
@@ -18,11 +19,12 @@ export function elrondEventListener(
         },
       ],
     })
-  );
+  );*/
   return {
     listen: async () => {
       ws.addEventListener("message", async (ev: any) => {
         const evs: EvResp[] = JSON.parse(ev.data);
+        console.log(evs);
         await Promise.all(evs.map(async (ev) => await eventHandler(ev)));
       });
     },
