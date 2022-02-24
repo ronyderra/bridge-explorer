@@ -60,7 +60,7 @@ export default function createEventRepo({
     },
     async createEvent(e) {
       const event = new BridgeEvent(e);
-      await em.persistAndFlush(new BridgeEvent(e));
+      await em.persistAndFlush(event);
       return event;
     },
     async findEvent(targetAddress) {
@@ -73,7 +73,9 @@ export default function createEventRepo({
           { fromChain: fromChain.toString() },
         ],
       });
-      while (!event) {
+      
+      const interval = setInterval(async () => {
+        if (event) clearInterval(interval)
         console.log("waiting for event", actionId, fromChain, toChain);
         event = await em.findOne(BridgeEvent, {
           $and: [
@@ -81,7 +83,21 @@ export default function createEventRepo({
             { fromChain: fromChain.toString() },
           ],
         });
-      }
+      }, 100)
+
+      setTimeout(() => {
+        clearInterval(interval)
+      }, 4000)
+
+     /* while (!event) {
+        console.log("waiting for event", actionId, fromChain, toChain);
+        event = await em.findOne(BridgeEvent, {
+          $and: [
+            { actionId: actionId.toString() },
+            { fromChain: fromChain.toString() },
+          ],
+        });
+      }*/
       if (!event) throw new Error("Event not found");
       wrap(event).assign({ toHash, status: "Completed", toChain }, { em });
       await em.flush();

@@ -1,6 +1,7 @@
 import express from "express";
 import { providers } from "ethers";
 import { contractEventService, EventService } from "./listeners/web3";
+import { elrondEventListener } from "./listeners/elrond";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
@@ -32,8 +33,9 @@ export default (async function main() {
       axios
     ).listen();
   });
-
   EventService(createEventRepo(orm)).listen();
+
+  //elrondEventListener(config.elrond.node, config.elrond.contract).listen()
 
   const server = http.createServer(app);
 

@@ -10,6 +10,7 @@ import { io as clientAppSocket } from "../index";
 
 import config from "../config";
 
+
 export interface IContractEventListener {
   listen(): void;
 }
@@ -30,18 +31,25 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
           // chain is targetChain
           // action id is well, action id
           // hash is the transaction hash
-          try {
-            const updated = await eventRepo.updateEvent(
-              action_id,
-              fromChain.toString(),
-              toChain.toString(),
-              hash
-            );
 
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
-            console.error(e);
-          }
+  
+            try {
+              const updated = await eventRepo.updateEvent(
+                action_id,
+                fromChain.toString(),
+                toChain.toString(),
+                hash
+              );
+  
+              console.log(updated,'updated');
+  
+              clientAppSocket.emit("updateEvent", updated);
+            } catch (e: any) {
+              console.error(e);
+            }
+         
+
+         
         }
       );
     },
@@ -76,6 +84,7 @@ export function contractEventService(
           mintWith,
           event
         ) => {
+          console.log(event);
           const NFTcontract = UserNftMinter__factory.connect(
             contract,
             provider
@@ -98,9 +107,11 @@ export function contractEventService(
             targetAddress: to,
             nftUri,
           };
+         
           const doc = await eventRepo.createEvent(eventObj);
           console.log(doc);
           clientAppSocket.emit("incomingEvent", doc);
+     
 
           console.log("Transfer", nftUri);
           console.log(
@@ -123,8 +134,7 @@ export function contractEventService(
           baseUri,
           event
         ) => {
-          console.log(event, "event");
-          console.log(baseUri, "base");
+     
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
@@ -154,9 +164,11 @@ export function contractEventService(
             nftUri: wrappedData?.data?.image,
             //imgUri:  wrappedData?.data?.image,
           };
-
+      
           const doc = await eventRepo.createEvent(eventObj);
+          console.log(doc);
           clientAppSocket.emit("incomingEvent", doc);
+         
           console.log("unfreeze");
           console.log(
             `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
