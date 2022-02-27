@@ -80,12 +80,12 @@ const config = {
     //   nonce: getOrThrow("UNIQUE_NONCE"),
     // },
   ],
-  //  elrond: {
-  //    name: "ELROND",
-  //    node: getOrThrow("ELROND_RPC_URL"),
-  //    contract: getOrThrow("ELROND_MINTER_ADDRESS"),
-  //    nonce: getOrThrow("ELROND_NONCE"),
-  //  },
+  elrond: {
+    name: "ELROND",
+    node: getOrThrow("ELROND_RPC_URL"),
+    // contract: getOrThrow("ELROND_MINTER_ADDRESS"),
+    nonce: getOrThrow("ELROND_NONCE"),
+  },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
   socketUrl: getOrThrow("SOCKET_URL"),
@@ -94,7 +94,11 @@ const config = {
 export function chainNonceToName(nonce: string) {
   const chain = config.web3.find((chain) => chain.nonce === nonce);
 
-  return chain ? chain.name : "UNKNOWN";
+  return chain
+    ? chain.name
+    : config.elrond.nonce === nonce
+    ? config.elrond.name
+    : "UNKNOWN";
 }
 
 console.log(chainNonceToName("4"));
