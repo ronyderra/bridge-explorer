@@ -18,6 +18,8 @@ export interface IContractEventListener {
 const socket = io(config.socketUrl);
 
 
+
+
 export function EventService(eventRepo: IEventRepo): IContractEventListener {
   return {
     listen: () => {
@@ -162,6 +164,7 @@ export function contractEventService(
               wrappedData?.data?.wrapped?.origin ?? "N/A"
             ),
             txFees: txFees.toString(),
+            //txFees: 
             type: "Unfreeze",
             status: "Pending",
             fromHash: event.transactionHash,
