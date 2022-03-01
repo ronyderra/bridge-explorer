@@ -14,7 +14,7 @@ import { Server } from "socket.io";
 
 export let io: Server;
 
-export default (async function main() {
+(async function main() {
   const app = express();
   app.use(cors());
 
@@ -35,23 +35,23 @@ export default (async function main() {
   });
   EventService(createEventRepo(orm)).listen();
 
-  elrondEventListener(config.elrond.node, config.elrond.contract).listen();
+  // elrondEventListener(config.elrond.node, config.elrond.contract).listen();
 
   const server = http.createServer(app);
 
-  io = new Server(server, {
-    cors: {
-      origin: "*",
-    },
-  });
+  // io = new Server(server, {
+  //   cors: {
+  //     origin: "*",
+  //   },
+  // });
 
-  io.on("connection", (socket) => {
-    console.log("a user connected");
-  });
+  // io.on("connection", (socket) => {
+  //   console.log("a user connected");
+  // });
 
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
   });
 
-  return { server, socket: io, app };
+  // return { server, socket: io, app };
 })();
