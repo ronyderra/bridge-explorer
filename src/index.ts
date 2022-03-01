@@ -12,10 +12,7 @@ import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
 
-
 export let io: Server;
-
-
 
 export default (async function main() {
   const app = express();
@@ -38,7 +35,7 @@ export default (async function main() {
   });
   EventService(createEventRepo(orm)).listen();
 
-  //elrondEventListener(config.elrond.node, config.elrond.contract).listen()
+  elrondEventListener(config.elrond.node, config.elrond.contract).listen();
 
   const server = http.createServer(app);
 

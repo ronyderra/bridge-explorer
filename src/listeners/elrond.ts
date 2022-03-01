@@ -11,6 +11,12 @@ export function elrondEventListener(
 ): IContractEventListener {
   console.log(rpc);
   const ws = new WebSocket(rpc);
+  ws.on("open", () => {
+    console.log("elrond rpc connected");
+  });
+  ws.on("", () => {
+    console.log("elrond rpc connected");
+  });
   /*ws.send(
     JSON.stringify({
       subscriptionEntries: [

@@ -62,10 +62,10 @@ const config = {
     //   nonce: getOrThrow("HARMONY_NONCE")
     // },
     {
-      name: "XDAI",
-      node: getOrThrow("XDAI_RPC_URL"),
-      contract: getOrThrow("XDAI_MINTER_ADDRESS"),
-      nonce: getOrThrow("XDAI_NONCE"),
+      name: "GNOSIS",
+      node: getOrThrow("GNOSIS_RPC_URL"),
+      contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
+      nonce: getOrThrow("GNOSIS_NONCE"),
     },
     // {
     //   name: "FUSE",
@@ -83,7 +83,7 @@ const config = {
   elrond: {
     name: "ELROND",
     node: getOrThrow("ELROND_RPC_URL"),
-    // contract: getOrThrow("ELROND_MINTER_ADDRESS"),
+    contract: getOrThrow("ELROND_MINTER_ADDRESS"),
     nonce: getOrThrow("ELROND_NONCE"),
   },
   db: getOrThrow("DB_URL"),
