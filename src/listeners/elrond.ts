@@ -8,6 +8,7 @@ import { chainNonceToName } from "../config";
 import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
+import { io as clientAppSocket } from "../index";
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
@@ -99,7 +100,6 @@ const eventHandler = async (
           wrappedData?.data?.wrapped?.origin ?? "N/A"
         ),
         txFees: tx_fees.toString(),
-        //txFees:
         type: "Unfreeze",
         status: "Pending",
         fromHash: "N/A",
@@ -107,30 +107,10 @@ const eventHandler = async (
         senderAddress: "N/A",
         targetAddress: to.toString(),
         nftUri: wrappedData?.data?.wrapped?.original_uri,
-        //imgUri:  wrappedData?.data?.image,
       };
       console.log("unfreez event: ", eventObj);
-      await eventRepo.createEvent({
-        actionId: action_id.toString(),
-        chainName: chainName,
-        tokenId: wrappedData?.data?.wrapped.tokenId,
-        fromChain: chainNonce,
-        toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
-        fromChainName: chainNonceToName(chainNonce),
-        toChainName: chainNonceToName(
-          wrappedData?.data?.wrapped?.origin ?? "N/A"
-        ),
-        txFees: tx_fees.toString(),
-        //txFees:
-        type: "Unfreeze",
-        status: "Pending",
-        fromHash: "N/A",
-        toHash: undefined,
-        senderAddress: "N/A",
-        targetAddress: to.toString(),
-        nftUri: wrappedData?.data?.wrapped?.original_uri,
-        //imgUri:  wrappedData?.data?.image,
-      });
+      const doc = await eventRepo.createEvent(eventObj);
+      clientAppSocket.emit("incomingEvent", doc);
     }
     case "freezeSendNft": {
       const to = Base64.atob(event.topics[3]);
@@ -162,23 +142,8 @@ const eventHandler = async (
       };
 
       console.log("transfer event: ", eventObj);
-      await eventRepo.createEvent({
-        actionId: action_id.toString(),
-        chainName,
-        tokenId: tokenId.toString(),
-        fromChain: chainNonce,
-        toChain: chain_nonce.toString(),
-        fromChainName: chainNonceToName(chainNonce),
-        toChainName: chainNonceToName(chain_nonce.toString()),
-        fromHash: "N/A",
-        txFees: tx_fees.toString(),
-        type: "Transfer",
-        status: "Pending",
-        toHash: undefined,
-        senderAddress: "N/A",
-        targetAddress: to,
-        nftUri: "N/A",
-      });
+      const doc = await eventRepo.createEvent(eventObj);
+      clientAppSocket.emit("incomingEvent", doc);
 
       console.log(
         "transfer",
