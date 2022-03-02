@@ -130,8 +130,8 @@ export function contractEventService(
         unfreezeEvent,
         async (
           actionId,
-          txFees,
           to,
+          txFees,
           value,
           burner,
           tokenId,
@@ -139,10 +139,7 @@ export function contractEventService(
           event
         ) => {
           
-          console.log(await event.getTransaction(), 'trx');
-          console.log(await event.getBlock(),'block');
-          console.log(await event.getTransactionReceipt(),'receipt');
-         if (event.decode)  console.log(event.decode(event.data), 'decode')
+
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
@@ -164,13 +161,12 @@ export function contractEventService(
               wrappedData?.data?.wrapped?.origin ?? "N/A"
             ),
             txFees: txFees.toString(),
-            //txFees: 
             type: "Unfreeze",
             status: "Pending",
             fromHash: event.transactionHash,
             toHash: undefined,
             senderAddress: (await event.getTransaction()).from,
-            targetAddress: to.toString(),
+            targetAddress: value.toString(),
             nftUri: wrappedData?.data?.wrapped?.original_uri,
             //imgUri:  wrappedData?.data?.image,
           };
