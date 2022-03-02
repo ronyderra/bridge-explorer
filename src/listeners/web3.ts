@@ -143,8 +143,6 @@ export function contractEventService(
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
-          //console.log(wrappedData, "wrapped");
-
           //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
@@ -168,7 +166,6 @@ export function contractEventService(
             senderAddress: (await event.getTransaction()).from,
             targetAddress: value.toString(),
             nftUri: wrappedData?.data?.wrapped?.original_uri,
-            //imgUri:  wrappedData?.data?.image,
           };
       
           const doc = await eventRepo.createEvent(eventObj);
