@@ -3,35 +3,44 @@ import { Base64 } from "js-base64";
 import BigNumber from "bignumber.js";
 import { IContractEventListener } from "./web3";
 import { EvResp } from "../entities/EvResp";
+import { IEventRepo } from "../db/repo";
+import { chainNonceToName } from "../config";
+import axios from "axios";
+import { IERC721WrappedMeta } from "../entities/ERCMeta";
+import { IEvent } from "../entities/IEvent";
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
   rpc: string,
-  contract: string
+  contract: string,
+  chainName: string,
+  chainNonce: string,
+  eventRepo: IEventRepo
 ): IContractEventListener {
   console.log(rpc);
   const ws = new WebSocket(rpc);
-  ws.on("open", () => {
-    console.log("elrond rpc connected");
-  });
-  ws.on("", () => {
-    console.log("elrond rpc connected");
-  });
-  /*ws.send(
-    JSON.stringify({
-      subscriptionEntries: [
-        {
-          address: contract,
-        },
-      ],
-    })
-  );*/
+  ws.onopen = () => {
+    ws.send(
+      JSON.stringify({
+        subscriptionEntries: [
+          {
+            address: contract,
+          },
+        ],
+      })
+    );
+  };
   return {
     listen: async () => {
       ws.addEventListener("message", async (ev: any) => {
         const evs: EvResp[] = JSON.parse(ev.data);
         console.log(evs);
-        await Promise.all(evs.map(async (ev) => await eventHandler(ev)));
+        await Promise.all(
+          evs.map(
+            async (ev) =>
+              await eventHandler(ev, chainName, chainNonce, eventRepo)
+          )
+        );
       });
     },
   };
@@ -42,7 +51,12 @@ function bigIntFromBe(buf: Uint8Array): BigNumber {
   return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16);
 }
 
-const eventHandler = async (event: EvResp) => {
+const eventHandler = async (
+  event: EvResp,
+  chainName: string,
+  chainNonce: string,
+  eventRepo: IEventRepo
+) => {
   if (event.topics.length < 5) {
     return undefined;
   }
@@ -53,17 +67,70 @@ const eventHandler = async (event: EvResp) => {
   );
 
   switch (event.identifier) {
-    case "withdraw": {
-      const to = Base64.atob(event.topics[3]);
-      const chain_nonce = new Uint32Array(
-        Base64.toUint8Array(event.topics[2])
-      )[0]; // TODO: Consider LO
-      const value = bigIntFromBe(Base64.toUint8Array(event.topics[4]));
-      console.log(action_id, chain_nonce, tx_fees, to, value);
-    }
+    // case "withdraw": {
+    //   const to = Base64.atob(event.topics[3]);
+    //   const chain_nonce = new Uint32Array(
+    //     Base64.toUint8Array(event.topics[2])
+    //   )[0]; // TODO: Consider LO
+    //   const value = bigIntFromBe(Base64.toUint8Array(event.topics[4]));
+    //   console.log(action_id, chain_nonce, tx_fees, to, value);
+    // }
     case "withdrawNft": {
-      const to = Base64.atob(event.topics[2]);
-      console.log(action_id, tx_fees, to, Base64.decode(event.topics[3]));
+      const to = Base64.atob(event.topics[3]);
+      const burner = Base64.decode(event.topics[4]);
+      const uri = Base64.decode(event.topics[5]);
+      const wrappedData = await axios.get<IERC721WrappedMeta>(uri);
+      console.log("wrapped", wrappedData);
+      console.log(
+        "Unfreez",
+        action_id.toString(),
+        tx_fees.toString(),
+        to,
+        Base64.decode(event.topics[3])
+      );
+      const eventObj: IEvent = {
+        actionId: action_id.toString(),
+        chainName: chainName,
+        tokenId: wrappedData?.data?.wrapped.tokenId,
+        fromChain: chainNonce,
+        toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
+        fromChainName: chainNonceToName(chainNonce),
+        toChainName: chainNonceToName(
+          wrappedData?.data?.wrapped?.origin ?? "N/A"
+        ),
+        txFees: tx_fees.toString(),
+        //txFees:
+        type: "Unfreeze",
+        status: "Pending",
+        fromHash: "N/A",
+        toHash: undefined,
+        senderAddress: "N/A",
+        targetAddress: to.toString(),
+        nftUri: wrappedData?.data?.wrapped?.original_uri,
+        //imgUri:  wrappedData?.data?.image,
+      };
+      console.log("unfreez event: ", eventObj);
+      await eventRepo.createEvent({
+        actionId: action_id.toString(),
+        chainName: chainName,
+        tokenId: wrappedData?.data?.wrapped.tokenId,
+        fromChain: chainNonce,
+        toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
+        fromChainName: chainNonceToName(chainNonce),
+        toChainName: chainNonceToName(
+          wrappedData?.data?.wrapped?.origin ?? "N/A"
+        ),
+        txFees: tx_fees.toString(),
+        //txFees:
+        type: "Unfreeze",
+        status: "Pending",
+        fromHash: "N/A",
+        toHash: undefined,
+        senderAddress: "N/A",
+        targetAddress: to.toString(),
+        nftUri: wrappedData?.data?.wrapped?.original_uri,
+        //imgUri:  wrappedData?.data?.image,
+      });
     }
     case "freezeSendNft": {
       const to = Base64.atob(event.topics[3]);
@@ -75,7 +142,51 @@ const eventHandler = async (event: EvResp) => {
       const name = Base64.decode(event.topics[6]);
       const image = Base64.decode(event.topics[7]);
 
-      console.log(action_id, chain_nonce, tx_fees, to);
+      // TODO: add event to db
+      const eventObj: IEvent = {
+        actionId: action_id.toString(),
+        chainName,
+        tokenId: tokenId.toString(),
+        fromChain: chainNonce,
+        toChain: chain_nonce.toString(),
+        fromChainName: chainNonceToName(chainNonce),
+        toChainName: chainNonceToName(chain_nonce.toString()),
+        fromHash: "N/A",
+        txFees: tx_fees.toString(),
+        type: "Transfer",
+        status: "Pending",
+        toHash: undefined,
+        senderAddress: "N/A",
+        targetAddress: to,
+        nftUri: "N/A",
+      };
+
+      console.log("transfer event: ", eventObj);
+      await eventRepo.createEvent({
+        actionId: action_id.toString(),
+        chainName,
+        tokenId: tokenId.toString(),
+        fromChain: chainNonce,
+        toChain: chain_nonce.toString(),
+        fromChainName: chainNonceToName(chainNonce),
+        toChainName: chainNonceToName(chain_nonce.toString()),
+        fromHash: "N/A",
+        txFees: tx_fees.toString(),
+        type: "Transfer",
+        status: "Pending",
+        toHash: undefined,
+        senderAddress: "N/A",
+        targetAddress: to,
+        nftUri: "N/A",
+      });
+
+      console.log(
+        "transfer",
+        action_id.toString(),
+        chain_nonce.toString(),
+        tx_fees.toString(),
+        to
+      );
     }
     default:
       return undefined;
