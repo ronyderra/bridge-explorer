@@ -14,7 +14,7 @@ import { Server } from "socket.io";
 
 export let io: Server;
 
-(async function main() {
+export default (async function main() {
   const app = express();
   app.use(cors());
 
