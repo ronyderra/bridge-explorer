@@ -11,6 +11,7 @@ import DBConf from "./mikro-orm.config";
 import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
+import { io as elrondIo } from "socket.io-client";
 
 export let io: Server;
 
@@ -43,6 +44,8 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
+  const elrondSocket = elrondIo(config.elrond.socket);
+
   const server = http.createServer(app);
 
   io = new Server(server, {
@@ -54,10 +57,36 @@ export default (async function main() {
   io.on("connection", (socket) => {
     console.log("a user connected");
   });
+  elrondSocket.on(
+    "elrond:bridge_tx",
+    async (
+      fromHash: string,
+      sender: string,
+      uris: string[],
+      actionId: string
+    ) => {
+      try {
+        console.log("dsds");
+        const updated = await createEventRepo(orm).updateElrond(
+          actionId,
+          config.elrond.nonce,
+          fromHash,
+          sender,
+          uris[0]
+        );
+
+        console.log(updated, "updated");
+
+        io.emit("updateEvent", updated);
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
+  );
 
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
   });
 
-  return { server, socket: io, app };
+  return { server, socket: io, app, eventRepo: createEventRepo(orm) };
 })();

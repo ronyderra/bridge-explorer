@@ -8,9 +8,16 @@ export interface IEventRepo {
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   updateEvent(
     actionId: string,
-    fromChain: string,
     toChain: string,
+    fromChain: string,
     toHash: string
+  ): Promise<BridgeEvent>;
+  updateElrond(
+    actionId: string,
+    fromChain: string,
+    fromHash: string,
+    senderAddress: string,
+    nftUri: string
   ): Promise<BridgeEvent>;
   getAllEvents(
     fromChain?: string,
@@ -67,52 +74,74 @@ export default function createEventRepo({
       return await em.findOne(BridgeEvent, { targetAddress });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
+      const waitEvent = await new Promise<BridgeEvent>(
+        async (resolve, reject) => {
+          let event = await em.findOne(BridgeEvent, {
+            $and: [
+              { actionId: actionId.toString() },
+              { fromChain: fromChain!.toString() },
+            ],
+          });
 
-      const waitEvent = await new Promise<BridgeEvent>(async (resolve, reject) => {
+          const interval = setInterval(async () => {
+            if (event) {
+              clearInterval(interval);
+              resolve(event);
+              return;
+            }
+            console.log("waiting for event", actionId, fromChain, toChain);
+            event = await em.findOne(BridgeEvent, {
+              $and: [
+                { actionId: actionId.toString() },
+                { fromChain: fromChain!.toString() },
+              ],
+            });
+          }, 100);
 
-        let event = await em.findOne(BridgeEvent, {
-          $and: [
-            { actionId: actionId.toString() },
-            { fromChain: fromChain.toString() },
-          ],
-        });
-  
-
-        const interval = setInterval(async () => {
-          if (event) {
-            clearInterval(interval)
-            resolve(event)
-            return;
-          }
-          console.log("waiting for event", actionId, fromChain, toChain);
-          event = await em.findOne(BridgeEvent, {
+          setTimeout(() => {
+            clearInterval(interval);
+            reject("no promise");
+          }, 20000);
+        }
+      );
+      wrap(waitEvent).assign({ toHash, status: "Completed", toChain }, { em });
+      await em.flush();
+      return waitEvent;
+    },
+    async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
+      const waitEvent = await new Promise<BridgeEvent>(
+        async (resolve, reject) => {
+          let event = await em.findOne(BridgeEvent, {
             $and: [
               { actionId: actionId.toString() },
               { fromChain: fromChain.toString() },
             ],
           });
-        }, 100)
-  
-        setTimeout(() => {
-          clearInterval(interval)
-          reject('no promise')
-        }, 20000)
 
-      })
-      
-      
+          const interval = setInterval(async () => {
+            if (event) {
+              clearInterval(interval);
+              resolve(event);
+              return;
+            }
+            event = await em.findOne(BridgeEvent, {
+              $and: [
+                { actionId: actionId.toString() },
+                { fromChain: fromChain!.toString() },
+              ],
+            });
+          }, 100);
 
-     /* while (!event) {
-        console.log("waiting for event", actionId, fromChain, toChain);
-        event = await em.findOne(BridgeEvent, {
-          $and: [
-            { actionId: actionId.toString() },
-            { fromChain: fromChain.toString() },
-          ],
-        });
-      }*/
-      //if (waitEvent) throw new Error("Event not found");
-      wrap(waitEvent).assign({ toHash, status: "Completed", toChain }, { em });
+          setTimeout(() => {
+            clearInterval(interval);
+            reject("no promise");
+          }, 20000);
+        }
+      );
+      wrap(waitEvent).assign(
+        { fromHash, status: "Completed", senderAddress, nftUri },
+        { em }
+      );
       await em.flush();
       return waitEvent;
     },

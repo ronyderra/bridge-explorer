@@ -85,6 +85,7 @@ const config = {
     node: getOrThrow("ELROND_RPC_URL"),
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
     nonce: getOrThrow("ELROND_NONCE"),
+    socket: getOrThrow("ELROND_SOCKET_URL"),
   },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
