@@ -26,6 +26,7 @@
     "dotenv": "^14.3.2",
     "ethers": "^5.5.3",
     "express": "^4.17.2",
+    "js-base64": "^3.7.2",
     "moment": "^2.29.1",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1",
