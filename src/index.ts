@@ -14,7 +14,7 @@ import { Server } from "socket.io";
 
 export let io: Server;
 
-(async function main() {
+export default (async function main() {
   const app = express();
   app.use(cors());
 
@@ -45,19 +45,19 @@ export let io: Server;
 
   const server = http.createServer(app);
 
-  // io = new Server(server, {
-  //   cors: {
-  //     origin: "*",
-  //   },
-  // });
+  io = new Server(server, {
+    cors: {
+      origin: "*",
+    },
+  });
 
-  // io.on("connection", (socket) => {
-  //   console.log("a user connected");
-  // });
+  io.on("connection", (socket) => {
+    console.log("a user connected");
+  });
 
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
   });
 
-  // return { server, socket: io, app };
+  return { server, socket: io, app };
 })();
