@@ -12,6 +12,13 @@ function getOrThrow(key: string): string {
 
 const config = {
   web3: [
+
+    {
+      name: "AURORA",
+      node: getOrThrow("AURORA_RPC_URL"),
+      contract: getOrThrow("AURORA_MINTER_ADDRESS"),
+      nonce: getOrThrow("AURORA_NONCE"),
+    },
     {
       name: "BSC",
       node: getOrThrow("BSC_RPC_URL"),
