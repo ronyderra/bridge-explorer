@@ -72,12 +72,12 @@ const config = {
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
     },
-    // {
-    //   name: "FUSE",
-    //   node: getOrThrow("FUSE_RPC_URL"),
-    //   contract: getOrThrow("FUSE_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("FUSE_NONCE"),
-    // },
+    {
+       name: "FUSE",
+       node: getOrThrow("FUSE_RPC_URL"),
+       contract: getOrThrow("FUSE_MINTER_ADDRESS"),
+       nonce: getOrThrow("FUSE_NONCE"),
+     },
     // {
     //   name: "UNIQUE",
     //   node: getOrThrow("UNIQUE_RPC_URL"),

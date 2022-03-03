@@ -8,6 +8,8 @@ import { io } from "socket.io-client";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
 
+import { saveWallet } from "../db/helpers";
+
 import config from "../config";
 
 
@@ -88,12 +90,13 @@ export function contractEventService(
           mintWith,
           event
         ) => {
-          console.log(event);
+
           const NFTcontract = UserNftMinter__factory.connect(
             contract,
             provider
           );
           const nftUri = await NFTcontract.tokenURI(tokenId);
+          const senderAddress = (await event.getTransaction()).from
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -107,15 +110,28 @@ export function contractEventService(
             type: "Transfer",
             status: "Pending",
             toHash: undefined,
-            senderAddress: (await event.getTransaction()).from,
+            senderAddress,
             targetAddress: to,
             nftUri,
           };
-         
-          const doc = await eventRepo.createEvent(eventObj);
-          console.log(doc);
-          clientAppSocket.emit("incomingEvent", doc);
-     
+          console.log(senderAddress);
+          console.log(to);
+
+          Promise.all([
+            (async () => {
+            return await eventRepo.createEvent(eventObj);
+            })(),
+            (async () => {
+             await saveWallet(eventRepo, senderAddress, to);
+            })(),
+          ])
+            .then(([doc]) => {
+              console.log(doc);
+              clientAppSocket.emit("incomingEvent", doc);
+            })
+            .catch(() => {
+
+            });
 
           console.log("Transfer", nftUri);
           console.log(
@@ -147,7 +163,7 @@ export function contractEventService(
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
 
-      
+          const senderAddress = (await event.getTransaction()).from
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -163,14 +179,27 @@ export function contractEventService(
             status: "Pending",
             fromHash: event.transactionHash,
             toHash: undefined,
-            senderAddress: (await event.getTransaction()).from,
+            senderAddress,
             targetAddress: value.toString(),
             nftUri: wrappedData?.data?.wrapped?.original_uri,
           };
       
-          const doc = await eventRepo.createEvent(eventObj);
-          console.log(doc);
-          clientAppSocket.emit("incomingEvent", doc);
+          
+          Promise.all([
+            (async () => {
+            return await eventRepo.createEvent(eventObj);
+            })(),
+            (async () => {
+             await saveWallet(eventRepo, senderAddress, eventObj.targetAddress);
+            })(),
+          ])
+            .then(([doc]) => {
+              console.log(doc);
+              clientAppSocket.emit("incomingEvent", doc);
+            })
+            .catch(() => {
+
+            });
          
           console.log("unfreeze");
           console.log(

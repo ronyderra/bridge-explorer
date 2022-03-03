@@ -1,11 +1,13 @@
 import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
-
+import {  IWallet, Wallet } from "../entities/IWallet";
 import moment from "moment";
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | null>;
+  createWallet(e: IWallet): Promise<Wallet | null>;
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
+  findWallet(address: string): Promise<Wallet | null>;
   updateEvent(
     actionId: string,
     toChain: string,
@@ -25,6 +27,10 @@ export interface IEventRepo {
     fromHash?: string,
     chainName?: string
   ): Promise<BridgeEvent[] | null>;
+  getMetrics(): Promise<{
+    totalTx:number,
+    totalWallets: number
+  } | null>;
   getDashboard(period: number): Promise<{
     events: BridgeEvent[];
     count: number;
@@ -70,8 +76,20 @@ export default function createEventRepo({
       await em.persistAndFlush(event);
       return event;
     },
+    async createWallet(e) {
+      const wallet = new Wallet({
+        ...e,
+        address: e.address.toLowerCase()
+      });
+      await em.persistAndFlush(wallet);
+      return wallet;
+
+    },
     async findEvent(targetAddress) {
       return await em.findOne(BridgeEvent, { targetAddress });
+    },
+    async findWallet(address) {
+      return await em.findOne(Wallet, { address: address.toLowerCase()});
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
       const waitEvent = await new Promise<BridgeEvent>(
@@ -144,6 +162,17 @@ export default function createEventRepo({
       );
       await em.flush();
       return waitEvent;
+    },
+    async getMetrics() {
+
+      const totalTx = await em.count(BridgeEvent, {});
+      const totalWallets = await em.count(Wallet, {});
+      
+
+      return {
+        totalTx,
+        totalWallets
+      }
     },
     async getDashboard(period) {
       console.log(period);

@@ -34,7 +34,7 @@ export default (async function main() {
       axios
     ).listen();
   });
-  EventService(createEventRepo(orm)).listen();
+  EventService(createEventRepo(orm)).listen(); /*
 
   elrondEventListener(
     config.elrond.node,
@@ -44,7 +44,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  const elrondSocket = elrondIo(config.elrond.socket);
+  const elrondSocket = elrondIo(config.elrond.socket);*/
 
   const server = http.createServer(app);
 
@@ -57,7 +57,7 @@ export default (async function main() {
   io.on("connection", (socket) => {
     console.log("a user connected");
   });
-  elrondSocket.on(
+  /*elrondSocket.on(
     "elrond:bridge_tx",
     async (
       fromHash: string,
@@ -82,7 +82,7 @@ export default (async function main() {
         console.error(e);
       }
     }
-  );
+  );*/
 
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
