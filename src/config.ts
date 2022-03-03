@@ -32,7 +32,6 @@ const config = {
     },
     {
       name: "POLYGON",
-
       node: getOrThrow("POLYGON_RPC_URL"),
       contract: getOrThrow("POLYGON_MINTER_ADDRESS"),
       nonce: getOrThrow("POLYGON_NONCE"),
@@ -42,6 +41,12 @@ const config = {
       node: getOrThrow("AVALANCHE_RPC_URL"),
       contract: getOrThrow("AVALANCHE_MINTER_ADDRESS"),
       nonce: getOrThrow("AVALANCHE_NONCE"),
+    },
+    {
+      name: "IOTEX",
+      node: getOrThrow("IOTEX_RPC_URL"),
+      contract: getOrThrow("IOTEX_MINTER_ADDRESS"),
+      nonce: getOrThrow("IOTEX_NONCE"),
     },
     // {
     //   name: "FANTOM",
