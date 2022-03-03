@@ -4,11 +4,13 @@ import BigNumber from "bignumber.js";
 import { IContractEventListener } from "./web3";
 import { EvResp } from "../entities/EvResp";
 import { IEventRepo } from "../db/repo";
-import { chainNonceToName } from "../config";
+import config, { chainNonceToName } from "../config";
 import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
+import { io } from "socket.io-client";
+import index from "../index";
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
