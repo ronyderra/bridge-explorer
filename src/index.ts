@@ -34,7 +34,7 @@ export default (async function main() {
       axios
     ).listen();
   });
-  EventService(createEventRepo(orm)).listen(); /*
+  EventService(createEventRepo(orm)).listen(); 
 
   elrondEventListener(
     config.elrond.node,
@@ -44,7 +44,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  const elrondSocket = elrondIo(config.elrond.socket);*/
+  const elrondSocket = elrondIo(config.elrond.socket);
 
   const server = http.createServer(app);
 
