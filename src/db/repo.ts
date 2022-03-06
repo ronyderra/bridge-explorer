@@ -1,6 +1,6 @@
 import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
-import {  IWallet, Wallet } from "../entities/IWallet";
+import { IWallet, Wallet } from "../entities/IWallet";
 import moment from "moment";
 
 export interface IEventRepo {
@@ -28,8 +28,8 @@ export interface IEventRepo {
     chainName?: string
   ): Promise<BridgeEvent[] | null>;
   getMetrics(): Promise<{
-    totalTx:number,
-    totalWallets: number
+    totalTx: number;
+    totalWallets: number;
   } | null>;
   getDashboard(period: number): Promise<{
     events: BridgeEvent[];
@@ -66,7 +66,10 @@ export default function createEventRepo({
             event?.fromChainName?.includes(chainName.toUpperCase()) ||
             event?.fromHash?.includes(chainName) ||
             event?.type?.includes(chainName) ||
-            event?.status?.includes(chainName)
+            event?.status?.includes(chainName) ||
+            event?.senderAddress?.includes(chainName) ||
+            event?.toChain?.includes(chainName) ||
+            event?.createdAt?.toDateString()?.includes(chainName)
           );
         });
       }
@@ -81,17 +84,16 @@ export default function createEventRepo({
     async createWallet(e) {
       const wallet = new Wallet({
         ...e,
-        address: e.address.toLowerCase()
+        address: e.address.toLowerCase(),
       });
       await em.persistAndFlush(wallet);
       return wallet;
-
     },
     async findEvent(targetAddress) {
       return await em.findOne(BridgeEvent, { targetAddress });
     },
     async findWallet(address) {
-      return await em.findOne(Wallet, { address: address.toLowerCase()});
+      return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
       const waitEvent = await new Promise<BridgeEvent>(
@@ -166,15 +168,13 @@ export default function createEventRepo({
       return waitEvent;
     },
     async getMetrics() {
-
       const totalTx = await em.count(BridgeEvent, {});
       const totalWallets = await em.count(Wallet, {});
-      
 
       return {
         totalTx,
-        totalWallets
-      }
+        totalWallets,
+      };
     },
     async getDashboard(period) {
       console.log(period);
