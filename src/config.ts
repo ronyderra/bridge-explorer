@@ -74,7 +74,7 @@ const config = {
     //   nonce: getOrThrow("HARMONY_NONCE")
     // },
     {
-      name: "GNOSIS",
+      name: "GNOSIS CHAIN",
       node: getOrThrow("GNOSIS_RPC_URL"),
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
