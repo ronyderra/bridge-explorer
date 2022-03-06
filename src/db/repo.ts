@@ -50,7 +50,7 @@ export default function createEventRepo({
       let events = await em.find(
         BridgeEvent,
         {},
-        { cache: true, orderBy: { createdAt: "DESC" }, limit: 100 }
+        { cache: true, orderBy: { createdAt: "DESC" }, limit: 50 }
       );
 
       if (fromChain) {
