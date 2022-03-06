@@ -18,8 +18,20 @@ export const txRouter = (repo: IEventRepo): Router => {
     }
   });
 
+  router.get("/getMetrics", async (req: any, res) => {
+
+    try {
+
+      const metrics = await repo.getMetrics();
+
+      res.status(200).json(metrics);
+    } catch (e: any) {
+      res.status(500).json({ message: e.toString() });
+    }
+  });
+
   router.get("/dashboard", async (req: any, res) => {
-    //req.app.get("io").emit("msg", "alef");
+
     try {
       const { period } = req.query;
 

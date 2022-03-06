@@ -12,6 +12,13 @@ function getOrThrow(key: string): string {
 
 const config = {
   web3: [
+
+    {
+      name: "AURORA",
+      node: getOrThrow("AURORA_RPC_URL"),
+      contract: getOrThrow("AURORA_MINTER_ADDRESS"),
+      nonce: getOrThrow("AURORA_NONCE"),
+    },
     {
       name: "BSC",
       node: getOrThrow("BSC_RPC_URL"),
@@ -72,12 +79,12 @@ const config = {
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
     },
-    // {
-    //   name: "FUSE",
-    //   node: getOrThrow("FUSE_RPC_URL"),
-    //   contract: getOrThrow("FUSE_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("FUSE_NONCE"),
-    // },
+    {
+       name: "FUSE",
+       node: getOrThrow("FUSE_RPC_URL"),
+       contract: getOrThrow("FUSE_MINTER_ADDRESS"),
+       nonce: getOrThrow("FUSE_NONCE"),
+     },
     // {
     //   name: "UNIQUE",
     //   node: getOrThrow("UNIQUE_RPC_URL"),
