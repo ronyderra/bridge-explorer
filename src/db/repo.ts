@@ -54,11 +54,13 @@ export default function createEventRepo({
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       } else if (chainName) {
-        // events where the chainName is a substring of the fromChainName or toChainName
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(chainName.toUpperCase()) ||
-            event?.fromChainName?.includes(chainName.toUpperCase())
+            event?.fromChainName?.includes(chainName.toUpperCase()) ||
+            event?.fromHash?.includes(chainName) ||
+            event?.type?.includes(chainName) ||
+            event?.status?.includes(chainName)
           );
         });
       }
