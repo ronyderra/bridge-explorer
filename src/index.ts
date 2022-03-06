@@ -34,17 +34,17 @@ export default (async function main() {
       axios
     ).listen();
   });
-  EventService(createEventRepo(orm)).listen(); 
+  EventService(createEventRepo(orm)).listen();
 
-  elrondEventListener(
-    config.elrond.node,
-    config.elrond.contract,
-    config.elrond.name,
-    config.elrond.nonce,
-    createEventRepo(orm)
-  ).listen();
+  // elrondEventListener(
+  //   config.elrond.node,
+  //   config.elrond.contract,
+  //   config.elrond.name,
+  //   config.elrond.nonce,
+  //   createEventRepo(orm)
+  // ).listen();
 
-  const elrondSocket = elrondIo(config.elrond.socket);
+  // const elrondSocket = elrondIo(config.elrond.socket);
 
   const server = http.createServer(app);
 
@@ -57,32 +57,32 @@ export default (async function main() {
   io.on("connection", (socket) => {
     console.log("a user connected");
   });
-  elrondSocket.on(
-    "elrond:bridge_tx",
-    async (
-      fromHash: string,
-      sender: string,
-      uris: string[],
-      actionId: string
-    ) => {
-      try {
-        console.log("dsds");
-        const updated = await createEventRepo(orm).updateElrond(
-          actionId,
-          config.elrond.nonce,
-          fromHash,
-          sender,
-          uris[0]
-        );
+  // elrondSocket.on(
+  //   "elrond:bridge_tx",
+  //   async (
+  //     fromHash: string,
+  //     sender: string,
+  //     uris: string[],
+  //     actionId: string
+  //   ) => {
+  //     try {
+  //       console.log("dsds");
+  //       const updated = await createEventRepo(orm).updateElrond(
+  //         actionId,
+  //         config.elrond.nonce,
+  //         fromHash,
+  //         sender,
+  //         uris[0]
+  //       );
 
-        console.log(updated, "updated");
+  //       console.log(updated, "updated");
 
-        io.emit("updateEvent", updated);
-      } catch (e: any) {
-        console.error(e);
-      }
-    }
-  );
+  //       io.emit("updateEvent", updated);
+  //     } catch (e: any) {
+  //       console.error(e);
+  //     }
+  //   }
+  // );
 
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);

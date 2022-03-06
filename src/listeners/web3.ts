@@ -12,15 +12,11 @@ import { saveWallet } from "../db/helpers";
 
 import config from "../config";
 
-
 export interface IContractEventListener {
   listen(): void;
 }
 
 const socket = io(config.socketUrl);
-
-
-
 
 export function EventService(eventRepo: IEventRepo): IContractEventListener {
   return {
@@ -37,25 +33,21 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
           // action id is well, action id
           // hash is the transaction hash
 
-  
-            try {
-              console.log('dsds')
-              const updated = await eventRepo.updateEvent(
-                action_id,
-                fromChain.toString(),
-                toChain.toString(),
-                hash
-              );
-  
-              console.log(updated,'updated');
-  
-              clientAppSocket.emit("updateEvent", updated);
-            } catch (e: any) {
-              console.error(e);
-            }
-         
+          try {
+            console.log("dsds");
+            const updated = await eventRepo.updateEvent(
+              action_id,
+              fromChain.toString(),
+              toChain.toString(),
+              hash
+            );
 
-         
+            console.log(updated, "updated");
+
+            clientAppSocket.emit("updateEvent", updated);
+          } catch (e: any) {
+            console.error(e);
+          }
         }
       );
     },
@@ -90,13 +82,12 @@ export function contractEventService(
           mintWith,
           event
         ) => {
-
           const NFTcontract = UserNftMinter__factory.connect(
             contract,
             provider
           );
           const nftUri = await NFTcontract.tokenURI(tokenId);
-          const senderAddress = (await event.getTransaction()).from
+          const senderAddress = (await event.getTransaction()).from;
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -119,19 +110,17 @@ export function contractEventService(
 
           Promise.all([
             (async () => {
-            return await eventRepo.createEvent(eventObj);
+              return await eventRepo.createEvent(eventObj);
             })(),
             (async () => {
-             await saveWallet(eventRepo, senderAddress, to);
+              await saveWallet(eventRepo, senderAddress, to);
             })(),
           ])
             .then(([doc]) => {
               console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
             })
-            .catch(() => {
-
-            });
+            .catch(() => {});
 
           console.log("Transfer", nftUri);
           console.log(
@@ -154,8 +143,6 @@ export function contractEventService(
           baseUri,
           event
         ) => {
-          
-
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
@@ -163,7 +150,7 @@ export function contractEventService(
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
 
-          const senderAddress = (await event.getTransaction()).from
+          const senderAddress = (await event.getTransaction()).from;
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -183,24 +170,25 @@ export function contractEventService(
             targetAddress: value.toString(),
             nftUri: wrappedData?.data?.wrapped?.original_uri,
           };
-      
-          
+
           Promise.all([
             (async () => {
-            return await eventRepo.createEvent(eventObj);
+              return await eventRepo.createEvent(eventObj);
             })(),
             (async () => {
-             await saveWallet(eventRepo, senderAddress, eventObj.targetAddress);
+              await saveWallet(
+                eventRepo,
+                senderAddress,
+                eventObj.targetAddress
+              );
             })(),
           ])
             .then(([doc]) => {
               console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
             })
-            .catch(() => {
+            .catch(() => {});
 
-            });
-         
           console.log("unfreeze");
           console.log(
             `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
