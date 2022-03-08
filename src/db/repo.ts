@@ -56,7 +56,11 @@ export default function createEventRepo({
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (status) {
-        events = await em.find(BridgeEvent, { status });
+        events = await em.find(
+          BridgeEvent,
+          { status },
+          { cache: true, orderBy: { createdAt: "DESC" }, limit: 50 }
+        );
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       }
