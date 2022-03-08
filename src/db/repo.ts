@@ -25,7 +25,8 @@ export interface IEventRepo {
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
-    chainName?: string
+    chainName?: string,
+    pendingSearch?: string
   ): Promise<BridgeEvent[] | null>;
   getMetrics(): Promise<{
     totalTx: number;
@@ -45,7 +46,8 @@ export default function createEventRepo({
       fromChain = undefined,
       status = undefined,
       fromHash = undefined,
-      chainName = undefined
+      chainName = undefined,
+      pendingSearch = undefined
     ) {
       let events = await em.find(
         BridgeEvent,
@@ -63,8 +65,27 @@ export default function createEventRepo({
         );
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
-      }
-      if (chainName) {
+      } else if (pendingSearch) {
+        events = await em.find(
+          BridgeEvent,
+          {
+            status: "pending",
+          },
+          { cache: true, orderBy: { createdAt: "DESC" } }
+        );
+        events = events.filter((event) => {
+          return (
+            event?.toChainName?.includes(pendingSearch.toUpperCase()) ||
+            event?.fromChainName?.includes(pendingSearch.toUpperCase()) ||
+            event?.fromHash?.includes(pendingSearch) ||
+            event?.type?.includes(pendingSearch) ||
+            event?.status?.includes(pendingSearch) ||
+            event?.senderAddress?.includes(pendingSearch) ||
+            event?.toChain?.includes(pendingSearch) ||
+            event?.createdAt?.toDateString()?.includes(pendingSearch)
+          );
+        });
+      } else if (chainName) {
         events = await em.find(
           BridgeEvent,
           {},

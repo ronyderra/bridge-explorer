@@ -10,7 +10,8 @@ export const txRouter = (repo: IEventRepo): Router => {
         req.query.from?.toString(),
         req.query.status?.toString(),
         req.query.fromHash?.toString(),
-        req.query.chainName?.toString()
+        req.query.chainName?.toString(),
+        req.query.pendingSearch?.toString()
       );
       res.status(200).json(events);
     } catch (e: any) {
