@@ -65,6 +65,11 @@ export default function createEventRepo({
         events = await em.find(BridgeEvent, { fromHash });
       }
       if (chainName) {
+        events = await em.find(
+          BridgeEvent,
+          {},
+          { cache: true, orderBy: { createdAt: "DESC" } }
+        );
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(chainName.toUpperCase()) ||
