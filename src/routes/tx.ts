@@ -8,7 +8,7 @@ export const txRouter = (repo: IEventRepo): Router => {
     try {
       const events = await repo.getAllEvents(
         req.query.from?.toString(),
-        req.query.to?.toString(),
+        req.query.status?.toString(),
         req.query.fromHash?.toString(),
         req.query.chainName?.toString()
       );
@@ -19,9 +19,7 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.get("/getMetrics", async (req: any, res) => {
-
     try {
-
       const metrics = await repo.getMetrics();
 
       res.status(200).json(metrics);
@@ -31,7 +29,6 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.get("/dashboard", async (req: any, res) => {
-
     try {
       const { period } = req.query;
 

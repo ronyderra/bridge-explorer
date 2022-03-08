@@ -43,7 +43,7 @@ export default function createEventRepo({
   return {
     async getAllEvents(
       fromChain = undefined,
-      toChain = undefined,
+      status = undefined,
       fromHash = undefined,
       chainName = undefined
     ) {
@@ -55,11 +55,12 @@ export default function createEventRepo({
 
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
-      } else if (toChain) {
-        events = await em.find(BridgeEvent, { toChain });
+      } else if (status) {
+        events = await em.find(BridgeEvent, { status });
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
-      } else if (chainName) {
+      }
+      if (chainName) {
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(chainName.toUpperCase()) ||
