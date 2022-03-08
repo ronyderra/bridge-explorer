@@ -1,6 +1,7 @@
 import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
+import { DailyData } from "../entities/IDailyData"
 import moment from "moment";
 
 export interface IEventRepo {
@@ -31,10 +32,8 @@ export interface IEventRepo {
     totalTx: number;
     totalWallets: number;
   } | null>;
-  getDashboard(period: number): Promise<{
-    events: BridgeEvent[];
-    count: number;
-  } | null>;
+  saveDailyData() : void,
+  getDashboard(period: number | undefined): Promise<DailyData[]>;
 }
 
 export default function createEventRepo({
@@ -78,8 +77,16 @@ export default function createEventRepo({
     },
     async createEvent(e) {
       const event = new BridgeEvent(e);
+      const same = await em.findOne(BridgeEvent, {
+        actionId: event.actionId,
+        tokenId: event.tokenId,
+        fromHash: event.fromHash
+      })
+      if (same) return same;
       await em.persistAndFlush(event);
       return event;
+      
+
     },
     async createWallet(e) {
       const wallet = new Wallet({
@@ -176,23 +183,71 @@ export default function createEventRepo({
         totalWallets,
       };
     },
-    async getDashboard(period) {
-      console.log(period);
-      const now = new Date();
-      const a = moment(now).subtract(period, "days").toDate();
-      let [events, count] = await em.findAndCount(
-        BridgeEvent,
-        {
-          createdAt: {
-            $gte: a,
-            $lt: now,
-          },
-        },
+    async saveDailyData(){
 
-        { cache: true, orderBy: { createdAt: "DESC" } }
+      const now = new Date();
+      var start = new Date();
+        start.setUTCHours(0,0,0,0);
+
+        let [events, count] = await em.findAndCount(
+          BridgeEvent,
+          {
+            createdAt: {
+              $gte: start,
+              $lt: now,
+            },
+          },
+          { cache: true, orderBy: { createdAt: "DESC" } }
+        );
+          
+          const users:string[] = [];  
+
+          for (const event of events) {
+            const sender = event.senderAddress;
+            const reciver = event.targetAddress;
+
+            if (sender && !users.includes(sender)) {
+              users.push(sender)
+            }
+
+            if (reciver && !users.includes(reciver)) {
+              users.push(reciver)
+            }
+          }
+         
+          const dailyData = new DailyData({
+            txNumber: count,
+            walletsNumber: users.length,
+            date: now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate()
+          })
+
+          const data = await em.findOne(DailyData, {
+            date: dailyData.date
+          })
+
+          if (data) {
+            const {txNumber, walletsNumber} = dailyData
+
+            wrap(data).assign(
+              {  txNumber, walletsNumber },
+              { em }
+            );
+            return await em.flush();
+          }
+          await em.persistAndFlush(dailyData)
+          
+
+    },
+    async getDashboard(period) {
+
+      if (period && period > 30) return [];
+
+      let events = await em.find(
+        DailyData, {},
+        { cache: true, orderBy: { createdAt: "DESC" }, limit: period }
       );
 
-      return { events, count };
+      return events
     },
   };
 }

@@ -13,6 +13,8 @@ import http from "http";
 import { Server } from "socket.io";
 import { io as elrondIo } from "socket.io-client";
 
+const cron = require("node-cron");
+
 export let io: Server;
 
 export default (async function main() {
@@ -57,6 +59,7 @@ export default (async function main() {
   io.on("connection", (socket) => {
     console.log("a user connected");
   });
+
   elrondSocket.on(
     "elrond:bridge_tx",
     async (
@@ -84,9 +87,16 @@ export default (async function main() {
     }
   );
 
+
+
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
+    const repo = createEventRepo(orm)
+    repo.saveDailyData()
+    cron.schedule("*/40 * * * * *",  () => repo.saveDailyData())
   });
+
+
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };
 })();

@@ -155,7 +155,7 @@ export function contractEventService(
           event
         ) => {
           
-
+        
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));

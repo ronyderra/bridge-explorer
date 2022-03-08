@@ -33,11 +33,8 @@ export const txRouter = (repo: IEventRepo): Router => {
   router.get("/dashboard", async (req: any, res) => {
 
     try {
-      const { period } = req.query;
-
-      const number = await repo.getDashboard(Number(period));
-
-      res.status(200).json(number);
+      const dailyData = await repo.getDashboard(req.query.period)
+      res.status(200).json(dailyData);
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }

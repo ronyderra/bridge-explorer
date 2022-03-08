@@ -1,6 +1,7 @@
 
 import { IEventRepo } from "./repo";
 
+
 const saveWallet = async  function (eventRepo:IEventRepo, senderAddress:string | undefined, to:string | undefined) {
     Promise.all([
         senderAddress ? eventRepo.findWallet(senderAddress): undefined,
@@ -10,5 +11,7 @@ const saveWallet = async  function (eventRepo:IEventRepo, senderAddress:string |
         if (!walletTo && to && senderAddress !== to) await eventRepo.createWallet({address: to!});
     }).catch((err) => console.log(err))
 }
+
+
 
 export {saveWallet}
