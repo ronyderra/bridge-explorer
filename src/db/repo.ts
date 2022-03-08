@@ -26,7 +26,8 @@ export interface IEventRepo {
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
-    chainName?: string
+    chainName?: string,
+    pendingSearch?: string
   ): Promise<BridgeEvent[] | null>;
   getMetrics(): Promise<{
     totalTx: number;
@@ -42,9 +43,10 @@ export default function createEventRepo({
   return {
     async getAllEvents(
       fromChain = undefined,
-      toChain = undefined,
+      status = undefined,
       fromHash = undefined,
-      chainName = undefined
+      chainName = undefined,
+      pendingSearch = undefined
     ) {
       let events = await em.find(
         BridgeEvent,
@@ -54,11 +56,40 @@ export default function createEventRepo({
 
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
-      } else if (toChain) {
-        events = await em.find(BridgeEvent, { toChain });
+      } else if (status) {
+        events = await em.find(
+          BridgeEvent,
+          { status },
+          { cache: true, orderBy: { createdAt: "DESC" }, limit: 50 }
+        );
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
+      } else if (pendingSearch) {
+        events = await em.find(
+          BridgeEvent,
+          {
+            status: "Pending",
+          },
+          { cache: true, orderBy: { createdAt: "DESC" } }
+        );
+        events = events.filter((event) => {
+          return (
+            event?.toChainName?.includes(pendingSearch.toUpperCase()) ||
+            event?.fromChainName?.includes(pendingSearch.toUpperCase()) ||
+            event?.fromHash?.includes(pendingSearch) ||
+            event?.type?.includes(pendingSearch) ||
+            event?.status?.includes(pendingSearch) ||
+            event?.senderAddress?.includes(pendingSearch) ||
+            event?.toChain?.includes(pendingSearch) ||
+            event?.createdAt?.toDateString()?.includes(pendingSearch)
+          );
+        });
       } else if (chainName) {
+        events = await em.find(
+          BridgeEvent,
+          {},
+          { cache: true, orderBy: { createdAt: "DESC" } }
+        );
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(chainName.toUpperCase()) ||

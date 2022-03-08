@@ -3,3 +3,4 @@ build
 .env
 .oldenv
 .mainenv
+.testnetenv

@@ -8,9 +8,10 @@ export const txRouter = (repo: IEventRepo): Router => {
     try {
       const events = await repo.getAllEvents(
         req.query.from?.toString(),
-        req.query.to?.toString(),
+        req.query.status?.toString(),
         req.query.fromHash?.toString(),
-        req.query.chainName?.toString()
+        req.query.chainName?.toString(),
+        req.query.pendingSearch?.toString()
       );
       res.status(200).json(events);
     } catch (e: any) {
@@ -19,9 +20,7 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.get("/getMetrics", async (req: any, res) => {
-
     try {
-
       const metrics = await repo.getMetrics();
 
       res.status(200).json(metrics);
@@ -31,7 +30,6 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.get("/dashboard", async (req: any, res) => {
-
     try {
       const dailyData = await repo.getDashboard(req.query.period)
       res.status(200).json(dailyData);
