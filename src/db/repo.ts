@@ -69,7 +69,7 @@ export default function createEventRepo({
         events = await em.find(
           BridgeEvent,
           {
-            status: "pending",
+            status: "Pending",
           },
           { cache: true, orderBy: { createdAt: "DESC" } }
         );
