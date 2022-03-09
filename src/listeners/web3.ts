@@ -172,9 +172,7 @@ export function contractEventService(
             fromChain: chainNonce,
             toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
             fromChainName: chainNonceToName(chainNonce),
-            toChainName: chainNonceToName(
-              wrappedData?.data?.wrapped?.origin ?? "N/A"
-            ),
+            toChainName: undefined,
             txFees: txFees.toString(),
             type: "Unfreeze",
             status: "Pending",
