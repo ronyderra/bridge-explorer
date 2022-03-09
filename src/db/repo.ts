@@ -108,7 +108,7 @@ export default function createEventRepo({
     },
     async createEvent(e) {
       const event = new BridgeEvent(e);
-      const same = await em.findOne(BridgeEvent, {
+     const same = await em.findOne(BridgeEvent, {
         actionId: event.actionId,
         tokenId: event.tokenId,
         fromHash: event.fromHash
@@ -134,6 +134,7 @@ export default function createEventRepo({
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
+      console.log('enter');
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
           let event = await em.findOne(BridgeEvent, {
@@ -142,7 +143,7 @@ export default function createEventRepo({
               { fromChain: fromChain!.toString() },
             ],
           });
-
+          console.log(event, 'event in update');
           const interval = setInterval(async () => {
             if (event) {
               clearInterval(interval);
@@ -156,7 +157,7 @@ export default function createEventRepo({
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 100);
+          }, 300);
 
           setTimeout(() => {
             clearInterval(interval);
@@ -195,7 +196,7 @@ export default function createEventRepo({
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 35000);
+          }, 20000);
         }
       );
       wrap(waitEvent).assign(

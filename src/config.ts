@@ -67,12 +67,12 @@ const config = {
     //   contract: getOrThrow("CELO_MINTER_ADDRESS"),
     //   nonce: getOrThrow("CELO_NONCE")
     // },
-    // {
-    //   name: "HARMONY",
-    //   node: getOrThrow("HARMONY_RPC_URL"),
-    //   contract: getOrThrow("HARMONY_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("HARMONY_NONCE")
-    // },
+     {
+       name: "HARMONY",
+       node: getOrThrow("HARMONY_RPC_URL"),
+       contract: getOrThrow("HARMONY_MINTER_ADDRESS"),
+       nonce: getOrThrow("HARMONY_NONCE")
+     },
     {
       name: "GNOSIS CHAIN",
       node: getOrThrow("GNOSIS_RPC_URL"),

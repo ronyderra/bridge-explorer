@@ -39,7 +39,8 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
 
   
             try {
-              console.log('dsds')
+              console.log(action_id, 'id');
+              console.log(fromChain, 'from');
               const updated = await eventRepo.updateEvent(
                 action_id,
                 fromChain.toString(),
