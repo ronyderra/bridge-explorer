@@ -11,6 +11,7 @@ import DBConf from "./mikro-orm.config";
 import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
+import bodyParser from "body-parser";
 import { io as elrondIo } from "socket.io-client";
 
 const cron = require("node-cron");
@@ -20,6 +21,8 @@ export let io: Server;
 export default (async function main() {
   const app = express();
   app.use(cors());
+  app.use(bodyParser.json({ limit: "10mb" }));
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   const orm = await MikroORM.init(DBConf);
   const txRoutes = txRouter(createEventRepo(orm));
@@ -36,7 +39,7 @@ export default (async function main() {
       axios
     ).listen();
   });
-  EventService(createEventRepo(orm)).listen(); 
+  EventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
     config.elrond.node,
@@ -87,16 +90,12 @@ export default (async function main() {
     }
   );
 
-
-
   server.listen(config.port, () => {
     console.log(`Listening on port ${process.env.PORT}`);
-    const repo = createEventRepo(orm)
-    repo.saveDailyData()
-    cron.schedule("*/40 * * * * *",  () => repo.saveDailyData())
+    const repo = createEventRepo(orm);
+    repo.saveDailyData();
+    cron.schedule("*/30 * * * *", () => repo.saveDailyData());
   });
-
-
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };
 })();
