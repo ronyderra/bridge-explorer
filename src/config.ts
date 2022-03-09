@@ -25,12 +25,12 @@ const config = {
       contract: getOrThrow("BSC_MINTER_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
     },
-    // {
-    //   name: "ETHEREUM",
-    //   node: getOrThrow("ETHEREUM_RPC_URL"),
-    //   contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("ETHEREUM_NONCE"),
-    // },
+     {
+       name: "ETHEREUM",
+       node: getOrThrow("ETHEREUM_RPC_URL"),
+       contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
+       nonce: getOrThrow("ETHEREUM_NONCE"),
+     },
     {
       name: "VELAS",
       node: getOrThrow("VELAS_RPC_URL"),
@@ -55,12 +55,12 @@ const config = {
       contract: getOrThrow("IOTEX_MINTER_ADDRESS"),
       nonce: getOrThrow("IOTEX_NONCE"),
     },
-    // {
-    //   name: "FANTOM",
-    //   node: getOrThrow("FANTOM_RPC_URL"),
-    //   contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("FANTOM_NONCE"),
-    // },
+     {
+       name: "FANTOM",
+       node: getOrThrow("FANTOM_RPC_URL"),
+       contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
+       nonce: getOrThrow("FANTOM_NONCE"),
+     },
     // {
     //   name: "CELO",
     //   node: getOrThrow("CELO_RPC_URL"),
@@ -117,3 +117,4 @@ export function chainNonceToName(nonce: string) {
 console.log(chainNonceToName("4"));
 
 export default config;
+//0x5B916EFb0e7bc0d8DdBf2d6A9A7850FdAb1984C4
