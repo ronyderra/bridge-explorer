@@ -190,12 +190,12 @@ export default function createEventRepo({
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 100);
+          }, 300);
 
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 20000);
+          }, 35000);
         }
       );
       wrap(waitEvent).assign(
