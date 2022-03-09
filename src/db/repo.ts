@@ -2,6 +2,7 @@ import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData"
+import { chainNonceToName } from "../config";
 import moment from "moment";
 
 export interface IEventRepo {
@@ -143,7 +144,7 @@ export default function createEventRepo({
               { fromChain: fromChain!.toString() },
             ],
           });
-          console.log(event, 'event in update');
+          
           const interval = setInterval(async () => {
             if (event) {
               clearInterval(interval);
@@ -165,7 +166,7 @@ export default function createEventRepo({
           }, 20000);
         }
       );
-      wrap(waitEvent).assign({ toHash, status: "Completed", toChain }, { em });
+      wrap(waitEvent).assign({ toHash, status: "Completed", toChain, toChainName: chainNonceToName(toChain) }, { em });
       await em.flush();
       return waitEvent;
     },
