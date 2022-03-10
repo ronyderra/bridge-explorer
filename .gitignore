@@ -4,3 +4,4 @@ build
 .oldenv
 .mainenv
 .testnetenv
+verbibot.json
