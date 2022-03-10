@@ -85,6 +85,7 @@ export default function createEventRepo({
             event?.createdAt?.toDateString()?.includes(pendingSearch)
           );
         });
+        events = events.slice(0, 50);
       } else if (chainName) {
         events = await em.find(
           BridgeEvent,
@@ -103,6 +104,7 @@ export default function createEventRepo({
             event?.createdAt?.toDateString()?.includes(chainName)
           );
         });
+        events = events.slice(0, 50);
       }
 
       return events;
