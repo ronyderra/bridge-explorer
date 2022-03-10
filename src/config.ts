@@ -111,6 +111,7 @@ const config = {
   token_uri: getOrThrow("token_uri_sheet"),
   auth_provider_x509_cert_url: getOrThrow("auth_provider_x509_cert_url"),
   client_x509_cert_url: getOrThrow("client_x509_cert_url"),
+  mail_key: getOrThrow("SENDING_BLUE"),
 };
 
 export function chainNonceToName(nonce: string) {

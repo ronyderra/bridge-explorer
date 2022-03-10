@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IEventRepo } from "../db/repo";
 import issueSheet from "../services/issueSheet";
+import { Mailer } from "../services/mailer";
 
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
@@ -41,7 +42,16 @@ export const txRouter = (repo: IEventRepo): Router => {
 
   router.post("/reportIssue", async (req: any, res) => {
     try {
+      const event = await repo.findEventByHash(req.body.txHash);
+      console.log(event);
+      if (!event || !req.body.txHash) {
+        res.send("hash not found");
+        return;
+      }
+
       await issueSheet(req.body);
+
+      await new Mailer().sendFormFill(req.body, "TX Explorer");
       res.send("success");
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
