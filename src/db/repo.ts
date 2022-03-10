@@ -132,7 +132,7 @@ export default function createEventRepo({
     },
     async findEventByHash(fromHash) {
       return await em.findOne(BridgeEvent, {
-        fromHash: fromHash.toLowerCase(),
+        fromHash,
       });
     },
     async findWallet(address) {

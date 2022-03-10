@@ -112,6 +112,7 @@ const config = {
   auth_provider_x509_cert_url: getOrThrow("auth_provider_x509_cert_url"),
   client_x509_cert_url: getOrThrow("client_x509_cert_url"),
   mail_key: getOrThrow("SENDING_BLUE"),
+  captcha_secret: getOrThrow("SECRET_CAPTCHA"),
 };
 
 export function chainNonceToName(nonce: string) {

@@ -2,6 +2,8 @@ import { Router } from "express";
 import { IEventRepo } from "../db/repo";
 import issueSheet from "../services/issueSheet";
 import { Mailer } from "../services/mailer";
+import axios from "axios";
+import config from "../config";
 
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
@@ -42,17 +44,27 @@ export const txRouter = (repo: IEventRepo): Router => {
 
   router.post("/reportIssue", async (req: any, res) => {
     try {
+      if (!req.body.token) return res.status(401).json({ message: 'Unauthtorized' });
+  
+      const { data } = await axios(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${config.captcha_secret}&response=${
+          req.body.token
+        }`
+      );
+
+      if (!data?.success) return res.status(401).json({ message: 'Unauthtorized' });
+      
       const event = await repo.findEventByHash(req.body.txHash);
-      console.log(event);
+
       if (!event || !req.body.txHash) {
-        res.send("hash not found");
+        res.status(404).json({message: "Hash not found"});
         return;
       }
-
+      
       await issueSheet(req.body);
 
       await new Mailer().sendFormFill(req.body, "TX Explorer");
-      res.send("success");
+      res.json({message: "Success"});
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }
