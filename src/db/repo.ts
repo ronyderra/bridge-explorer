@@ -172,12 +172,12 @@ export default function createEventRepo({
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 300);
+          }, 500);
 
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 20000);
+          }, 60000);
         }
       );
       wrap(waitEvent).assign(
@@ -214,12 +214,12 @@ export default function createEventRepo({
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 300);
+          }, 500);
 
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 20000);
+          }, 60000);
         }
       );
       wrap(waitEvent).assign(
