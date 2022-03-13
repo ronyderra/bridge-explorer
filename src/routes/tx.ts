@@ -10,14 +10,15 @@ export const txRouter = (repo: IEventRepo): Router => {
 
   router.get("/", async (req, res) => {
     try {
-      const events = await repo.getAllEvents(
+      const docs = await repo.getAllEvents(
         req.query.from?.toString(),
         req.query.status?.toString(),
         req.query.fromHash?.toString(),
         req.query.chainName?.toString(),
-        req.query.pendingSearch?.toString()
+        req.query.pendingSearch?.toString(),
+        Number(req.query.offset)
       );
-      res.status(200).json(events);
+      res.status(200).json({events: docs?.events, count: docs?.count});
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }

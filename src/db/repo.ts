@@ -29,8 +29,9 @@ export interface IEventRepo {
     toChain?: string,
     fromHash?: string,
     chainName?: string,
-    pendingSearch?: string
-  ): Promise<BridgeEvent[] | null>;
+    pendingSearch?: string,
+    offset?: number
+  ): Promise<{events: BridgeEvent[], count: number} | null>;
   getMetrics(): Promise<{
     totalTx: number;
     totalWallets: number;
@@ -48,21 +49,26 @@ export default function createEventRepo({
       status = undefined,
       fromHash = undefined,
       chainName = undefined,
-      pendingSearch = undefined
+      pendingSearch = undefined,
+      offset = 0
     ) {
-      let events = await em.find(
+   
+      let [events, count] = await em.findAndCount(
         BridgeEvent,
-        {},
-        { cache: true, orderBy: { createdAt: "DESC" }, limit: 50 }
+        {
+          //status,
+         // chainName,
+        },
+        { cache: true, orderBy: { createdAt: "DESC" }, limit: 50, offset: offset * 50 }
       );
-
+      
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (status) {
         events = await em.find(
           BridgeEvent,
           { status },
-          { cache: true, orderBy: { createdAt: "DESC" }, limit: 50 }
+          { cache: true, orderBy: { createdAt: "DESC" }, limit: 50,  offset: offset * 50 }
         );
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
@@ -91,7 +97,7 @@ export default function createEventRepo({
         events = await em.find(
           BridgeEvent,
           {},
-          { cache: true, orderBy: { createdAt: "DESC" } }
+          { cache: true, orderBy: { createdAt: "DESC" }, offset: offset * 50  }
         );
         events = events.filter((event) => {
           return (
@@ -105,10 +111,12 @@ export default function createEventRepo({
             event?.createdAt?.toDateString()?.includes(chainName)
           );
         });
+        count = events.length;
         events = events.slice(0, 50);
       }
+      console.log(count);
 
-      return events;
+      return {events, count};
     },
     async createEvent(e) {
       const event = new BridgeEvent(e);
