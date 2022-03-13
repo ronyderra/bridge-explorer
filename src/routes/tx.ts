@@ -4,19 +4,22 @@ import issueSheet from "../services/issueSheet";
 import { Mailer } from "../services/mailer";
 import axios from "axios";
 import config from "../config";
+import { QueryOrderKeys } from "@mikro-orm/core";
 
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
-
   router.get("/", async (req, res) => {
+    console.log(req.query.sort);
     try {
       const docs = await repo.getAllEvents(
+        req.query.sort?.toString(),
         req.query.from?.toString(),
         req.query.status?.toString(),
         req.query.fromHash?.toString(),
         req.query.chainName?.toString(),
         req.query.pendingSearch?.toString(),
-        Number(req.query.offset)
+        Number(req.query.offset),
+        
       );
       res.status(200).json({events: docs?.events, count: docs?.count});
     } catch (e: any) {

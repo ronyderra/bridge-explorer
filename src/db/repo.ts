@@ -1,8 +1,9 @@
-import { MikroORM, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
+import { MikroORM, IDatabaseDriver, Connection, wrap, QueryOrderKeys } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
+
 import moment from "moment";
 
 export interface IEventRepo {
@@ -25,12 +26,13 @@ export interface IEventRepo {
     nftUri: string
   ): Promise<BridgeEvent>;
   getAllEvents(
+    sort?:string,
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
     chainName?: string,
     pendingSearch?: string,
-    offset?: number
+    offset?: number,
   ): Promise<{events: BridgeEvent[], count: number} | null>;
   getMetrics(): Promise<{
     totalTx: number;
@@ -45,12 +47,14 @@ export default function createEventRepo({
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
     async getAllEvents(
+      sort = "DESC",
       fromChain = undefined,
       status = undefined,
       fromHash = undefined,
       chainName = undefined,
       pendingSearch = undefined,
-      offset = 0
+      offset = 0,
+    
     ) {
    
       let [events, count] = await em.findAndCount(
@@ -59,7 +63,7 @@ export default function createEventRepo({
           //status,
          // chainName,
         },
-        { cache: true, orderBy: { createdAt: "DESC" }, limit: 50, offset: offset * 50 }
+        { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' }, limit: 50, offset: offset * 50 }
       );
       
       if (fromChain) {
