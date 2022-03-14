@@ -69,20 +69,25 @@ export default function createEventRepo({
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (status) {
+  
         events = await em.find(
           BridgeEvent,
           { status },
-          { cache: true, orderBy: { createdAt: "DESC" }, limit: 50,  offset: offset * 50 }
+          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' } }
         );
+
+        count = events.length
+        events = events.slice(offset * 50, offset * 50 + 50);
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       } else if (pendingSearch) {
+        console.log('d');
         events = await em.find(
           BridgeEvent,
           {
             status: "Pending",
           },
-          { cache: true, orderBy: { createdAt: "DESC" } }
+          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' } }
         );
         events = events.filter((event) => {
           return (
@@ -96,12 +101,13 @@ export default function createEventRepo({
             event?.createdAt?.toDateString()?.includes(pendingSearch)
           );
         });
-        events = events.slice(0, 50);
+        count = events.length;
+        events = events.slice(offset * 50, offset * 50 + 50);
       } else if (chainName) {
         events = await em.find(
           BridgeEvent,
           {},
-          { cache: true, orderBy: { createdAt: "DESC" }, offset: offset * 50  }
+          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' }, /*offset: offset * 50*/  }
         );
         events = events.filter((event) => {
           return (
@@ -116,7 +122,7 @@ export default function createEventRepo({
           );
         });
         count = events.length;
-        events = events.slice(0, 50);
+        events = events.slice(offset * 50, offset * 50 + 50);
       }
       console.log(count);
 

@@ -7,6 +7,7 @@ import config from "../config";
 import { QueryOrderKeys } from "@mikro-orm/core";
 
 export const txRouter = (repo: IEventRepo): Router => {
+  
   const router = Router();
   router.get("/", async (req, res) => {
     console.log(req.query.sort);
@@ -47,7 +48,9 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.post("/reportIssue", async (req: any, res) => {
+  
     try {
+      
       if (!req.body.token) return res.status(401).json({ message: 'Unauthtorized' });
   
       const { data } = await axios(
@@ -61,7 +64,7 @@ export const txRouter = (repo: IEventRepo): Router => {
       const event = await repo.findEventByHash(req.body.txHash);
 
       if (!event || !req.body.txHash) {
-        res.status(404).json({message: "Hash not found"});
+        res.status(200).json({message: "Hash not found"});
         return;
       }
       
