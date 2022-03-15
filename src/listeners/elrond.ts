@@ -113,6 +113,13 @@ const eventHandler = async (
       console.log("unfreez event: ", eventObj);
       const doc = await eventRepo.createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
+      setTimeout(async () => {
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        console.log(updated, 'in errored');
+        if (updated) {
+          clientAppSocket.emit("updateEvent", updated);
+        }
+    }, 1000 * 60)
     }
     case "freezeSendNft": {
       const to = Base64.atob(event.topics[3]);
@@ -146,6 +153,13 @@ const eventHandler = async (
       console.log("transfer event: ", eventObj);
       const doc = await eventRepo.createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
+      setTimeout(async () => {
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        console.log(updated, 'in errored');
+        if (updated) {
+          clientAppSocket.emit("updateEvent", updated);
+        }
+    }, 1000 * 60)
 
       console.log(
         "transfer",
