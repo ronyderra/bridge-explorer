@@ -1,4 +1,10 @@
-import { MikroORM, IDatabaseDriver, Connection, wrap, QueryOrderKeys } from "@mikro-orm/core";
+import {
+  MikroORM,
+  IDatabaseDriver,
+  Connection,
+  wrap,
+  QueryOrderKeys,
+} from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
@@ -26,14 +32,14 @@ export interface IEventRepo {
     nftUri: string
   ): Promise<BridgeEvent>;
   getAllEvents(
-    sort?:string,
+    sort?: string,
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
     chainName?: string,
     pendingSearch?: string,
-    offset?: number,
-  ): Promise<{events: BridgeEvent[], count: number} | null>;
+    offset?: number
+  ): Promise<{ events: BridgeEvent[]; count: number } | null>;
   getMetrics(): Promise<{
     totalTx: number;
     totalWallets: number;
@@ -53,41 +59,49 @@ export default function createEventRepo({
       fromHash = undefined,
       chainName = undefined,
       pendingSearch = undefined,
-      offset = 0,
-    
+      offset = 0
     ) {
-   
       let [events, count] = await em.findAndCount(
         BridgeEvent,
         {
           //status,
-         // chainName,
+          // chainName,
         },
-        { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' }, limit: 50, offset: offset * 50 }
+        {
+          cache: true,
+          orderBy: { createdAt: sort === "DESC" ? "DESC" : "ASC" },
+          limit: 50,
+          offset: offset * 50,
+        }
       );
-      
+
       if (fromChain) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (status) {
-  
         events = await em.find(
           BridgeEvent,
           { status },
-          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' } }
+          {
+            cache: true,
+            orderBy: { createdAt: sort === "DESC" ? "DESC" : "ASC" },
+          }
         );
 
-        count = events.length
+        count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       } else if (pendingSearch) {
-        console.log('d');
+        console.log("d");
         events = await em.find(
           BridgeEvent,
           {
             status: "Pending",
           },
-          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' } }
+          {
+            cache: true,
+            orderBy: { createdAt: sort === "DESC" ? "DESC" : "ASC" },
+          }
         );
         events = events.filter((event) => {
           return (
@@ -107,7 +121,12 @@ export default function createEventRepo({
         events = await em.find(
           BridgeEvent,
           {},
-          { cache: true, orderBy: { createdAt: sort === 'DESC'? 'DESC': 'ASC' }, /*offset: offset * 50*/  }
+          {
+            cache: true,
+            orderBy: {
+              createdAt: sort === "DESC" ? "DESC" : "ASC",
+            } /*offset: offset * 50*/,
+          }
         );
         events = events.filter((event) => {
           return (
@@ -126,7 +145,7 @@ export default function createEventRepo({
       }
       console.log(count);
 
-      return {events, count};
+      return { events, count };
     },
     async createEvent(e) {
       const event = new BridgeEvent(e);
@@ -159,6 +178,8 @@ export default function createEventRepo({
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
+      console.log("update", { actionId, fromChain, toChain });
+
       console.log("enter");
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
