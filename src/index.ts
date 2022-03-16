@@ -14,6 +14,7 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import { io as elrondIo } from "socket.io-client";
 import { generateCSV } from "./generateCSV";
+import { captchaProtected } from "./db/helpers";
 
 const cron = require("node-cron");
 
@@ -99,18 +100,21 @@ export default (async function main() {
   });
 
   console.log(__dirname);
-  app.get("/csv", async (req, res) => {
+  app.get("/csv", captchaProtected, async (req, res) => {
     const startDate = req.query?.startDate as string | undefined;
     const endDate = req.query?.endDate as string | undefined;
     const searchQuery = req.query?.searchQuery as string | undefined;
+    console.log('this');
 
     try {
       await generateCSV(createEventRepo(orm), startDate, endDate, searchQuery);
+      return res.sendFile('events.csv', { root: require('path').join(__dirname, '../') });
     } catch (error) {
       console.log(error);
     }
 
-    res.download(`${__dirname}/../events.csv`, "events.csv");
+    //res.download(`${__dirname}/../events.csv`, "events.csv");
+    
   });
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };

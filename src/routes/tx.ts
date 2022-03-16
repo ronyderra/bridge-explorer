@@ -4,12 +4,13 @@ import issueSheet from "../services/issueSheet";
 import { Mailer } from "../services/mailer";
 import axios from "axios";
 import config from "../config";
+import { captchaProtected } from "../db/helpers";
 import { QueryOrderKeys } from "@mikro-orm/core";
 
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
   router.get("/", async (req, res) => {
-    console.log(req.query.sort);
+   
     try {
       const docs = await repo.getAllEvents(
         req.query.sort?.toString(),
@@ -45,17 +46,8 @@ export const txRouter = (repo: IEventRepo): Router => {
     }
   });
 
-  router.post("/reportIssue", async (req: any, res) => {
+  router.post("/reportIssue", captchaProtected, async (req: any, res) => {
     try {
-      if (!req.body.token)
-        return res.status(401).json({ message: "Unauthtorized" });
-
-      const { data } = await axios(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${config.captcha_secret}&response=${req.body.token}`
-      );
-
-      if (!data?.success)
-        return res.status(401).json({ message: "Unauthtorized" });
 
       const event = await repo.findEventByHash(req.body.txHash);
 

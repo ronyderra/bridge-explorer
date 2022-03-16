@@ -74,17 +74,17 @@ export default function createEventRepo({
       if (startDate && endDate) {
         events = events.filter((e) => {
           const date = moment(e.createdAt);
-          return date.isSameOrAfter(startDate) && date.isSameOrBefore(endDate);
+          return date.isSameOrAfter(new Date(startDate)) && date.isSameOrBefore(new Date(endDate));
         });
       } else if (startDate) {
         events = events.filter((e) => {
           const date = moment(e.createdAt);
-          return date.isSameOrAfter(startDate);
+          return date.isSameOrAfter(new Date(startDate));
         });
       } else if (endDate) {
         events = events.filter((e) => {
           const date = moment(e.createdAt);
-          return date.isSameOrBefore(endDate);
+          return date.isSameOrBefore(new Date(endDate));
         });
       }
 
