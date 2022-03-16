@@ -31,6 +31,9 @@ export interface IEventRepo {
     senderAddress: string,
     nftUri: string
   ): Promise<BridgeEvent>;
+  errorEvent(actionId: string,
+    fromChain: string,
+): Promise<BridgeEvent | undefined>;
   getAllEvents(
     sort?: string,
     fromChain?: string,
@@ -259,6 +262,25 @@ export default function createEventRepo({
       );
       await em.flush();
       return waitEvent;
+    },
+    async errorEvent(actionId, fromChain) {
+        const event = await em.findOne(BridgeEvent, {
+          $and: [
+            { actionId: actionId.toString() },
+            { fromChain: fromChain.toString() },
+          ],
+        });
+
+        if (event && event.status === 'Pending') {
+          wrap(event).assign(
+            { status: "Failed"},
+            { em }
+          );
+          await em.flush();
+          return event;
+        }
+
+        return undefined;
     },
     async getMetrics() {
       const totalTx = await em.count(BridgeEvent, {});

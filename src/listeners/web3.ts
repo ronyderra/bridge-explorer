@@ -120,6 +120,13 @@ export function contractEventService(
             .then(([doc]) => {
               console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
+              setTimeout(async () => {
+                  const updated = await eventRepo.errorEvent(actionId.toString(),chainNonce);
+                  if (updated) {
+                    clientAppSocket.emit("updateEvent", updated);
+                  }
+              }, 1000 * 60)
+
             })
             .catch(() => {});
 
