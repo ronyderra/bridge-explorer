@@ -57,24 +57,28 @@ export default function createEventRepo({
   em,
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
-    async getEventsForCSV(startDate?: string, endDate?: string) {
+    async getEventsForCSV(startDate = undefined, endDate = undefined) {
       // get events between startDate and endDate
-      const events = await em.find(
-        BridgeEvent,
-        {
-          createdAt: {
-            $gte: startDate,
-            $lte: endDate,
-          },
-        },
-        {
-          orderBy: {
-            createdAt: "DESC",
-          },
-        }
-      );
+      let events = await em.find(BridgeEvent, {});
 
-      console.log(events);
+      // filter by startDate and endDate
+
+      if (startDate && endDate) {
+        events = events.filter((e) => {
+          const date = moment(e.createdAt);
+          return date.isSameOrAfter(startDate) && date.isSameOrBefore(endDate);
+        });
+      } else if (startDate) {
+        events = events.filter((e) => {
+          const date = moment(e.createdAt);
+          return date.isSameOrAfter(startDate);
+        });
+      } else if (endDate) {
+        events = events.filter((e) => {
+          const date = moment(e.createdAt);
+          return date.isSameOrBefore(endDate);
+        });
+      }
 
       return events;
     },
