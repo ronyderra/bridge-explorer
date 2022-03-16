@@ -132,9 +132,11 @@ export function contractEventService(
             .catch(() => {});
 
           console.log("Transfer", nftUri);
-          console.log(
-            `${chainName} ${chainNonce}  ${targetNonce} ${actionId} ${txFees} ${to} ${tokenId} ${contract}`
-          );
+          console.log("unfreeze", {
+            chainName,
+            actionId,
+            fromChain: chainNonce,
+          });
         }
       );
 
@@ -205,10 +207,11 @@ export function contractEventService(
             })
             .catch(() => {});
 
-          console.log("unfreeze");
-          console.log(
-            `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
-          );
+          console.log("unfreeze", {
+            chainName,
+            actionId,
+            fromChain: chainNonce,
+          });
         }
       );
     },
