@@ -99,7 +99,7 @@ export default (async function main() {
   });
 
   console.log(__dirname);
-  app.get("csv", async (req, res) => {
+  app.get("/csv", async (req, res) => {
     const startDate = req.query?.startDate as string | undefined;
     const endDate = req.query?.endDate as string | undefined;
 
