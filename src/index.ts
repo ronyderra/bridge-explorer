@@ -104,7 +104,7 @@ export default (async function main() {
     const endDate = req.query?.endDate as string | undefined;
 
     try {
-      generateCSV(createEventRepo(orm), startDate, endDate);
+      await generateCSV(createEventRepo(orm), startDate, endDate);
     } catch (error) {
       console.log(error);
     }
