@@ -31,9 +31,11 @@ export interface IEventRepo {
     senderAddress: string,
     nftUri: string
   ): Promise<BridgeEvent>;
-  errorEvent(actionId: string,
-    fromChain: string,
-): Promise<BridgeEvent | undefined>;
+  errorEvent(
+    actionId: string,
+    fromChain: string
+  ): Promise<BridgeEvent | undefined>;
+  getEventsForCSV(startDate?: string, endDate?: string): Promise<BridgeEvent[]>;
   getAllEvents(
     sort?: string,
     fromChain?: string,
@@ -55,6 +57,27 @@ export default function createEventRepo({
   em,
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
+    async getEventsForCSV(startDate?: string, endDate?: string) {
+      // get events between startDate and endDate
+      const events = await em.find(
+        BridgeEvent,
+        {
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        },
+        {
+          orderBy: {
+            createdAt: "DESC",
+          },
+        }
+      );
+
+      console.log(events);
+
+      return events;
+    },
     async getAllEvents(
       sort = "DESC",
       fromChain = undefined,
@@ -264,23 +287,20 @@ export default function createEventRepo({
       return waitEvent;
     },
     async errorEvent(actionId, fromChain) {
-        const event = await em.findOne(BridgeEvent, {
-          $and: [
-            { actionId: actionId.toString() },
-            { fromChain: fromChain.toString() },
-          ],
-        });
+      const event = await em.findOne(BridgeEvent, {
+        $and: [
+          { actionId: actionId.toString() },
+          { fromChain: fromChain.toString() },
+        ],
+      });
 
-        if (event && event.status === 'Pending') {
-          wrap(event).assign(
-            { status: "Failed"},
-            { em }
-          );
-          await em.flush();
-          return event;
-        }
+      if (event && event.status === "Pending") {
+        wrap(event).assign({ status: "Failed" }, { em });
+        await em.flush();
+        return event;
+      }
 
-        return undefined;
+      return undefined;
     },
     async getMetrics() {
       const totalTx = await em.count(BridgeEvent, {});

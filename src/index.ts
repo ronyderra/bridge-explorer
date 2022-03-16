@@ -13,6 +13,7 @@ import http from "http";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import { io as elrondIo } from "socket.io-client";
+import { generateCSV } from "./generateCSV";
 
 const cron = require("node-cron");
 
@@ -95,6 +96,20 @@ export default (async function main() {
     const repo = createEventRepo(orm);
     repo.saveDailyData();
     cron.schedule("*/30 * * * *", () => repo.saveDailyData());
+  });
+
+  console.log(__dirname);
+  app.get("csv", async (req, res) => {
+    const startDate = req.query?.startDate as string | undefined;
+    const endDate = req.query?.endDate as string | undefined;
+
+    try {
+      generateCSV(createEventRepo(orm), startDate, endDate);
+    } catch (error) {
+      console.log(error);
+    }
+
+    res.download(`${__dirname}/../events.csv`, "events.csv");
   });
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };

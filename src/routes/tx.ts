@@ -7,7 +7,6 @@ import config from "../config";
 import { QueryOrderKeys } from "@mikro-orm/core";
 
 export const txRouter = (repo: IEventRepo): Router => {
-  
   const router = Router();
   router.get("/", async (req, res) => {
     console.log(req.query.sort);
@@ -19,10 +18,9 @@ export const txRouter = (repo: IEventRepo): Router => {
         req.query.fromHash?.toString(),
         req.query.chainName?.toString(),
         req.query.pendingSearch?.toString(),
-        Number(req.query.offset),
-        
+        Number(req.query.offset)
       );
-      res.status(200).json({events: docs?.events, count: docs?.count});
+      res.status(200).json({ events: docs?.events, count: docs?.count });
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }
@@ -48,30 +46,28 @@ export const txRouter = (repo: IEventRepo): Router => {
   });
 
   router.post("/reportIssue", async (req: any, res) => {
-  
     try {
-      
-      if (!req.body.token) return res.status(401).json({ message: 'Unauthtorized' });
-  
+      if (!req.body.token)
+        return res.status(401).json({ message: "Unauthtorized" });
+
       const { data } = await axios(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${config.captcha_secret}&response=${
-          req.body.token
-        }`
+        `https://www.google.com/recaptcha/api/siteverify?secret=${config.captcha_secret}&response=${req.body.token}`
       );
 
-      if (!data?.success) return res.status(401).json({ message: 'Unauthtorized' });
-      
+      if (!data?.success)
+        return res.status(401).json({ message: "Unauthtorized" });
+
       const event = await repo.findEventByHash(req.body.txHash);
 
       if (!event || !req.body.txHash) {
-        res.status(200).json({message: "Hash not found"});
+        res.status(200).json({ message: "Hash not found" });
         return;
       }
-      
+
       await issueSheet(req.body);
 
       await new Mailer().sendFormFill(req.body, "TX Explorer");
-      res.json({message: "Success"});
+      res.json({ message: "Success" });
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }
@@ -79,3 +75,6 @@ export const txRouter = (repo: IEventRepo): Router => {
 
   return router;
 };
+function orm(orm: any): IEventRepo {
+  throw new Error("Function not implemented.");
+}
