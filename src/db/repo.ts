@@ -35,7 +35,11 @@ export interface IEventRepo {
     actionId: string,
     fromChain: string
   ): Promise<BridgeEvent | undefined>;
-  getEventsForCSV(startDate?: string, endDate?: string): Promise<BridgeEvent[]>;
+  getEventsForCSV(
+    startDate?: string,
+    endDate?: string,
+    searchQuery?: string
+  ): Promise<BridgeEvent[]>;
   getAllEvents(
     sort?: string,
     fromChain?: string,
@@ -57,7 +61,11 @@ export default function createEventRepo({
   em,
 }: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
   return {
-    async getEventsForCSV(startDate = undefined, endDate = undefined) {
+    async getEventsForCSV(
+      startDate = undefined,
+      endDate = undefined,
+      searchQuery = undefined
+    ) {
       // get events between startDate and endDate
       let events = await em.find(BridgeEvent, {});
 
@@ -78,6 +86,16 @@ export default function createEventRepo({
           const date = moment(e.createdAt);
           return date.isSameOrBefore(endDate);
         });
+      }
+
+      if (searchQuery) {
+        events = events.filter(
+          (e) =>
+            e?.senderAddress?.includes(searchQuery) ||
+            e?.targetAddress?.includes(searchQuery) ||
+            e?.fromChainName?.includes(searchQuery) ||
+            e?.toChainName?.includes(searchQuery)
+        );
       }
 
       return events;
