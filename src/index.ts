@@ -2,6 +2,7 @@ import express from "express";
 import { providers } from "ethers";
 import { contractEventService, EventService } from "./listeners/web3";
 import { elrondEventListener } from "./listeners/elrond";
+import {tezosEventListener} from "./listeners/tezos";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
@@ -15,7 +16,7 @@ import bodyParser from "body-parser";
 import { io as elrondIo } from "socket.io-client";
 import { generateCSV } from "./generateCSV";
 import { captchaProtected } from "./db/helpers";
-
+import { chains } from "./config";
 const cron = require("node-cron");
 
 export let io: Server;
@@ -32,6 +33,7 @@ export default (async function main() {
   app.use("/", txRoutes);
 
   config.web3.map((chain) => {
+   
     return contractEventService(
       new providers.JsonRpcProvider(chain.node),
       chain.contract,
@@ -50,6 +52,8 @@ export default (async function main() {
     config.elrond.nonce,
     createEventRepo(orm)
   ).listen();
+
+  //tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, createEventRepo(orm)).listen();
 
   const elrondSocket = elrondIo(config.elrond.socket);
 
@@ -92,11 +96,12 @@ export default (async function main() {
     }
   );
 
-  server.listen(config.port, () => {
+  server.listen(config.port, async () => {
     console.log(`Listening on port ${process.env.PORT}`);
     const repo = createEventRepo(orm);
     repo.saveDailyData();
     cron.schedule("*/30 * * * *", () => repo.saveDailyData());
+
   });
 
   console.log(__dirname);

@@ -9,8 +9,9 @@ import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
-
+import { chains } from "../config";
 import moment from "moment";
+import axios from "axios";
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | null>;
@@ -364,21 +365,37 @@ export default function createEventRepo({
         }
       }
 
+      /*const rates = await axios(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${chains.map(c => c.id).join(
+          ","
+        )}&vs_currencies=usd`
+      );*/
+      
+    
+
       const dailyData = new DailyData({
         txNumber: count,
+        //exchangeRates: Object.keys(rates.data).reduce((acc:{[x: string]:string}, coin:string) => {
+         // return {
+           // ...acc,
+           // [coin]: rates.data[coin].usd
+         // }
+       // }, {}),
         walletsNumber: users.length,
         date:
           now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate(),
       });
+
+      console.log(dailyData);
 
       const data = await em.findOne(DailyData, {
         date: dailyData.date,
       });
 
       if (data) {
-        const { txNumber, walletsNumber } = dailyData;
+        const { txNumber, walletsNumber, /*exchangeRates*/ } = dailyData;
 
-        wrap(data).assign({ txNumber, walletsNumber }, { em });
+        wrap(data).assign({ txNumber, walletsNumber, /*exchangeRates */}, { em });
         return await em.flush();
       }
       await em.persistAndFlush(dailyData);

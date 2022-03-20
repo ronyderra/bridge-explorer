@@ -3,8 +3,12 @@ import { ObjectId } from "@mikro-orm/mongodb";
 
 export interface IDailyData {
     txNumber: number,
+    //exchangeRates: {
+    //  [x:string]: string
+    //},
     walletsNumber: number,
     date: string
+
 }
 
 @Entity()
@@ -14,6 +18,11 @@ export class DailyData {
 
   @Property()
   txNumber: number;
+
+ // @Property()
+  //exchangeRates: {
+   // [coin:string]: string
+  //};
 
   @Property()
   walletsNumber: number
@@ -25,6 +34,7 @@ export class DailyData {
 
   constructor(obj:IDailyData) {
       this.txNumber = obj.txNumber;
+      //this.exchangeRates = obj.exchangeRates;
       this.walletsNumber = obj.walletsNumber;
       this.date = obj.date
   }

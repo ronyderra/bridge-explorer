@@ -65,6 +65,7 @@ export function contractEventService(
 ): IContractEventListener {
   return {
     listen: () => {
+    
       const contract = Minter__factory.connect(minterAddress, provider);
 
       const transferEvent = contract.filters.TransferErc721();
