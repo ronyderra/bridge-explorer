@@ -1,4 +1,4 @@
-import moment = require("moment");
+const moment = require("moment");
 import CONFIG from "../config";
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 

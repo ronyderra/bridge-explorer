@@ -183,6 +183,7 @@ const config = {
   tezos : {
     name: "TEZOS",
     socket: getOrThrow("TEZOS_RPC_URL"),
+    xpnft: getOrThrow("TEZOS_XPNFT_ADDRESS"),
     contract: getOrThrow("TEZOS_MINTER_ADDRESS"),
     nonce: getOrThrow("TEZOS_NONCE"),
   },

@@ -43,6 +43,7 @@ export default (async function main() {
       axios
     ).listen();
   });
+  
   EventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
@@ -53,7 +54,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  //tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, createEventRepo(orm)).listen();
+  tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, createEventRepo(orm)).listen();
 
   const elrondSocket = elrondIo(config.elrond.socket);
 
@@ -118,7 +119,6 @@ export default (async function main() {
       console.log(error);
     }
 
-    //res.download(`${__dirname}/../events.csv`, "events.csv");
     
   });
 
