@@ -76,6 +76,7 @@ export function tezosEventListener(
   return {
     listen: async () => {
         console.log('listen tezos');
+
       sub.on(
         "data",
         async (
@@ -159,7 +160,7 @@ export function tezosEventListener(
             }
 
             case "withdraw_nft": {
-              console.log(util.inspect(data, false, null, true /* enable colors */))
+              //console.log(util.inspect(data, false, null, true /* enable colors */))
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
               const to = params.args![0] as MichelsonV1ExpressionBase;
@@ -180,7 +181,7 @@ export function tezosEventListener(
                 fromChainName: chainNonceToName(chainNonce),
                 toChainName: chainNonceToName(tchainNonce),
                 fromHash: data.hash,
-                txFees: new BigNumber(data.amount).pow(12).toString(),
+                txFees: data.amount + '000000000000',
                 type: "Unfreeze",
                 status: "Pending",
                 toHash: undefined,
