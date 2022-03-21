@@ -195,11 +195,11 @@ export function tezosEventListener(
                    config.tezos.xpnft,
                   tokenId
                 ); // TODO: extract from storage
-                console.log(uri);
+                eventObj.nftUri = uri;
               } catch (e) {
                 console.log(e);
               }
-              console.log(eventObj);
+             
 
               Promise.all([
                 (async () => {
