@@ -1,8 +1,9 @@
 import express from "express";
 import { providers } from "ethers";
-import { contractEventService, EventService } from "./listeners/web3";
-import { elrondEventListener ,elrondBridgeListener } from "./listeners/elrond";
-import {tezosEventListener} from "./listeners/tezos";
+import { contractEventService } from "./listeners/web3";
+import { BridgeEventService } from "./listeners/bridge";
+import { elrondEventListener, elrondBridgeListener } from "./listeners/elrond";
+import { tezosEventListener } from "./listeners/tezos";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
@@ -13,7 +14,6 @@ import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
-
 
 const cron = require("node-cron");
 
@@ -30,11 +30,10 @@ export default (async function main() {
 
   app.use("/", txRoutes);
 
+  BridgeEventService(createEventRepo(orm)).listen();
 
-
-  config.web3.map((chain) => {
-   
-    return contractEventService(
+  config.web3.map((chain) =>
+    contractEventService(
       new providers.JsonRpcProvider(chain.node),
       chain.contract,
       chain.name,
@@ -42,10 +41,8 @@ export default (async function main() {
       chain.id,
       createEventRepo(orm),
       axios
-    ).listen();
-  });
-  
-  EventService(createEventRepo(orm)).listen();
+    ).listen()
+  );
 
   elrondEventListener(
     config.elrond.node,
@@ -55,10 +52,14 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  elrondBridgeListener(orm)
-
-  tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, config.tezos.id ,createEventRepo(orm)).listen();
-
+  tezosEventListener(
+    config.tezos.socket,
+    config.tezos.contract,
+    config.tezos.name,
+    config.tezos.nonce,
+    config.tezos.id,
+    createEventRepo(orm)
+  ).listen();
 
   const server = http.createServer(app);
 
@@ -72,13 +73,12 @@ export default (async function main() {
     console.log("a user connected");
   });
 
-
   server.listen(config.port, async () => {
     console.log(`Listening on port ${process.env.PORT}`);
     const repo = createEventRepo(orm);
     repo.saveDailyData();
     cron.schedule("*/30 * * * *", () => repo.saveDailyData());
-  })
+  });
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };
 })();

@@ -21,7 +21,7 @@ const socket = io(config.socketUrl);
 
 
 
-export function EventService(eventRepo: IEventRepo): IContractEventListener {
+/*export function EventService(eventRepo: IEventRepo): IContractEventListener {
   return {
     listen: () => {
       socket.on(
@@ -56,7 +56,7 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
       );
     },
   };
-}
+}*/
 
 export function contractEventService(
   provider: providers.Provider,

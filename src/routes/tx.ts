@@ -86,6 +86,3 @@ export const txRouter = (repo: IEventRepo): Router => {
 
   return router;
 };
-function orm(orm: any): IEventRepo {
-  throw new Error("Function not implemented.");
-}
