@@ -49,6 +49,7 @@ export function tezosEventListener(
   contract: string,
   chainName: string,
   chainNonce: string,
+  chainId: string,
   eventRepo: IEventRepo
 ): IContractEventListener {
   const tezos = new TezosToolkit(rpc);
@@ -134,8 +135,19 @@ export function tezosEventListener(
               };
 
               try {
-                const url = await getUriFa2(fa2Address.string!, tokenId.int!);
-                console.log(url);
+                //const url = await getUriFa2(fa2Address.string!, tokenId.int!);
+                //console.log(url);
+
+                let [url, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
+                  (async () => await getUriFa2(fa2Address.string!, tokenId.int!))(),
+                  (async () =>  {
+                    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`);
+                    return res.data[chainId].usd;
+                  } )(),
+              ])
+                eventObj.nftUri = url.status === 'fulfilled'? url.value : '';
+                eventObj.dollarFees = exchangeRate.status === 'fulfilled' ? new BigNumber(ethers.utils.formatEther(eventObj.txFees)).multipliedBy(exchangeRate.value).toString() : '';
+
               } catch (e) {
                 console.log(e);
               }
@@ -158,9 +170,9 @@ export function tezosEventListener(
                 })
               break;
             }
-
+   
             case "withdraw_nft": {
-              //console.log(util.inspect(data, false, null, true /* enable colors */))
+              console.log(util.inspect(data, false, null, true /* enable colors */))
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
               const to = params.args![0] as MichelsonV1ExpressionBase;
@@ -182,6 +194,7 @@ export function tezosEventListener(
                 toChainName: chainNonceToName(tchainNonce),
                 fromHash: data.hash,
                 txFees: new BigNumber(data.amount).multipliedBy(1e12).toString(),
+                //dollarFees: 
                 type: "Unfreeze",
                 status: "Pending",
                 toHash: undefined,
@@ -192,11 +205,23 @@ export function tezosEventListener(
               };
 
               try {
-                const uri = await getUriFa2(
+                /*const uri = await getUriFa2(
                    config.tezos.xpnft,
                   tokenId
                 ); // TODO: extract from storage
-                eventObj.nftUri = uri;
+                eventObj.nftUri = uri;*/
+
+
+                let [url, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
+                  (async () => await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
+                  (async () =>  {
+                    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`);
+                    return res.data[chainId].usd;
+                  } )(),
+              ])
+                eventObj.nftUri = url.status === 'fulfilled'? url.value : '';
+                eventObj.dollarFees = exchangeRate.status === 'fulfilled' ? new BigNumber(ethers.utils.formatEther(eventObj.txFees)).multipliedBy(exchangeRate.value).toString() : '';
+
               } catch (e) {
                 console.log(e);
               }

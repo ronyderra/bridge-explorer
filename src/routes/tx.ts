@@ -60,7 +60,7 @@ export const txRouter = (repo: IEventRepo): Router => {
 
       await issueSheet(req.body);
 
-      //await new Mailer().sendFormFill(req.body, "TX Explorer");
+      await new Mailer().sendFormFill(req.body, "TX Explorer");
       res.json({ message: "Success" });
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });

@@ -193,7 +193,7 @@ export function contractEventService(
         wrappedData = wrappedData.status === 'fulfilled'?  wrappedData.value : ''
         senderAddress = senderAddress.status === 'fulfilled'? senderAddress.value: ''
 
-        console.log(wrappedData);
+       
         console.log(senderAddress, 'senderAddress');
         console.log(exchangeRate);
 
@@ -201,6 +201,7 @@ export function contractEventService(
             actionId: actionId.toString(),
             chainName,
             tokenId: wrappedData?.data?.wrapped.tokenId ?? '',
+            initialTokenId: tokenId.toString(),
             fromChain: chainNonce,
             toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
             fromChainName: chainNonceToName(chainNonce),

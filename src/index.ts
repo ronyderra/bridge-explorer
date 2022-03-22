@@ -57,7 +57,7 @@ export default (async function main() {
 
   elrondBridgeListener(orm)
 
-  tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, createEventRepo(orm)).listen();
+  tezosEventListener(config.tezos.socket, config.tezos.contract, config.tezos.name, config.tezos.nonce, config.tezos.id ,createEventRepo(orm)).listen();
 
 
   const server = http.createServer(app);
