@@ -23,7 +23,7 @@ export interface IEventRepo {
     toChain: string,
     fromChain: string,
     toHash: string
-  ): Promise<BridgeEvent>;
+  ): Promise<BridgeEvent | undefined>;
   updateElrond(
     actionId: string,
     fromChain: string,
@@ -259,7 +259,7 @@ export default function createEventRepo({
           }, 60000);
         }
       );
-      if (waitEvent.status === "Completed") return waitEvent; 
+      if (waitEvent.status === "Completed") return undefined; 
       wrap(waitEvent).assign(
         {
           toHash,

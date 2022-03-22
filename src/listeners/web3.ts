@@ -45,7 +45,7 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
               toChain.toString(),
               hash
             );
-
+            if (!updated) return;
             console.log(updated, "updated");
 
             clientAppSocket.emit("updateEvent", updated);
@@ -98,8 +98,8 @@ export function contractEventService(
           let [nftUri, senderAddress, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
               (async () => await NFTcontract.tokenURI(tokenId))(),
               (async () => {
-                const res = await event.getTransaction()
-                return res.from
+                const res = await event.getTransaction();
+                return res.from;
               })(),
               (async () =>  {
                 const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`);
