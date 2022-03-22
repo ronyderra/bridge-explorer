@@ -8,9 +8,50 @@ import config, { chainNonceToName } from "../config";
 import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
+import { io as elrondIo } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
-import { io } from "socket.io-client";
-import index from "../index";
+import { MikroORM,IDatabaseDriver,Connection} from "@mikro-orm/core";
+
+import createEventRepo from "../db/repo";
+
+
+
+export function elrondBridgeListener(orm:MikroORM<IDatabaseDriver<Connection>>):IContractEventListener {
+  const elrondSocket = elrondIo(config.elrond.socket);
+
+  return {
+    
+    listen() {
+      elrondSocket.on(
+        "elrond:bridge_tx",
+        async (
+          fromHash: string,
+          sender: string,
+          uris: string[],
+          actionId: string
+        ) => {
+          try {
+            console.log("dsds");
+            const updated = await createEventRepo(orm).updateElrond(
+              actionId,
+              config.elrond.nonce,
+              fromHash,
+              sender,
+              uris[0]
+            );
+    
+            console.log(updated, "updated");
+    
+            clientAppSocket.emit("updateEvent", updated);
+          } catch (e: any) {
+            console.error(e);
+          }
+        }
+      );
+    }
+  }
+}
+
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
@@ -34,6 +75,7 @@ export function elrondEventListener(
     );
   };
   return {
+
     listen: async () => {
       ws.addEventListener("message", async (ev: any) => {
         const evs: EvResp[] = JSON.parse(ev.data);

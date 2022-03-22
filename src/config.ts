@@ -51,31 +51,7 @@ export const addressExplorers: any = {
   "18": "https://tezblock.io/account/"
 };
 
-export const chains = [
-  {
-    id: "aurora-near",
-    name: "AURORA",
-    icon: "./assets/icons/aurora.svg",
-  },
-  { id: "binancecoin", name: "BSC", icon: "./assets/icons/bsc.svg" },
-  { id: "ethereum", name: "Ethereum", icon: "./assets/icons/ethereum.svg" },
-  { id: "velas", name: "Velas", icon: "./assets/icons/velas.svg" },
-  { id: "matic-network", name: "Polygon", icon: "./assets/icons/polygon.svg" },
-  {
-    id: "avalanche-2",
-    name: "Avalanche",
-    icon: "./assets/icons/avalanche.svg",
-  },
-  { id: "iotex", name: "Iotex", icon: "./assets/icons/iotex.svg" },
-  { id: "fantom", name: "Fantom", icon: "./assets/icons/fantom.svg" },
-  // { id: "celo", name: "Celo", icon: "./assets/icons/celo.svg" },
-  { id: "harmony", name: "Harmony", icon: "./assets/icons/harmony.svg" },
-  { id: "gnosis", name: "Gnosis", icon: "./assets/icons/gnosis.svg" },
-  { id: "fuse-network-token", name: "Fuse", icon: "./assets/icons/fuse.svg" },
-  // { id: "unique-one", name: "Unique", icon: "./assets/icons/unique.svg" }, // TODO: check if this is correct
-  { id: "elrond-erd-2", name: "Elrond", icon: "./assets/icons/elrond.svg" },
-  {id: "tezos", name: "Tezos", icon: "./assets/icons/tezos.svg"}
-];
+
 
 function getOrThrow(key: string): string {
   const value = process.env[key];
@@ -85,55 +61,78 @@ function getOrThrow(key: string): string {
   return value;
 }
 
-const config = {
+interface ChainConfig {
+    name: string,
+    node: string,
+    contract: string,
+    nonce: string,
+    id: string
+}
+
+interface Config{
+  web3: ChainConfig[],
+  elrond: ChainConfig & {socket: string},
+  tezos: ChainConfig & {socket: string; xpnft: string},
+  [key: string]: any
+}
+
+const config: Config = {
   web3: [
     {
       name: "AURORA",
       node: getOrThrow("AURORA_RPC_URL"),
       contract: getOrThrow("AURORA_MINTER_ADDRESS"),
       nonce: getOrThrow("AURORA_NONCE"),
+      id: "aurora-near"
     },
     {
       name: "BSC",
       node: getOrThrow("BSC_RPC_URL"),
       contract: getOrThrow("BSC_MINTER_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
+      id: "binancecoin"
     },
     {
       name: "ETHEREUM",
       node: getOrThrow("ETHEREUM_RPC_URL"),
       contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
       nonce: getOrThrow("ETHEREUM_NONCE"),
+      id: "ethereum"
     },
     {
       name: "VELAS",
       node: getOrThrow("VELAS_RPC_URL"),
       contract: getOrThrow("VELAS_MINTER_ADDRESS"),
       nonce: getOrThrow("VELAS_NONCE"),
+      id: "velas"
     },
     {
       name: "POLYGON",
       node: getOrThrow("POLYGON_RPC_URL"),
       contract: getOrThrow("POLYGON_MINTER_ADDRESS"),
       nonce: getOrThrow("POLYGON_NONCE"),
+      id: "matic-network"
     },
     {
       name: "AVALANCHE",
       node: getOrThrow("AVALANCHE_RPC_URL"),
       contract: getOrThrow("AVALANCHE_MINTER_ADDRESS"),
       nonce: getOrThrow("AVALANCHE_NONCE"),
+      id: "avalanche-2"
     },
     {
       name: "IOTEX",
       node: getOrThrow("IOTEX_RPC_URL"),
       contract: getOrThrow("IOTEX_MINTER_ADDRESS"),
       nonce: getOrThrow("IOTEX_NONCE"),
+      id: "iotex"
     },
     {
       name: "FANTOM",
       node: getOrThrow("FANTOM_RPC_URL"),
       contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
       nonce: getOrThrow("FANTOM_NONCE"),
+      id: "fantom"
     },
     // {
     //   name: "CELO",
@@ -146,24 +145,22 @@ const config = {
       node: getOrThrow("HARMONY_RPC_URL"),
       contract: getOrThrow("HARMONY_MINTER_ADDRESS"),
       nonce: getOrThrow("HARMONY_NONCE"),
+      id: "harmony"
     },
     {
       name: "GNOSIS CHAIN",
       node: getOrThrow("GNOSIS_RPC_URL"),
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
+      id: "gnosis"
     },
-   /* {
-      name: "TEZOS",
-      node: getOrThrow("TEZOS_RPC_URL"),
-      contract: getOrThrow("TEZOS_MINTER_ADDRESS"),
-      nonce: getOrThrow("TEZOS_NONCE"),
-    },*/
+
     {
       name: "FUSE",
       node: getOrThrow("FUSE_RPC_URL"),
       contract: getOrThrow("FUSE_MINTER_ADDRESS"),
       nonce: getOrThrow("FUSE_NONCE"),
+      id: "fuse-network-token"
     },
    
     // {
@@ -179,13 +176,16 @@ const config = {
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
     nonce: getOrThrow("ELROND_NONCE"),
     socket: getOrThrow("ELROND_SOCKET_URL"),
+    id: "elrond-erd-2"
   },
   tezos : {
     name: "TEZOS",
+    node: '',
     socket: getOrThrow("TEZOS_RPC_URL"),
     xpnft: getOrThrow("TEZOS_XPNFT_ADDRESS"),
     contract: getOrThrow("TEZOS_MINTER_ADDRESS"),
     nonce: getOrThrow("TEZOS_NONCE"),
+    id: "tezos"
   },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),

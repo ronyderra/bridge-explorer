@@ -8,7 +8,7 @@ import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";
 import axios from "axios";
 import { io as clientAppSocket } from "../index";
-import { ethers } from "ethers";
+import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../entities/IEvent";
 
 const util = require('util')
@@ -124,7 +124,7 @@ export function tezosEventListener(
                 fromChainName: chainNonceToName(chainNonce),
                 toChainName: chainNonceToName(tchainNonce.int!),
                 fromHash: data.hash,
-                txFees: new BigNumber(data.amount).toString(),
+                txFees: new BigNumber(data.amount).multipliedBy(1e12).toString(),
                 type: "Transfer",
                 status: "Pending",
                 toHash: undefined,
@@ -181,7 +181,7 @@ export function tezosEventListener(
                 fromChainName: chainNonceToName(chainNonce),
                 toChainName: chainNonceToName(tchainNonce),
                 fromHash: data.hash,
-                txFees: data.amount + '000000000000',
+                txFees: new BigNumber(data.amount).multipliedBy(1e12).toString(),
                 type: "Unfreeze",
                 status: "Pending",
                 toHash: undefined,

@@ -7,6 +7,8 @@ import config from "../config";
 import { captchaProtected } from "../db/helpers";
 import { QueryOrderKeys } from "@mikro-orm/core";
 
+import { generateCSV } from "../generateCSV";
+
 export const txRouter = (repo: IEventRepo): Router => {
   const router = Router();
   router.get("/", async (req, res) => {
@@ -58,12 +60,29 @@ export const txRouter = (repo: IEventRepo): Router => {
 
       await issueSheet(req.body);
 
-      await new Mailer().sendFormFill(req.body, "TX Explorer");
+      //await new Mailer().sendFormFill(req.body, "TX Explorer");
       res.json({ message: "Success" });
     } catch (e: any) {
       res.status(500).json({ message: e.toString() });
     }
   });
+
+  router.get("/csv", captchaProtected, async (req, res) => {
+    const startDate = req.query?.startDate as string | undefined;
+    const endDate = req.query?.endDate as string | undefined;
+    const searchQuery = req.query?.searchQuery as string | undefined;
+
+
+    try {
+      await generateCSV(repo, startDate, endDate, searchQuery);
+      return res.sendFile('events.csv', { root: require('path').join(__dirname, '../../') });
+    } catch (error) {
+      console.log(error);
+    }
+
+    
+  });
+
 
   return router;
 };

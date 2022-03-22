@@ -9,6 +9,7 @@ export interface IEvent {
   toChainName?: string;
   actionId: string;
   txFees: string;
+  dollarFees?: string;
   tokenId?: string;
   status: "Pending" | "Completed";
   fromHash: string;
@@ -48,6 +49,9 @@ export class BridgeEvent {
   txFees?: string;
 
   @Property({ nullable: true })
+  dollarFees?: string;
+
+  @Property({ nullable: true })
   tokenId?: string;
 
   @Property({ nullable: true })
@@ -79,6 +83,7 @@ export class BridgeEvent {
     status,
     toChain,
     txFees,
+    dollarFees,
     type,
     tokenId,
     fromChain,
@@ -103,5 +108,6 @@ export class BridgeEvent {
     this.nftUri = nftUri;
     this.fromChainName = fromChainName;
     this.toChainName = toChainName;
+    this.dollarFees = dollarFees
   }
 }

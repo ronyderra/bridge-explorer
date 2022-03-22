@@ -9,7 +9,6 @@ import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
-import { chains } from "../config";
 import moment from "moment";
 import axios from "axios";
 
@@ -260,6 +259,7 @@ export default function createEventRepo({
           }, 60000);
         }
       );
+      if (waitEvent.status === "Completed") return waitEvent; 
       wrap(waitEvent).assign(
         {
           toHash,
