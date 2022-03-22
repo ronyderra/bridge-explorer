@@ -150,13 +150,6 @@ export function contractEventService(
 
             })
             .catch(() => {});
-
-          console.log("Transfer", nftUri);
-          console.log("Transfer", {
-            chainName,
-            actionId,
-            fromChain: chainNonce,
-          });
         }
       );
 
@@ -209,10 +202,10 @@ export function contractEventService(
             chainName,
             tokenId: wrappedData?.data?.wrapped.tokenId ?? '',
             fromChain: chainNonce,
-            toChain: wrappedData.status === 'fulfilled'? wrappedData?.value?.data?.wrapped?.origin : "N/A",
+            toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
             fromChainName: chainNonceToName(chainNonce),
             toChainName: chainNonceToName(
-              wrappedData.status === 'fulfilled'? wrappedData?.value?.data?.wrapped?.origin || "N/A" : "N/A"
+              wrappedData?.data?.wrapped?.origin ?? "N/A"
             ),
             txFees: txFees.toString(),
             type: "Unfreeze",
@@ -221,7 +214,7 @@ export function contractEventService(
             toHash: undefined,
             senderAddress: senderAddress,
             targetAddress: value.toString(),
-            nftUri: wrappedData.status === 'fulfilled'? wrappedData?.value?.data?.wrapped?.original_uri: '',
+            nftUri: wrappedData?.data?.wrapped?.original_uri,
             dollarFees: exchangeRate.status === 'fulfilled' ? new BigNumber(ethers.utils.formatEther(txFees.toString())).multipliedBy(exchangeRate.value).toString() : ''
           };
 
