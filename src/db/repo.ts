@@ -259,7 +259,7 @@ export default function createEventRepo({
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 1000 * 60 * 5);
+          }, 1000 * 60 * 15);
         }
       );
       if (waitEvent.status === "Completed") return undefined;
