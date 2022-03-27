@@ -74,7 +74,10 @@ export default function createEventRepo({
       if (startDate && endDate) {
         events = events.filter((e) => {
           const date = moment(e.createdAt);
-          return date.isSameOrAfter(new Date(startDate)) && date.isSameOrBefore(new Date(endDate));
+          return (
+            date.isSameOrAfter(new Date(startDate)) &&
+            date.isSameOrBefore(new Date(endDate))
+          );
         });
       } else if (startDate) {
         events = events.filter((e) => {
@@ -244,22 +247,22 @@ export default function createEventRepo({
               resolve(event);
               return;
             }
-            console.log("waiting for event", actionId, fromChain, toChain);
+            console.log("waiting for event", { actionId, fromChain, toChain });
             event = await em.findOne(BridgeEvent, {
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 500);
+          }, 5000);
 
           setTimeout(() => {
             clearInterval(interval);
             reject("no promise");
-          }, 60000);
+          }, 1000 * 60 * 5);
         }
       );
-      if (waitEvent.status === "Completed") return undefined; 
+      if (waitEvent.status === "Completed") return undefined;
       wrap(waitEvent).assign(
         {
           toHash,
@@ -370,17 +373,15 @@ export default function createEventRepo({
           ","
         )}&vs_currencies=usd`
       );*/
-      
-    
 
       const dailyData = new DailyData({
         txNumber: count,
         //exchangeRates: Object.keys(rates.data).reduce((acc:{[x: string]:string}, coin:string) => {
-         // return {
-           // ...acc,
-           // [coin]: rates.data[coin].usd
-         // }
-       // }, {}),
+        // return {
+        // ...acc,
+        // [coin]: rates.data[coin].usd
+        // }
+        // }, {}),
         walletsNumber: users.length,
         date:
           now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate(),
@@ -393,9 +394,12 @@ export default function createEventRepo({
       });
 
       if (data) {
-        const { txNumber, walletsNumber, /*exchangeRates*/ } = dailyData;
+        const { txNumber, walletsNumber /*exchangeRates*/ } = dailyData;
 
-        wrap(data).assign({ txNumber, walletsNumber, /*exchangeRates */}, { em });
+        wrap(data).assign(
+          { txNumber, walletsNumber /*exchangeRates */ },
+          { em }
+        );
         return await em.flush();
       }
       await em.persistAndFlush(dailyData);
