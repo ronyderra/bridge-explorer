@@ -231,6 +231,8 @@ export default function createEventRepo({
       console.log("enter");
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
+           
+
           let event = await em.findOne(BridgeEvent, {
             $and: [
               { actionId: actionId.toString() },

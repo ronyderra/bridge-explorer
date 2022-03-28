@@ -17,46 +17,6 @@ export interface IContractEventListener {
   listen(): void;
 }
 
-const socket = io(config.socketUrl);
-
-
-
-/*export function EventService(eventRepo: IEventRepo): IContractEventListener {
-  return {
-    listen: () => {
-      socket.on(
-        "tx_executed_event",
-        async (
-          toChain: number,
-          fromChain: number,
-          action_id: string,
-          hash: string
-        ) => {
-          // chain is targetChain
-          // action id is well, action id
-          // hash is the transaction hash
-
-          try {
-            console.log(action_id, "id");
-            console.log(fromChain, "toChain");
-            const updated = await eventRepo.updateEvent(
-              action_id,
-              fromChain.toString(),
-              toChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
-            console.error(e);
-          }
-        }
-      );
-    },
-  };
-}*/
 
 export function contractEventService(
   provider: providers.Provider,
@@ -74,7 +34,7 @@ export function contractEventService(
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
-
+      
       contract.on(
         transferEvent,
         async (
@@ -92,9 +52,7 @@ export function contractEventService(
             contract,
             provider
           );
-          //const nftUri = await NFTcontract.tokenURI(tokenId);
-          //const senderAddress = (await event.getTransaction()).from;
-          
+
           let [nftUri, senderAddress, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
               (async () => await NFTcontract.tokenURI(tokenId))(),
               (async () => {
@@ -167,14 +125,6 @@ export function contractEventService(
           baseUri,
           event
         ) => {
-          //const wrappedData = await axios
-           // .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
-           // .catch((e: any) => console.log("Could not fetch data"));
-          //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
-
-          //const nftUri = await NFTcontract.tokenURI(tokenId);
-
-          //const senderAddress = (await event.getTransaction()).from;
 
           let [wrappedData, senderAddress, exchangeRate]:PromiseSettledResult<string>[] | any[] = await Promise.allSettled([
             (async () => await axios

@@ -2,7 +2,7 @@ import express from "express";
 import { providers } from "ethers";
 import { contractEventService } from "./listeners/web3";
 import { BridgeEventService } from "./listeners/bridge";
-import { elrondEventListener, elrondBridgeListener } from "./listeners/elrond";
+import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
