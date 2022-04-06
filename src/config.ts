@@ -152,7 +152,7 @@ const config: Config = {
       node: getOrThrow("GNOSIS_RPC_URL"),
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
-      id: "gnosis"
+      id: "xdai"
     },
 
     {
