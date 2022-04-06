@@ -15,8 +15,7 @@ export const currency: any = {
   "5": "ETH",
   "8": "FTM",
   "12": "ONE",
-  "18": "TEZ"
-
+  "18": "TEZ",
 };
 
 export const txExplorers: any = {
@@ -32,7 +31,7 @@ export const txExplorers: any = {
   "5": "https://etherscan.io/tx/",
   "8": "https://ftmscan.com/tx/",
   "12": "https://explorer.harmony.one/tx/",
-  "18": "https://tezblock.io/transaction/"
+  "18": "https://tezblock.io/transaction/",
 };
 
 export const addressExplorers: any = {
@@ -48,10 +47,8 @@ export const addressExplorers: any = {
   "5": "https://etherscan.io/address/",
   "8": "https://ftmscan.com/address/",
   "12": "https://explorer.harmony.one/address/",
-  "18": "https://tezblock.io/account/"
+  "18": "https://tezblock.io/account/",
 };
-
-
 
 function getOrThrow(key: string): string {
   const value = process.env[key];
@@ -62,18 +59,18 @@ function getOrThrow(key: string): string {
 }
 
 interface ChainConfig {
-    name: string,
-    node: string,
-    contract: string,
-    nonce: string,
-    id: string
+  name: string;
+  node: string;
+  contract: string;
+  nonce: string;
+  id: string;
 }
 
-interface Config{
-  web3: ChainConfig[],
-  elrond: ChainConfig & {socket: string},
-  tezos: ChainConfig & {socket: string; xpnft: string},
-  [key: string]: any
+interface Config {
+  web3: ChainConfig[];
+  elrond: ChainConfig & { socket: string };
+  tezos: ChainConfig & { socket: string; xpnft: string };
+  [key: string]: any;
 }
 
 const config: Config = {
@@ -83,56 +80,56 @@ const config: Config = {
       node: getOrThrow("AURORA_RPC_URL"),
       contract: getOrThrow("AURORA_MINTER_ADDRESS"),
       nonce: getOrThrow("AURORA_NONCE"),
-      id: "aurora-near"
+      id: "aurora-near",
     },
     {
       name: "BSC",
       node: getOrThrow("BSC_RPC_URL"),
       contract: getOrThrow("BSC_MINTER_ADDRESS"),
       nonce: getOrThrow("BSC_NONCE"),
-      id: "binancecoin"
+      id: "binancecoin",
     },
     {
       name: "ETHEREUM",
       node: getOrThrow("ETHEREUM_RPC_URL"),
       contract: getOrThrow("ETHEREUM_MINTER_ADDRESS"),
       nonce: getOrThrow("ETHEREUM_NONCE"),
-      id: "ethereum"
+      id: "ethereum",
     },
     {
       name: "VELAS",
       node: getOrThrow("VELAS_RPC_URL"),
       contract: getOrThrow("VELAS_MINTER_ADDRESS"),
       nonce: getOrThrow("VELAS_NONCE"),
-      id: "velas"
+      id: "velas",
     },
     {
       name: "POLYGON",
       node: getOrThrow("POLYGON_RPC_URL"),
       contract: getOrThrow("POLYGON_MINTER_ADDRESS"),
       nonce: getOrThrow("POLYGON_NONCE"),
-      id: "matic-network"
+      id: "matic-network",
     },
     {
       name: "AVALANCHE",
       node: getOrThrow("AVALANCHE_RPC_URL"),
       contract: getOrThrow("AVALANCHE_MINTER_ADDRESS"),
       nonce: getOrThrow("AVALANCHE_NONCE"),
-      id: "avalanche-2"
+      id: "avalanche-2",
     },
     {
       name: "IOTEX",
       node: getOrThrow("IOTEX_RPC_URL"),
       contract: getOrThrow("IOTEX_MINTER_ADDRESS"),
       nonce: getOrThrow("IOTEX_NONCE"),
-      id: "iotex"
+      id: "iotex",
     },
     {
       name: "FANTOM",
       node: getOrThrow("FANTOM_RPC_URL"),
       contract: getOrThrow("FANTOM_MINTER_ADDRESS"),
       nonce: getOrThrow("FANTOM_NONCE"),
-      id: "fantom"
+      id: "fantom",
     },
     // {
     //   name: "CELO",
@@ -145,14 +142,14 @@ const config: Config = {
       node: getOrThrow("HARMONY_RPC_URL"),
       contract: getOrThrow("HARMONY_MINTER_ADDRESS"),
       nonce: getOrThrow("HARMONY_NONCE"),
-      id: "harmony"
+      id: "harmony",
     },
     {
       name: "GNOSIS CHAIN",
       node: getOrThrow("GNOSIS_RPC_URL"),
       contract: getOrThrow("GNOSIS_MINTER_ADDRESS"),
       nonce: getOrThrow("GNOSIS_NONCE"),
-      id: "gnosis"
+      id: "gnosis",
     },
 
     {
@@ -160,9 +157,9 @@ const config: Config = {
       node: getOrThrow("FUSE_RPC_URL"),
       contract: getOrThrow("FUSE_MINTER_ADDRESS"),
       nonce: getOrThrow("FUSE_NONCE"),
-      id: "fuse-network-token"
+      id: "fuse-network-token",
     },
-   
+
     // {
     //   name: "UNIQUE",
     //   node: getOrThrow("UNIQUE_RPC_URL"),
@@ -176,16 +173,16 @@ const config: Config = {
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
     nonce: getOrThrow("ELROND_NONCE"),
     socket: getOrThrow("ELROND_SOCKET_URL"),
-    id: "elrond-erd-2"
+    id: "elrond-erd-2",
   },
-  tezos : {
+  tezos: {
     name: "TEZOS",
-    node: '',
+    node: "",
     socket: getOrThrow("TEZOS_RPC_URL"),
     xpnft: getOrThrow("TEZOS_XPNFT_ADDRESS"),
     contract: getOrThrow("TEZOS_MINTER_ADDRESS"),
     nonce: getOrThrow("TEZOS_NONCE"),
-    id: "tezos"
+    id: "tezos",
   },
   db: getOrThrow("DB_URL"),
   port: getOrThrow("PORT"),
@@ -202,29 +199,32 @@ const config: Config = {
   client_x509_cert_url: getOrThrow("client_x509_cert_url"),
   mail_key: getOrThrow("SENDING_BLUE"),
   captcha_secret: getOrThrow("SECRET_CAPTCHA"),
+  web3socketUrl: getOrThrow("WEB3_SOCKET_URL"),
 };
 
 export function chainNonceToName(nonce: string) {
   let chain = config.web3.find((chain) => chain.nonce === nonce);
 
-  if (chain)
-    return chain.name;
+  if (chain) return chain.name;
 
-  
-    for (const key of ['elrond', 'tezos']) {
+  for (const key of ["elrond", "tezos"]) {
+    //@ts-ignore
+    if (nonce == config[key].nonce) {
       //@ts-ignore
-        if (nonce == config[key].nonce) {
-          //@ts-ignore
-          return config[key].name
-        }    
+      return config[key].name;
     }
-
-    return "UNKNOWN";
   }
 
-
+  return "UNKNOWN";
+}
 
 console.log(chainNonceToName("20"));
+
+export const chainNonceToId = (nonce: string) => {
+  let chain = config.web3.find((chain) => chain.nonce === nonce);
+
+  return chain?.id || "unknown";
+};
 
 export default config;
 //0x5B916EFb0e7bc0d8DdBf2d6A9A7850FdAb1984C4

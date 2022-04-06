@@ -32,17 +32,17 @@ export default (async function main() {
 
   BridgeEventService(createEventRepo(orm)).listen();
 
-  config.web3.map((chain) =>
-    contractEventService(
-      new providers.JsonRpcProvider(chain.node),
-      chain.contract,
-      chain.name,
-      chain.nonce,
-      chain.id,
-      createEventRepo(orm),
-      axios
-    ).listen()
-  );
+  // config.web3.map((chain) =>
+  //   contractEventService(
+  //     new providers.JsonRpcProvider(chain.node),
+  //     chain.contract,
+  //     chain.name,
+  //     chain.nonce,
+  //     chain.id,
+  //     createEventRepo(orm),
+  //     axios
+  //   ).listen()
+  // );
 
   elrondEventListener(
     config.elrond.node,
