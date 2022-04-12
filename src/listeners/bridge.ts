@@ -34,18 +34,16 @@ export  function BridgeEventService(
           senderAddress?: string,
           targetAddress?: string,
           nftUri?: string,
-          tokenId?: string,
-          contract?: string
+      
 
         ) => {
           if (actionId && type && txFees && senderAddress) {
 
-            console.log(tokenId,'tokenId');
-            console.log(contract,'contract');
+          
             
             const chainId = chainNonceToId(fromChain?.toString());
 
-            let [exchangeRate]: PromiseSettledResult<string>[] | string[] =
+            let [exchangeRate, trxData]: any  =
               await Promise.allSettled([
                 (async () => {
                   const res = await axios(
@@ -53,7 +51,13 @@ export  function BridgeEventService(
                   );
                   return res.data[chainId].usd;
                 })(),
+
+                (async () => {
+                    return await IndexUpdater.instance.getTrxInfo(fromHash, chainNonceToName(fromChain.toString()));
+                })()
               ]);
+
+           
 
             const event: IEvent = {
               chainName: chainNonceToName(fromChain.toString()),
@@ -62,7 +66,7 @@ export  function BridgeEventService(
               toChainName: chainNonceToName(toChain?.toString() || ""),
               fromHash,
               actionId: actionId,
-              tokenId,
+              tokenId:  trxData.status === "fulfilled"? trxData.value.tokenId : undefined,
               type,
               status: "Pending",
               toChain: toChain?.toString(),
@@ -78,8 +82,10 @@ export  function BridgeEventService(
               senderAddress,
               targetAddress,
               nftUri,
-              contract
+              contract: trxData.status === "fulfilled"? trxData.value.contractAddr : undefined
             };
+            console.log(event.tokenId,'tokenId');
+            console.log(event.contract,'contract');
             console.log(event);
           
             Promise.all([

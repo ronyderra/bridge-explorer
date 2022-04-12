@@ -48,7 +48,10 @@ export default class IndexUpdater {
       }
     });
 
-    return descs[0].args["id"].toString();
+    return {
+        tokenId: descs[0].args["id"].toString(),
+        contractAddr: descs[0].args["contractAddr"].toString()
+    }
   }
 
   public async createDefault() {

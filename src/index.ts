@@ -38,6 +38,8 @@ export default (async function main() {
 
   new IndexUpdater(createNFTRepo(indexerOrm))
 
+  //IndexUpdater.instance.getTrxInfo('0x1adcceb9bee4145353a579375afb4d34e58be8b85de5cbc8a9c145070071cd65', "BSC")
+
   app.use("/", txRoutes);
 
   BridgeEventService(createEventRepo(orm)).listen();;
@@ -70,7 +72,7 @@ export default (async function main() {
     config.tezos.id,
     createEventRepo(orm)
   ).listen();
-
+  
   const server = http.createServer(app);
 
   io = new Server(server, {
