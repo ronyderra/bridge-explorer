@@ -19,11 +19,7 @@ const web3socket = io(config.web3socketUrl);
 
 export  function BridgeEventService(
   eventRepo: IEventRepo
-): IContractEventListener | undefined {
-
-  //IndexUpdater.instance.createDefault();
-
-
+): IContractEventListener {
   return {
     listen: () => {
       web3socket.on(

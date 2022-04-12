@@ -40,7 +40,7 @@ export default (async function main() {
 
   app.use("/", txRoutes);
 
-  BridgeEventService(createEventRepo(orm));
+  BridgeEventService(createEventRepo(orm)).listen();;
 
   // config.web3.map((chain) =>
   //   contractEventService(
