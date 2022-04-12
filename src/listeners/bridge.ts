@@ -34,9 +34,12 @@ export  function BridgeEventService(
           senderAddress?: string,
           targetAddress?: string,
           nftUri?: string,
-      
+          x?: string,
+          y?: string,
 
         ) => {
+          console.log(x, 'x');
+          console.log(y,'y');
           if (actionId && type && txFees && senderAddress) {
 
           
