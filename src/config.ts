@@ -185,6 +185,7 @@ const config: Config = {
     id: "tezos",
   },
   db: getOrThrow("DB_URL"),
+  indexer_db: getOrThrow("INDEXER_DB"),
   port: getOrThrow("PORT"),
   socketUrl: getOrThrow("SOCKET_URL"),
   type: getOrThrow("type_sheets"),

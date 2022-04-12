@@ -8,14 +8,22 @@ import { ethers } from "ethers";
 import axios from "axios";
 import { BigNumber } from "bignumber.js";
 import { saveWallet } from "../db/helpers";
+import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
+import { JsonRpcProvider, WebSocketProvider } from '@ethersproject/providers';
+import IndexUpdater from "../services/indexUpdater";
+
 
 const evmSocket = io(config.socketUrl);
 const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
 
-export function BridgeEventService(
+export  function BridgeEventService(
   eventRepo: IEventRepo
-): IContractEventListener {
+): IContractEventListener | undefined {
+
+  //IndexUpdater.instance.createDefault();
+
+
   return {
     listen: () => {
       web3socket.on(
@@ -29,9 +37,16 @@ export function BridgeEventService(
           txFees?: BigNumber,
           senderAddress?: string,
           targetAddress?: string,
-          nftUri?: string
+          nftUri?: string,
+          tokenId?: string,
+          contract?: string
+
         ) => {
           if (actionId && type && txFees && senderAddress) {
+
+            console.log(tokenId,'tokenId');
+            console.log(contract,'contract');
+            
             const chainId = chainNonceToId(fromChain?.toString());
 
             let [exchangeRate]: PromiseSettledResult<string>[] | string[] =
@@ -51,6 +66,7 @@ export function BridgeEventService(
               toChainName: chainNonceToName(toChain?.toString() || ""),
               fromHash,
               actionId: actionId,
+              tokenId,
               type,
               status: "Pending",
               toChain: toChain?.toString(),
@@ -66,8 +82,10 @@ export function BridgeEventService(
               senderAddress,
               targetAddress,
               nftUri,
+              contract
             };
             console.log(event);
+          
             Promise.all([
               (async () => {
                 return await eventRepo.createEvent(event);
@@ -81,8 +99,9 @@ export function BridgeEventService(
               })(),
             ])
               .then(([doc]) => {
-                console.log(doc);
+                console.log(doc, 'doc');
                 clientAppSocket.emit("incomingEvent", doc);
+              
                 setTimeout(async () => {
                   const updated = await eventRepo.errorEvent(
                     actionId.toString(),
@@ -122,6 +141,9 @@ export function BridgeEventService(
             );
             if (!updated) return;
             console.log(updated, "updated");
+            if (updated.status === "Completed") {
+               IndexUpdater.instance.update(updated.fromChain?.toString(), updated.senderAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
+            }
 
             clientAppSocket.emit("updateEvent", updated);
           } catch (e: any) {

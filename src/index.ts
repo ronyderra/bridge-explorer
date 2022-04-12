@@ -9,28 +9,38 @@ import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
-import DBConf from "./mikro-orm.config";
+import {explorerDB, indexerDb} from "./mikro-orm.config";
 import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
+import createNFTRepo from "./db/indexerRepo";
+import IndexUpdater from "./services/indexUpdater"
+
+
 
 const cron = require("node-cron");
 
 export let io: Server;
 
 export default (async function main() {
+
+
+  
   const app = express();
   app.use(cors());
   app.use(bodyParser.json({ limit: "10mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  const orm = await MikroORM.init(DBConf);
+  const orm = await MikroORM.init(explorerDB);
+  const indexerOrm = await MikroORM.init(indexerDb);
   const txRoutes = txRouter(createEventRepo(orm));
+
+  new IndexUpdater(createNFTRepo(indexerOrm))
 
   app.use("/", txRoutes);
 
-  BridgeEventService(createEventRepo(orm)).listen();
+  BridgeEventService(createEventRepo(orm));
 
   // config.web3.map((chain) =>
   //   contractEventService(
