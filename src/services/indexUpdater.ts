@@ -200,7 +200,7 @@ export default class IndexUpdater {
 
             if (bridgeContract && originalTokenId && updated?.targetAddress) {
               const nfts = await this.repo.findNFT({
-                chainId: updated.toChainName,
+                chainId: updated.toChain!.toString(),
                 senderAddress: bridgeContract,
                 tokenId: originalTokenId,
               });
