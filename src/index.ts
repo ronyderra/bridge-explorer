@@ -41,6 +41,8 @@ export default (async function main() {
   await IndexUpdater.instance.createDefault()
   app.use("/", txRoutes);
 
+  //const x = await IndexUpdater.instance.getDestTrxInfo('0x751af7ce2783214efb40c3129cee233f0955cc56764f47ef2424137a186fb2c2', 'BSC');
+
   BridgeEventService(createEventRepo(orm)).listen();;
 
   // config.web3.map((chain) =>

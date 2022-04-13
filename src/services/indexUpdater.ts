@@ -71,6 +71,8 @@ export default class IndexUpdater {
     const node = config.web3.find((c) => c.name === chainName)?.node;
     const minter = config.web3.find((c) => c.name === chainName)?.contract;
 
+
+
     try {
       const provider = new JsonRpcProvider(node);
 
@@ -78,11 +80,13 @@ export default class IndexUpdater {
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      console.log(decoded, "decoded");
 
-      return decoded.args["tokenId"].toString();
+      const tokenId = decoded.name === 'validateTransferNft'? decoded.args['nftId'].toString() : decoded.args["tokenId"].toString();
+
+      return tokenId;
     } catch (e) {
-      return "";
+      console.log(e, 'kistro');
+      return null;
     }
   }
 
@@ -174,17 +178,23 @@ export default class IndexUpdater {
 
         console.log("after save");
 
-        if (type === "Transfer") {
-          console.log('is transfer');
-        } else {
-          if (updated.toHash && updated.toChainName) {
-            const originalTokenId = await IndexUpdater.instance.getDestTrxInfo(
-              updated.toHash,
-              updated.toChainName
-            );
+        if (updated.toHash && updated.toChainName) {
+          console.log(updated.toHash, 'uth');
+          console.log(updated.toChainName, 'utcn');
+          
+          const originalTokenId = await IndexUpdater.instance.getDestTrxInfo(
+            updated.toHash,
+            updated.toChainName
+          );
+          console.log(originalTokenId, 'originalTokenId');
+
+
+      
+           
             const bridgeContract = config.web3.find(
               (c) => c.name === updated.toChainName
             )?.contract;
+
             if (bridgeContract && originalTokenId && updated?.targetAddress) {
               const nfts = await this.repo.findNFT({
                 chainId: updated.toChainName,
@@ -220,33 +230,14 @@ export default class IndexUpdater {
 
             } else {
               console.log('no bridgeContract or originalTokenId');
+              console.log(bridgeContract);
               console.log(originalTokenId);
               console.log(updated.targetAddress);
             }
           }
 
-          /* await this.repo.findNFT({
-            chainId: '4',
-            owner: 
-          })
-
-
-          await this.repo.createNFT({
-            ents: toUpdate.map(
-              (nft) =>
-                new EthNftDto(
-                  BigInt(nft.chainId),
-                  BigInt(nft.tokenId),
-                  nft.owner,
-                  nft.contract,
-                  nft.contractType!,
-                  nft.uri,
-                  nft.name,
-                  nft.symbol
-                )
-            ),
-          });*/
-        }
+   
+        
       } catch (e: any) {
         console.log(e);
       }
