@@ -45,10 +45,19 @@ export default class IndexUpdater {
         }
       });
 
+      
+      if (descs[0].name === "UnfreezeNft") {
+          return {
+            tokenId: descs[0].args["tokenId"].toString(),
+            contractAddr: descs[0].args["burner"].toString(),
+          }
+      }
+
       return {
         tokenId: descs[0].args["id"].toString(),
         contractAddr: descs[0].args["contractAddr"].toString(),
       };
+
     } catch (e) {
       return {
         tokenId: "",
