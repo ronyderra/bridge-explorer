@@ -80,7 +80,7 @@ export default class IndexUpdater {
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-
+      console.log(decoded, 'decoded');
       const tokenId = decoded.name === 'validateTransferNft'? decoded.args['nftId'].toString() : decoded.args["tokenId"].toString();
 
       return tokenId;
