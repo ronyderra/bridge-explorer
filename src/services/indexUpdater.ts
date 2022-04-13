@@ -6,6 +6,8 @@ import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 import { chainNonceToName } from "../config";
 import BigNumber from "bignumber.js";
 
+import { BridgeEvent } from "../entities/IEvent";
+
 export default class IndexUpdater {
   public static instance: IndexUpdater;
   private repo: IndexerRepo;
@@ -37,7 +39,7 @@ export default class IndexUpdater {
         }
         try {
           const parsed = contract.interface.parseLog(log);
-          console.log(parsed);
+
           return parsed;
         } catch (_) {
           console.log(_);
@@ -45,19 +47,18 @@ export default class IndexUpdater {
         }
       });
 
-      
+      console.log(descs);
       if (descs[0].name === "UnfreezeNft") {
-          return {
-            tokenId: descs[0].args["tokenId"].toString(),
-            contractAddr: descs[0].args["burner"].toString(),
-          }
+        return {
+          tokenId: descs[0].args["tokenId"].toString(),
+          contractAddr: descs[0].args["burner"].toString(),
+        };
       }
 
       return {
         tokenId: descs[0].args["id"].toString(),
         contractAddr: descs[0].args["contractAddr"].toString(),
       };
-
     } catch (e) {
       return {
         tokenId: "",
@@ -77,41 +78,40 @@ export default class IndexUpdater {
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      console.log(decoded);
+      console.log(decoded, "decoded");
 
-      return {
-        tokenId: decoded.args["nftId"].toString(),
-        contractAddr: decoded.args["mintWith"],
-      };
+      return decoded.args["tokenId"].toString();
     } catch (e) {
-      return {
-        tokenId: "",
-        contractAddr: "",
-      };
+      return "";
     }
   }
 
+  //public
+
   public async createDefault() {
     const newNft = new EthNftDto(
-      BigInt("4"),
-      BigInt("10000098204"),
-      "0x0B7ED039DFF2b91Eb4746830EaDAE6A0436fC4CB",
-      "0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D",
+      BigInt("7"),
+      BigInt("30431109045241522795830634386"),
+      "0x47Bf0dae6e92e49a3c95e5b0c71422891D5cd4FE",
+      "0x61f4A37676700F6E9bcbAeb05FF6c2f701c1c702",
       "ERC721",
-      "https://meta.polkamon.com/meta?id=10000098204",
-      "PolkamonOfficialCollection",
-      "PMONC"
+      "https://pinata.buzz/ipfs/QmTjnBS4muiHeYLMj6RpyikY2Vo7dBUMBtaqj9NbXPuRVF/lootjson/0/7210.json",
+      "WNFT",
+      "Wrapped NFT"
     );
 
     await this.repo.createNFT({ ents: [newNft] }).catch((e) => console.log(e));
   }
 
-  public async update(
-    chainId: string | undefined,
-    senderAddress: string | undefined,
-    tokenId: string | undefined,
-    contractAddress: string | undefined
-  ) {
+  public async update(updated: BridgeEvent) {
+    const {
+      fromChain: chainId,
+      senderAddress,
+      tokenId,
+      contract: contractAddress,
+      type,
+    } = updated;
+
     if (!this.repo) throw new Error("no initilized");
     console.log(chainId);
     console.log(senderAddress);
@@ -173,9 +173,85 @@ export default class IndexUpdater {
         });
 
         console.log("after save");
+
+        if (type === "Transfer") {
+          console.log('is transfer');
+        } else {
+          if (updated.toHash && updated.toChainName) {
+            const originalTokenId = await IndexUpdater.instance.getDestTrxInfo(
+              updated.toHash,
+              updated.toChainName
+            );
+            const bridgeContract = config.web3.find(
+              (c) => c.name === updated.toChainName
+            )?.contract;
+            if (bridgeContract && originalTokenId && updated?.targetAddress) {
+              const nfts = await this.repo.findNFT({
+                chainId: updated.toChainName,
+                senderAddress: bridgeContract,
+                tokenId: originalTokenId,
+              });
+
+              if (nfts?.length === 1) {
+                await this.repo.removeNFT({
+                  ents: nfts,
+                });
+
+
+                await this.repo.createNFT({
+                  ents: nfts.map(
+                    (nft) =>
+                      new EthNftDto(
+                        BigInt(nft.chainId),
+                        BigInt(nft.tokenId),
+                        updated.targetAddress!,
+                        nft.contract,
+                        nft.contractType!,
+                        nft.uri,
+                        nft.name,
+                        nft.symbol
+                      )
+                  ),
+                });
+
+              } else {
+                console.log('not 1')
+              }
+
+            } else {
+              console.log('no bridgeContract or originalTokenId');
+              console.log(originalTokenId);
+              console.log(updated.targetAddress);
+            }
+          }
+
+          /* await this.repo.findNFT({
+            chainId: '4',
+            owner: 
+          })
+
+
+          await this.repo.createNFT({
+            ents: toUpdate.map(
+              (nft) =>
+                new EthNftDto(
+                  BigInt(nft.chainId),
+                  BigInt(nft.tokenId),
+                  nft.owner,
+                  nft.contract,
+                  nft.contractType!,
+                  nft.uri,
+                  nft.name,
+                  nft.symbol
+                )
+            ),
+          });*/
+        }
       } catch (e: any) {
         console.log(e);
       }
+    } else {
+      console.log("more than 1");
     }
   }
 }

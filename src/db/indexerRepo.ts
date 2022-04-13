@@ -17,10 +17,12 @@ import {
   export interface IndexerRepo {
     findNFT({
         chainId,
-        senderAddress
+        senderAddress,
+        tokenId
     }:{
         chainId: string,
-        senderAddress: string
+        senderAddress: string,
+        tokenId?:string
     }): Promise<EthNftDto[] | null>;
     createNFT({
         ents
@@ -38,7 +40,10 @@ import {
     em,
   }: MikroORM<IDatabaseDriver<Connection>>): IndexerRepo {
     return {
-      async findNFT({chainId,senderAddress}) {
+      async findNFT({chainId,senderAddress,tokenId}) {
+        if (tokenId) {
+          return await em.find(EthNftDto, { chainId, owner: senderAddress, tokenId });
+        }
         return await em.find(EthNftDto, { chainId, owner: senderAddress });
       },
       async createNFT({ents}) {

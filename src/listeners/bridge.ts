@@ -63,9 +63,7 @@ export  function BridgeEventService(
                     
                     }
                     let res = await IndexUpdater.instance.getDepTrxInfo(fromHash, chainNonceToName(fromChain.toString()));
-                    if (!res.contractAddr || !res.tokenId) {
-                        res = await IndexUpdater.instance.getDestTrxInfo(fromHash, chainNonceToName(fromChain.toString()))
-                    }
+                    
 
                     return res
                 })()
@@ -159,7 +157,10 @@ export  function BridgeEventService(
             console.log(updated, "updated");
             if (updated.status === "Completed") {
                (async () => {
-                  await IndexUpdater.instance.update(updated.fromChain?.toString(), updated.senderAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
+  
+                  const nfts =  await IndexUpdater.instance.update(updated).catch(e => console.log(e))
+                
+
                   //await IndexUpdater.instance.update(updated.toChain?.toString(), updated.targetAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
                })()
             }

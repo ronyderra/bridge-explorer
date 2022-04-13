@@ -38,8 +38,7 @@ export default (async function main() {
 
   new IndexUpdater(createNFTRepo(indexerOrm))
 
-  //console.log(await IndexUpdater.instance.getDestTrxInfo('0xa295b9ba79515cce11726a5b400e97305a6dd532c76ca151fdb8113ca5e79421', "POLYGON"))
-
+  await IndexUpdater.instance.createDefault()
   app.use("/", txRoutes);
 
   BridgeEventService(createEventRepo(orm)).listen();;
