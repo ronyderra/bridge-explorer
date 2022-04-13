@@ -156,13 +156,7 @@ export  function BridgeEventService(
             if (!updated) return;
             console.log(updated, "updated");
             if (updated.status === "Completed") {
-               (async () => {
-  
-                  const nfts =  await IndexUpdater.instance.update(updated).catch(e => console.log(e))
-                
-
-                  //await IndexUpdater.instance.update(updated.toChain?.toString(), updated.targetAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
-               })()
+               setTimeout(() => IndexUpdater.instance.update(updated).catch(e => console.log(e)), 100)
             }
 
             clientAppSocket.emit("updateEvent", updated);

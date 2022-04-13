@@ -77,10 +77,10 @@ export default class IndexUpdater {
       const provider = new JsonRpcProvider(node);
 
       const res = await provider.getTransaction(trx);
-
+      
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      console.log(decoded, 'decoded');
+      
       const tokenId = decoded.name === 'validateTransferNft'? decoded.args['nftId'].toString() : decoded.args["tokenId"].toString();
 
       return tokenId;
@@ -130,7 +130,7 @@ export default class IndexUpdater {
       senderAddress,
     });
 
-    console.log(nfts);
+    console.log(nfts?.length);
 
     let toUpdate = nfts?.filter(
       (nft) =>
@@ -138,45 +138,45 @@ export default class IndexUpdater {
         nft.contract.toLowerCase() === contractAddress.toLowerCase()
     );
 
-    console.log(toUpdate);
+    
+      if (!toUpdate || (toUpdate.length > 500 || toUpdate.length === 0)) {
+        toUpdate && console.log(toUpdate.length, 'more than 500');
+        return
+      }
 
-    if (toUpdate && toUpdate.length === 1) {
-      console.log("go");
-      try {
         await this.repo.removeNFT({
           ents: toUpdate,
         });
 
-        console.log(toUpdate, "after removal");
+        const depBridgeContract = config.web3.find(
+          (c) => c.name === updated.fromChain
+        )?.contract;
 
-        toUpdate = toUpdate.map((nft) => {
-          return {
-            ...nft,
-            owner:
-              config.web3.find((c) => chainNonceToName(chainId) === c.name)
-                ?.contract || nft.owner,
-          };
-        });
-
-        console.log(toUpdate, "after update");
+        if (!depBridgeContract) {
+          console.log('depBridgeContract')
+          return
+        }
+   
+        const nft = toUpdate[0];
+        const newDoc = new EthNftDto(
+          BigInt(nft.chainId),
+          BigInt(nft.tokenId),
+          depBridgeContract,
+          nft.contract,
+          nft.contractType!,
+          nft.uri,
+          nft.name,
+          nft.symbol
+        )
 
         await this.repo.createNFT({
-          ents: toUpdate.map(
-            (nft) =>
-              new EthNftDto(
-                BigInt(nft.chainId),
-                BigInt(nft.tokenId),
-                nft.owner,
-                nft.contract,
-                nft.contractType!,
-                nft.uri,
-                nft.name,
-                nft.symbol
-              )
-          ),
+          ents: [newDoc]
         });
 
-        console.log("after save");
+        console.log("finish updating depNFT");
+        console.log(newDoc);
+
+    
 
         if (updated.toHash && updated.toChainName) {
           console.log(updated.toHash, 'uth');
@@ -202,32 +202,43 @@ export default class IndexUpdater {
                 tokenId: originalTokenId,
               });
 
-              if (nfts?.length === 1) {
+
+
+              if (!nfts || nfts?.length > 500) {
+                console.log('more than 500 in target chain');
+                return
+              }
+
+              if (nfts.length === 0) {
+                console.log('not found in target chain');
+                return
+              }
+
+
                 await this.repo.removeNFT({
                   ents: nfts,
                 });
 
+                const targetNft = nfts[0];
+
+                const newTagetNft = new EthNftDto(
+                  BigInt(targetNft.chainId),
+                  BigInt(targetNft.tokenId),
+                  updated.targetAddress!,
+                  targetNft.contract,
+                  targetNft.contractType!,
+                  targetNft.uri,
+                  targetNft.name,
+                  targetNft.symbol
+                )
+
+                console.log(newTagetNft, 'newTagetNft');
 
                 await this.repo.createNFT({
-                  ents: nfts.map(
-                    (nft) =>
-                      new EthNftDto(
-                        BigInt(nft.chainId),
-                        BigInt(nft.tokenId),
-                        updated.targetAddress!,
-                        nft.contract,
-                        nft.contractType!,
-                        nft.uri,
-                        nft.name,
-                        nft.symbol
-                      )
-                  ),
+                  ents: [newTagetNft]
                 });
-
-              } else {
-                console.log('not 1')
-              }
-
+                
+                console.log('finishing updating target chain');
             } else {
               console.log('no bridgeContract or originalTokenId');
               console.log(bridgeContract);
@@ -235,14 +246,10 @@ export default class IndexUpdater {
               console.log(updated.targetAddress);
             }
           }
-
-   
         
-      } catch (e: any) {
-        console.log(e);
-      }
-    } else {
-      console.log("more than 1");
-    }
+        
+        
+   
+    
   }
 }
