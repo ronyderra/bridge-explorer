@@ -149,7 +149,7 @@ export default class IndexUpdater {
         });
 
         const depBridgeContract = config.web3.find(
-          (c) => c.name === updated.fromChain
+          (c) => c.name === updated.fromChainName
         )?.contract;
 
         if (!depBridgeContract) {
