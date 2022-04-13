@@ -38,7 +38,7 @@ export default (async function main() {
 
   new IndexUpdater(createNFTRepo(indexerOrm))
 
-  //IndexUpdater.instance.getTrxInfo('0x1adcceb9bee4145353a579375afb4d34e58be8b85de5cbc8a9c145070071cd65', "BSC")
+  //console.log(await IndexUpdater.instance.getDestTrxInfo('0xa295b9ba79515cce11726a5b400e97305a6dd532c76ca151fdb8113ca5e79421', "POLYGON"))
 
   app.use("/", txRoutes);
 
@@ -72,7 +72,7 @@ export default (async function main() {
     config.tezos.id,
     createEventRepo(orm)
   ).listen();
-  
+
   const server = http.createServer(app);
 
   io = new Server(server, {

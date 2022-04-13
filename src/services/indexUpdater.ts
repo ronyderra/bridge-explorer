@@ -6,7 +6,6 @@ import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 import { chainNonceToName } from "../config";
 import BigNumber from "bignumber.js";
 
-
 export default class IndexUpdater {
   public static instance: IndexUpdater;
   private repo: IndexerRepo;
@@ -21,52 +20,81 @@ export default class IndexUpdater {
     IndexUpdater.instance = this;
   }
 
-  public async getTrxInfo(trx: string, chainName: string) {
+  public async getDepTrxInfo(trx: string, chainName: string) {
     const node = config.web3.find((c) => c.name === chainName)?.node;
     const minter = config.web3.find((c) => c.name === chainName)?.contract;
+
     const provider = new JsonRpcProvider(node);
 
-    console.log(
-      "Connection to Node: ",
-      (await provider.getNetwork()).name,
-      node,
-      "established."
-    );
+    try {
+      const res = await provider.waitForTransaction(trx);
 
-    const res = await provider.waitForTransaction(trx);
-    const contract = Minter__factory.connect(minter!, provider);
+      const contract = Minter__factory.connect(minter!, provider);
 
-    const descs = res.logs.flatMap((log) => {
-      if (log.address != minter) {
-        return [];
-      }
-      try {
-        const parsed = contract.interface.parseLog(log);
-        return parsed;
-      } catch (_) {
-        return [];
-      }
-    });
+      const descs = res.logs.flatMap((log) => {
+        if (log.address != minter) {
+          return [];
+        }
+        try {
+          const parsed = contract.interface.parseLog(log);
+          console.log(parsed);
+          return parsed;
+        } catch (_) {
+          console.log(_);
+          return [];
+        }
+      });
 
-    return {
+      return {
         tokenId: descs[0].args["id"].toString(),
-        contractAddr: descs[0].args["contractAddr"].toString()
+        contractAddr: descs[0].args["contractAddr"].toString(),
+      };
+    } catch (e) {
+      return {
+        tokenId: "",
+        contractAddr: "",
+      };
+    }
+  }
+
+  public async getDestTrxInfo(trx: string, chainName: string) {
+    const node = config.web3.find((c) => c.name === chainName)?.node;
+    const minter = config.web3.find((c) => c.name === chainName)?.contract;
+
+    try {
+      const provider = new JsonRpcProvider(node);
+
+      const res = await provider.getTransaction(trx);
+
+      const contract = Minter__factory.connect(minter!, provider);
+      const decoded = contract.interface.parseTransaction(res);
+      console.log(decoded);
+
+      return {
+        tokenId: decoded.args["nftId"].toString(),
+        contractAddr: decoded.args["mintWith"],
+      };
+    } catch (e) {
+      return {
+        tokenId: "",
+        contractAddr: "",
+      };
     }
   }
 
   public async createDefault() {
-      const newNft = new EthNftDto(
-        BigInt('4'),
-        BigInt('10000098204'),
-        '0x0B7ED039DFF2b91Eb4746830EaDAE6A0436fC4CB',
-        '0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D',
-        'ERC721',
-        'https://meta.polkamon.com/meta?id=10000098204',
-        'PolkamonOfficialCollection',
-        'PMONC'
-      )
+    const newNft = new EthNftDto(
+      BigInt("4"),
+      BigInt("10000098204"),
+      "0x0B7ED039DFF2b91Eb4746830EaDAE6A0436fC4CB",
+      "0x85F0e02cb992aa1F9F47112F815F519EF1A59E2D",
+      "ERC721",
+      "https://meta.polkamon.com/meta?id=10000098204",
+      "PolkamonOfficialCollection",
+      "PMONC"
+    );
 
-      await this.repo.createNFT({ents: [newNft]}).catch((e) => console.log(e))
+    await this.repo.createNFT({ ents: [newNft] }).catch((e) => console.log(e));
   }
 
   public async update(
@@ -81,7 +109,7 @@ export default class IndexUpdater {
     console.log(tokenId);
     console.log(contractAddress);
     if (!chainId || !senderAddress || !tokenId || !contractAddress) {
-       return
+      return;
     }
 
     const nfts = await this.repo.findNFT({
@@ -100,26 +128,29 @@ export default class IndexUpdater {
     console.log(toUpdate);
 
     if (toUpdate && toUpdate.length === 1) {
-        console.log('go');
+      console.log("go");
       try {
         await this.repo.removeNFT({
           ents: toUpdate,
         });
 
-        console.log(toUpdate, 'after removal');
+        console.log(toUpdate, "after removal");
 
         toUpdate = toUpdate.map((nft) => {
           return {
             ...nft,
             owner:
-              config.web3.find((c) => chainNonceToName(chainId) === c.name)?.contract || nft.owner,
+              config.web3.find((c) => chainNonceToName(chainId) === c.name)
+                ?.contract || nft.owner,
           };
         });
 
-        console.log(toUpdate, 'after update');
+        console.log(toUpdate, "after update");
 
         await this.repo.createNFT({
-            ents: toUpdate.map((nft) => new EthNftDto(
+          ents: toUpdate.map(
+            (nft) =>
+              new EthNftDto(
                 BigInt(nft.chainId),
                 BigInt(nft.tokenId),
                 nft.owner,
@@ -128,11 +159,11 @@ export default class IndexUpdater {
                 nft.uri,
                 nft.name,
                 nft.symbol
-            ))
-        })
+              )
+          ),
+        });
 
-        console.log('after save');
-        
+        console.log("after save");
       } catch (e: any) {
         console.log(e);
       }

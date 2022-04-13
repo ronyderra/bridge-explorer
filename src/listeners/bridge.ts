@@ -34,12 +34,12 @@ export  function BridgeEventService(
           senderAddress?: string,
           targetAddress?: string,
           nftUri?: string,
-          x?: string,
-          y?: string,
+          eventTokenId?: string,
+          eventContract?: string,
 
         ) => {
-          console.log(x, 'x');
-          console.log(y,'y');
+          console.log(eventTokenId, 'eventTokenId');
+          console.log(eventContract,'eventContact');
           if (actionId && type && txFees && senderAddress) {
 
           
@@ -56,7 +56,18 @@ export  function BridgeEventService(
                 })(),
 
                 (async () => {
-                    return await IndexUpdater.instance.getTrxInfo(fromHash, chainNonceToName(fromChain.toString()));
+                    if (eventTokenId && eventContract) return {
+                   
+                        tokenId: eventTokenId,
+                        contractAddr: eventContract
+                    
+                    }
+                    let res = await IndexUpdater.instance.getDepTrxInfo(fromHash, chainNonceToName(fromChain.toString()));
+                    if (!res.contractAddr || !res.tokenId) {
+                        res = await IndexUpdater.instance.getDestTrxInfo(fromHash, chainNonceToName(fromChain.toString()))
+                    }
+
+                    return res
                 })()
               ]);
 
@@ -147,7 +158,10 @@ export  function BridgeEventService(
             if (!updated) return;
             console.log(updated, "updated");
             if (updated.status === "Completed") {
-               IndexUpdater.instance.update(updated.fromChain?.toString(), updated.senderAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
+               (async () => {
+                  await IndexUpdater.instance.update(updated.fromChain?.toString(), updated.senderAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
+                  //await IndexUpdater.instance.update(updated.toChain?.toString(), updated.targetAddress?.toString(), updated.tokenId?.toString(), updated.contract?.toString()).catch(e => console.log(e))
+               })()
             }
 
             clientAppSocket.emit("updateEvent", updated);
