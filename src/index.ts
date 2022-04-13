@@ -41,7 +41,7 @@ export default (async function main() {
   await IndexUpdater.instance.createDefault()
   app.use("/", txRoutes);
 
-  //const x = await IndexUpdater.instance.getDestTrxInfo('0x9a8aa3e9c9f9afb81ce8686b4ab2c7b5710ebe6a5c2cee0767866fef50a9678d', 'POLYGON');
+  //const x = await IndexUpdater.instance.getDepTrxInfo('0xb04f1ceb60d3333f1c95c4d6576181b69378233ede2256dd2841258e17ee54df', 'BSC');
 
   BridgeEventService(createEventRepo(orm)).listen();;
 

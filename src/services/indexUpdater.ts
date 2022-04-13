@@ -30,7 +30,7 @@ export default class IndexUpdater {
 
     try {
       const res = await provider.waitForTransaction(trx);
-
+    
       const contract = Minter__factory.connect(minter!, provider);
 
       const descs = res.logs.flatMap((log) => {
@@ -76,11 +76,14 @@ export default class IndexUpdater {
     try {
       const provider = new JsonRpcProvider(node);
 
+      const wait = await provider.waitForTransaction(trx);
+      console.log(wait.transactionHash);
       const res = await provider.getTransaction(trx);
+      console.log(res.blockHash);
       
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      
+      console.log(decoded);
       const tokenId = decoded.name === 'validateTransferNft'? decoded.args['nftId'].toString() : decoded.args["tokenId"].toString();
 
       return tokenId;
