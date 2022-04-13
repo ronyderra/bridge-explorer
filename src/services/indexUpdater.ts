@@ -125,14 +125,14 @@ export default class IndexUpdater {
       return;
     }
 
-    const nfts = await this.repo.findNFT({
+    const depNfts = await this.repo.findNFT({
       chainId,
       senderAddress,
     });
 
-    console.log(nfts?.length);
+    console.log(depNfts?.length);
 
-    let toUpdate = nfts?.filter(
+    let toUpdate = depNfts?.filter(
       (nft) =>
         nft.tokenId === tokenId &&
         nft.contract.toLowerCase() === contractAddress.toLowerCase()
