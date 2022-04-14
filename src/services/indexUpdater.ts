@@ -133,10 +133,18 @@ export default class IndexUpdater {
       return;
     }
 
-    const depNfts = await this.repo.findNFT({
+    let depNfts = await this.repo.findNFT({
       chainId,
       senderAddress,
     });
+
+    if (depNfts?.length === 0 && updated.type === "Unfreeze") {
+      depNfts = await this.repo.findNFT({
+        chainId,
+        senderAddress: '0x0000000000000000000000000000000000000000',
+        tokenId
+      });
+    }
 
     console.log(depNfts?.length);
 

@@ -44,13 +44,13 @@ import {
         if (tokenId) {
           return await em.find(EthNftDto, { chainId, owner: senderAddress, tokenId });
         }
-        return await em.find(EthNftDto, { chainId, owner: {$in: [senderAddress, '0x0000000000000000000000000000000000000000']} });
+        return await em.find(EthNftDto, { chainId, owner: senderAddress });
       },
       async createNFT({ents}) {
         return await em.persistAndFlush(ents)
       },
       async removeNFT({ents}) {
-         return await em.removeAndFlush(ents)
+          await em.removeAndFlush(ents)
       }
 
     };
