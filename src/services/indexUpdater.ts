@@ -71,9 +71,11 @@ export default class IndexUpdater {
     const node = config.web3.find((c) => c.name === chainName)?.node;
     const minter = config.web3.find((c) => c.name === chainName)?.contract;
 
+    if (!node && !minter) return null;
+    console.log('try to connect to ', node);
     try {
       const provider = new JsonRpcProvider(node);
-
+      console.log('got Provider');
       const wait = await provider.waitForTransaction(trx);
       console.log(wait.transactionHash);
       const res = await provider.getTransaction(trx);
