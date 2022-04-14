@@ -39,7 +39,7 @@ export default class IndexUpdater {
         }
         try {
           const parsed = contract.interface.parseLog(log);
-
+          console.log(parsed);
           return parsed;
         } catch (_) {
           console.log(_);
@@ -54,7 +54,7 @@ export default class IndexUpdater {
           contractAddr: descs[0].args["burner"].toString(),
         };
       }
-
+      console.log(descs);
       return {
         tokenId: descs[0].args["id"].toString(),
         contractAddr: descs[0].args["contractAddr"].toString(),
@@ -89,8 +89,9 @@ export default class IndexUpdater {
           ? decoded.args["nftId"].toString()
           : decoded.args["tokenId"].toString();
 
-          const xpnftMinter = decoded.args["mintWith"].toString();
-      return { tokenId, provider, xpnftMinter };
+          const xpnftMinter = decoded.args["mintWith"]?.toString();
+          const originalContractAddress = decoded.args["contractAddr"]?.toString();
+      return { tokenId, provider, xpnftMinter, originalContractAddress  };
     } catch (e) {
       console.log(e, "kistro");
       return null;
@@ -204,11 +205,22 @@ export default class IndexUpdater {
         updated?.targetAddress
       ) {
         console.log(updated.toChain, 'updated.toChain');
-        const nfts = await this.repo.findNFT({
+        let nfts = await this.repo.findNFT({
           chainId: updated.toChain!,
           senderAddress: bridgeContract,
           tokenId: originalTokenId.tokenId,
+
         });
+
+        nfts?.filter(n => {
+          if (originalTokenId.xpnftMinter) {
+            return n.contract.toLowerCase() === originalTokenId.xpnftMinter.toLowerCase()
+          } else {
+            return n.contract.toLowerCase() === originalTokenId.originalContractAddress.toLowerCase()
+          }
+        })
+
+        console.log(nfts,' nfts after filter');
 
         if (!nfts || nfts?.length > 500) {
           console.log("more than 500 in target chain");
