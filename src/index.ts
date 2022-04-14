@@ -56,7 +56,7 @@ export default (async function main() {
 
     console.log(uri, name, symbol);*/
 
-  //const x = await IndexUpdater.instance.getDestTrxInfo('0x70b4a77a8f2bb3ed258da8f83f3c81063ab0d1e115935f2e3f7d14b3068c408f', 'POLYGON');
+  //const x = await IndexUpdater.instance.getDestTrxInfo('0x9fd1528d0ddd1ea070460d4e79515bed98169ef9e76fc48883ae1f4c0f8384ef', 'POLYGON');
 
   BridgeEventService(createEventRepo(orm)).listen();;
 

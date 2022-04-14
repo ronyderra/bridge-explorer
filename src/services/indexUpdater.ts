@@ -83,13 +83,14 @@ export default class IndexUpdater {
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      
+      console.log(decoded);
       const tokenId =
         decoded.name === "validateTransferNft"
           ? decoded.args["nftId"].toString()
           : decoded.args["tokenId"].toString();
 
-      return { tokenId, provider };
+          const xpnftMinter = decoded.args["mintWith"].toString();
+      return { tokenId, provider, xpnftMinter };
     } catch (e) {
       console.log(e, "kistro");
       return null;
@@ -218,7 +219,7 @@ export default class IndexUpdater {
           await delay(1000);
           try {
             const erc7 = UserNftMinter__factory.connect(
-              contractAddress,
+              originalTokenId.xpnftMinter,
               originalTokenId.provider
             );
               console.log(erc7.address,'erc7.address');
@@ -236,6 +237,18 @@ export default class IndexUpdater {
               name.status === "fulfilled" &&
               symbol.status === "fulfilled"
             ) {
+
+              const alreadyExist = await this.repo.findNFT({
+                tokenId:originalTokenId.tokenId,
+                chainId: updated.toChain!,
+                senderAddress: updated.targetAddress!
+              })
+
+              if (alreadyExist && alreadyExist.length > 0) {
+                console.log('already exist', alreadyExist[0].tokenId);
+                return 
+              }
+
               const createdTagetNft = new EthNftDto(
                 BigInt(updated.toChain!),
                 BigInt(originalTokenId.tokenId),
@@ -256,6 +269,7 @@ export default class IndexUpdater {
             return
           } catch (e) {
             console.log(e, "onCreating new");
+            return
           }
         }
 
