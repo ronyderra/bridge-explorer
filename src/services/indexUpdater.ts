@@ -5,7 +5,7 @@ import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 import { chainNonceToName } from "../config";
 import BigNumber from "bignumber.js";
-
+import { delay } from "../db/helpers";
 import { BridgeEvent } from "../entities/IEvent";
 
 export default class IndexUpdater {
@@ -213,17 +213,20 @@ export default class IndexUpdater {
           console.log("more than 500 in target chain");
           return;
         }
-
+        console.log(nfts.length);
         if (nfts.length === 0) {
+          await delay(1000);
           try {
             const erc7 = UserNftMinter__factory.connect(
               contractAddress,
               originalTokenId.provider
             );
+              console.log(erc7.address,'erc7.address');
+    
             const [uri, name, symbol] = await Promise.allSettled([
-              (async () => erc7.tokenURI(originalTokenId.tokenId))(),
-              (async () => erc7.name())(),
-              (async () => erc7.symbol())(),
+              erc7.tokenURI(originalTokenId.tokenId),
+              erc7.name(),
+              erc7.symbol()
             ]);
 
             console.log(uri, name, symbol );
