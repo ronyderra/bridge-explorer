@@ -156,7 +156,7 @@ export  function BridgeEventService(
             if (!updated) return;
             console.log(updated, "updated");
             if (updated.status === "Completed") {
-               setTimeout(() => IndexUpdater.instance.update(updated).catch(e => console.log(e)), 100)
+               IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
             clientAppSocket.emit("updateEvent", updated);

@@ -185,7 +185,7 @@ export default class IndexUpdater {
       console.log(updated.toHash, "uth");
       console.log(updated.toChainName, "utcn");
 
-      const originalTokenId = await IndexUpdater.instance.getDestTrxInfo(
+      const originalTokenId = await this.getDestTrxInfo(
         updated.toHash,
         updated.toChainName
       );
@@ -226,6 +226,8 @@ export default class IndexUpdater {
               (async () => erc7.symbol())(),
             ]);
 
+            console.log(uri, name, symbol );
+
             if (
               uri.status === "fulfilled" &&
               name.status === "fulfilled" &&
@@ -246,8 +248,9 @@ export default class IndexUpdater {
                 ents: [createdTagetNft],
               });
               console.log(createdTagetNft, 'newCreated');
-              return;
+        
             }
+            return
           } catch (e) {
             console.log(e, "onCreating new");
           }

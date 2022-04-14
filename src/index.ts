@@ -40,6 +40,21 @@ export default (async function main() {
 
   app.use("/", txRoutes);
 
+  /*const provider = new JsonRpcProvider("https://polygon-rpc.com");
+
+  
+    const erc7 = UserNftMinter__factory.connect(
+      '0xC254a8D4eF5f825FD31561bDc69551ed2b8db134',
+      provider
+    );
+    const [uri, name, symbol] = await Promise.allSettled([
+      (async () => erc7.tokenURI('30431109045241522795830634386'))(),
+      (async () => erc7.name())(),
+      (async () => erc7.symbol())(),
+    ]);
+
+
+    console.log(uri, name, symbol);*/
 
   //const x = await IndexUpdater.instance.getDestTrxInfo('0x70b4a77a8f2bb3ed258da8f83f3c81063ab0d1e115935f2e3f7d14b3068c408f', 'POLYGON');
 

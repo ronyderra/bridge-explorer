@@ -50,7 +50,7 @@ import {
         return await em.persistAndFlush(ents)
       },
       async removeNFT({ents}) {
-          await em.removeAndFlush(ents)
+         return await em.removeAndFlush(ents)
       }
 
     };
