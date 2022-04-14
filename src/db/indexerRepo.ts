@@ -22,7 +22,7 @@ import {
     }:{
         chainId: string,
         senderAddress: string,
-        tokenId?:string
+        tokenId?:string | undefined
     }): Promise<EthNftDto[] | null>;
     createNFT({
         ents

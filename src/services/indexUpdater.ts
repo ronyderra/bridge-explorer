@@ -47,7 +47,7 @@ export default class IndexUpdater {
         }
       });
 
-      console.log(descs);
+    
       if (descs[0].name === "UnfreezeNft") {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
@@ -83,7 +83,7 @@ export default class IndexUpdater {
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      console.log(decoded);
+      
       const tokenId =
         decoded.name === "validateTransferNft"
           ? decoded.args["nftId"].toString()
@@ -195,13 +195,16 @@ export default class IndexUpdater {
         (c) => c.name === updated.toChainName
       )?.contract;
 
+      console.log(bridgeContract,'bridgeContract');
+
       if (
         bridgeContract &&
         originalTokenId?.tokenId &&
         updated?.targetAddress
       ) {
+        console.log(updated.toChain, 'updated.toChain');
         const nfts = await this.repo.findNFT({
-          chainId: updated.toChain!.toString(),
+          chainId: updated.toChain!,
           senderAddress: bridgeContract,
           tokenId: originalTokenId.tokenId,
         });
@@ -242,7 +245,7 @@ export default class IndexUpdater {
               await this.repo.createNFT({
                 ents: [createdTagetNft],
               });
-
+              console.log(createdTagetNft, 'newCreated');
               return;
             }
           } catch (e) {
@@ -254,12 +257,13 @@ export default class IndexUpdater {
           ents: nfts,
         });
 
-        const targetNft = nfts[0];
-
+        const targetNft = nfts.find(n => n.chainId && n.tokenId && n.contract && n.contractType && n.symbol && n.name && n.uri);
+        console.log(nfts, 'targetNft');
+        if (!targetNft) return
         const newTagetNft = new EthNftDto(
           BigInt(targetNft.chainId),
           BigInt(targetNft.tokenId),
-          updated.targetAddress!,
+          updated.targetAddress,
           targetNft.contract,
           targetNft.contractType!,
           targetNft.uri,
