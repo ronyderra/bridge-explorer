@@ -16,9 +16,8 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater"
-
-
-
+import { UserNftMinter__factory } from "xpnet-web3-contracts";
+import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 const cron = require("node-cron");
 
 export let io: Server;
@@ -38,10 +37,11 @@ export default (async function main() {
 
   new IndexUpdater(createNFTRepo(indexerOrm))
 
-  await IndexUpdater.instance.createDefault()
+
   app.use("/", txRoutes);
 
-  //const x = await IndexUpdater.instance.getDepTrxInfo('0xb04f1ceb60d3333f1c95c4d6576181b69378233ede2256dd2841258e17ee54df', 'BSC');
+
+  //const x = await IndexUpdater.instance.getDestTrxInfo('0x70b4a77a8f2bb3ed258da8f83f3c81063ab0d1e115935f2e3f7d14b3068c408f', 'POLYGON');
 
   BridgeEventService(createEventRepo(orm)).listen();;
 
