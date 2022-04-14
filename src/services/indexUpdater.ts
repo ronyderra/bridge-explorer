@@ -231,7 +231,7 @@ export default class IndexUpdater {
           await delay(1000);
           try {
             const erc7 = UserNftMinter__factory.connect(
-              originalTokenId.xpnftMinter,
+              originalTokenId.xpnftMinter? originalTokenId.xpnftMinter: originalTokenId.originalContractAddress,
               originalTokenId.provider
             );
               console.log(erc7.address,'erc7.address');
