@@ -16,6 +16,7 @@ export const currency: any = {
   "8": "FTM",
   "12": "ONE",
   "18": "TEZ",
+  "23": "GT",
 };
 
 export const txExplorers: any = {
@@ -32,6 +33,7 @@ export const txExplorers: any = {
   "8": "https://ftmscan.com/tx/",
   "12": "https://explorer.harmony.one/tx/",
   "18": "https://tezblock.io/transaction/",
+  "23": "https://gatescan.org/tx/",
 };
 
 export const addressExplorers: any = {
@@ -48,6 +50,7 @@ export const addressExplorers: any = {
   "8": "https://ftmscan.com/address/",
   "12": "https://explorer.harmony.one/address/",
   "18": "https://tezblock.io/account/",
+  "23": "https://gatescan.org/address/",
 };
 
 function getOrThrow(key: string): string {
@@ -158,6 +161,14 @@ const config: Config = {
       contract: getOrThrow("FUSE_MINTER_ADDRESS"),
       nonce: getOrThrow("FUSE_NONCE"),
       id: "fuse-network-token",
+    },
+
+    {
+      name: "GATECHAIN",
+      node: getOrThrow("GATECHAIN_RPC_URL"),
+      contract: getOrThrow("GATECHAIN_MINTER_ADDRESS"),
+      nonce: getOrThrow("GATECHAIN_NONCE"),
+      id: "gatechain-wormhole",
     },
 
     // {
