@@ -54,10 +54,10 @@ export default (async function main() {
     ]);
 
 
-    console.log(uri, name, symbol);*/
+    console.log(uri, name, symbol);
 
-  //const x = await IndexUpdater.instance.getDestTrxData('0xc895d535b287249ff69dea35d8c8b559ad5765c6a733bb0b34e854efa6012567', 'POLYGON');
-  //console.log(x);
+  //const x = await IndexUpdater.instance.getDestTrxData('0x78d1085a53fab4a3da5561d918ca5e289c49f1b35fd40da2b96e2a6ff6e6077b', 'GATECHAIN');
+  //console.log(x);*/
 
   BridgeEventService(createEventRepo(orm)).listen();;
 
@@ -81,7 +81,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  tezosEventListener(
+  false && tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,
