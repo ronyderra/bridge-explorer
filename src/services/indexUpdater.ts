@@ -315,7 +315,7 @@ export default class IndexUpdater {
             BigInt(updated.toChain!),
             BigInt(destTrxData.tokenId),
             updated.targetAddress!,
-            contractAddress,
+            destTrxData.originalContractAddress? destTrxData.originalContractAddress: destTrxData.bridgeMinter,
             ownedByBridge.contractType!,
             uri.value,
             name.value,
