@@ -230,7 +230,7 @@ export default class IndexUpdater {
       updated.toChainName
     );
 
-    if (destTrxData?.provider || !destTrxData?.tokenId) {
+    if (!destTrxData?.provider || !destTrxData?.tokenId) {
       console.log(
         "missing some data of destination trx",
         destTrxData?.originalContractAddress,
