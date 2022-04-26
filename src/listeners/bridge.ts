@@ -62,7 +62,7 @@ export  function BridgeEventService(
                         contractAddr: eventContract
                     
                     }
-                    let res = await IndexUpdater.instance.getDepTrxInfo(fromHash, chainNonceToName(fromChain.toString()));
+                    let res = await IndexUpdater.instance.getDepTrxData(fromHash, chainNonceToName(fromChain.toString()));
                     
 
                     return res

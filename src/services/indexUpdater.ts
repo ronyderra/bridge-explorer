@@ -22,7 +22,7 @@ export default class IndexUpdater {
     IndexUpdater.instance = this;
   }
 
-  public async getDepTrxInfo(trx: string, chainName: string) {
+  public async getDepTrxData(trx: string, chainName: string) {
     const node = config.web3.find((c) => c.name === chainName)?.node;
     const minter = config.web3.find((c) => c.name === chainName)?.contract;
 
@@ -39,7 +39,7 @@ export default class IndexUpdater {
         }
         try {
           const parsed = contract.interface.parseLog(log);
-          console.log(parsed);
+
           return parsed;
         } catch (_) {
           console.log(_);
@@ -47,14 +47,13 @@ export default class IndexUpdater {
         }
       });
 
-    
       if (descs[0].name === "UnfreezeNft") {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
           contractAddr: descs[0].args["burner"].toString(),
         };
       }
-      console.log(descs);
+
       return {
         tokenId: descs[0].args["id"].toString(),
         contractAddr: descs[0].args["contractAddr"].toString(),
@@ -67,38 +66,56 @@ export default class IndexUpdater {
     }
   }
 
-  public async getDestTrxInfo(trx: string, chainName: string) {
-    const node = config.web3.find((c) => c.name === chainName)?.node;
-    const minter = config.web3.find((c) => c.name === chainName)?.contract;
+  public async getDestTrxData(trx: string, chainName: string) {
+    const node = this.getNodeRpc(chainName);
+    const minter = this.getMinterContract(chainName);
 
     if (!node && !minter) return null;
-    console.log('try to connect to ', node);
+
     try {
       const provider = new JsonRpcProvider(node);
-      console.log('got Provider');
+
       const wait = await provider.waitForTransaction(trx);
-      console.log(wait.transactionHash);
+      console.log(wait.transactionHash, "trxHash");
       const res = await provider.getTransaction(trx);
-      console.log(res.blockHash);
+      console.log(res.blockHash, "blockHash");
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-      console.log(decoded);
+
       const tokenId =
         decoded.name === "validateTransferNft"
           ? decoded.args["nftId"].toString()
           : decoded.args["tokenId"].toString();
 
-          const xpnftMinter = decoded.args["mintWith"]?.toString();
-          const originalContractAddress = decoded.args["contractAddr"]?.toString();
-      return { tokenId, provider, xpnftMinter, originalContractAddress  };
+      const bridgeMinter = decoded.args["mintWith"]?.toString();
+      const originalContractAddress = decoded.args["contractAddr"]?.toString();
+
+      return { tokenId, provider, bridgeMinter, originalContractAddress };
     } catch (e) {
       console.log(e, "kistro");
       return null;
     }
   }
 
-  //public
+  private async getNfts(chainId: string, address: string, tokenId?: string) {
+    try {
+      const nfts = await this.repo.findNFT({
+        chainId,
+        address,
+        tokenId,
+      });
+      return nfts ? nfts : [];
+    } catch (e) {
+      console.log(e, "in getNfts");
+      return [];
+    }
+  }
+
+  private getMinterContract = (chainName: string) =>
+    config.web3.find((c) => c.name === chainName)?.contract;
+  private getNodeRpc = (chainName: string) =>
+    config.web3.find((c) => c.name === chainName)?.node;
 
   public async createDefault() {
     const newNft = new EthNftDto(
@@ -115,215 +132,242 @@ export default class IndexUpdater {
     await this.repo.createNFT({ ents: [newNft] }).catch((e) => console.log(e));
   }
 
+
+  
+
   public async update(updated: BridgeEvent) {
     const {
-      fromChain: chainId,
+      fromChain,
       senderAddress,
       tokenId,
       contract: contractAddress,
-      type,
     } = updated;
 
     if (!this.repo) throw new Error("no initilized");
-    console.log(chainId);
+    console.log(fromChain);
     console.log(senderAddress);
     console.log(tokenId);
     console.log(contractAddress);
-    if (!chainId || !senderAddress || !tokenId || !contractAddress) {
+    if (
+      !fromChain ||
+      !senderAddress ||
+      !tokenId ||
+      !contractAddress ||
+      !updated.fromChainName ||
+      !updated.toHash ||
+      !updated.toChainName
+    ) {
+      console.log(
+        "missing paramg",
+        fromChain,
+        senderAddress,
+        tokenId,
+        contractAddress,
+        updated.fromChainName,
+        updated.toHash,
+        updated.toChainName
+      );
       return;
     }
 
-    let depNfts = await this.repo.findNFT({
-      chainId,
-      senderAddress,
-    });
+    let depChainNfts = await this.getNfts(fromChain, senderAddress);
 
-    if (depNfts?.length === 0 && updated.type === "Unfreeze") {
-      depNfts = await this.repo.findNFT({
-        chainId,
-        senderAddress: '0x0000000000000000000000000000000000000000',
+    if (depChainNfts?.length === 0 && updated.type === "Unfreeze") {
+      depChainNfts = await this.getNfts(
+        fromChain,
+        "0x0000000000000000000000000000000000000000",
         tokenId
-      });
+      );
     }
 
-    console.log(depNfts?.length);
-
-    let toUpdate = depNfts?.filter(
+    depChainNfts = depChainNfts.filter(
       (nft) =>
         nft.tokenId === tokenId &&
         nft.contract.toLowerCase() === contractAddress.toLowerCase()
     );
 
-    if (!toUpdate || toUpdate.length > 500 || toUpdate.length === 0) {
-      toUpdate && console.log(toUpdate.length, "more than 500 or 0");
+    if (depChainNfts.length === 0) {
+      console.log(
+        `Nft ${tokenId}/${contractAddress}/${senderAddress} not found when try to clean up departure chain - ${updated.fromChainName}`
+      );
       return;
     }
 
     await this.repo.removeNFT({
-      ents: toUpdate,
+      ents: depChainNfts,
     });
 
-    const depBridgeContract = config.web3.find(
-      (c) => c.name === updated.fromChainName
-    )?.contract;
+    const minterContract = this.getMinterContract(updated.fromChainName);
 
-    if (!depBridgeContract) {
-      console.log("depBridgeContract");
+    if (!minterContract) {
+      console.log("cant find minterContract");
       return;
     }
 
-    const nft = toUpdate[0];
-    const newDoc = new EthNftDto(
-      BigInt(nft.chainId),
-      BigInt(nft.tokenId),
-      depBridgeContract,
-      nft.contract,
-      nft.contractType!,
-      nft.uri,
-      nft.name,
-      nft.symbol
+    const ownedByBridge = new EthNftDto(
+      BigInt(depChainNfts[0].chainId),
+      BigInt(depChainNfts[0].tokenId),
+      minterContract,
+      depChainNfts[0].contract,
+      depChainNfts[0].contractType!,
+      depChainNfts[0].uri,
+      depChainNfts[0].name,
+      depChainNfts[0].symbol
     );
 
     await this.repo.createNFT({
-      ents: [newDoc],
+      ents: [ownedByBridge],
     });
 
-    console.log("finish updating depNFT");
-    console.log(newDoc);
+    console.log("finish updating deparureNFTs");
+    console.log(ownedByBridge);
 
-    if (updated.toHash && updated.toChainName) {
-      console.log(updated.toHash, "uth");
-      console.log(updated.toChainName, "utcn");
+    console.log(updated.toHash, "toHash");
+    console.log(updated.toChainName, "toChainName");
 
-      const originalTokenId = await this.getDestTrxInfo(
-        updated.toHash,
-        updated.toChainName
+    const destTrxData = await this.getDestTrxData(
+      updated.toHash,
+      updated.toChainName
+    );
+
+    if (destTrxData?.provider || !destTrxData?.tokenId) {
+      console.log(
+        "missing some data of destination trx",
+        destTrxData?.originalContractAddress,
+        destTrxData?.provider,
+        destTrxData?.tokenId,
+        destTrxData?.bridgeMinter
       );
-      console.log(originalTokenId, "originalTokenId");
+      return;
+    }
 
-      const bridgeContract = config.web3.find(
-        (c) => c.name === updated.toChainName
-      )?.contract;
+    const desMinterContract = this.getMinterContract(updated.toChainName);
 
-      console.log(bridgeContract,'bridgeContract');
+    console.log(desMinterContract, "desMinterContract");
 
-      if (
-        bridgeContract &&
-        originalTokenId?.tokenId &&
-        updated?.targetAddress
-      ) {
-        console.log(updated.toChain, 'updated.toChain');
-        let nfts = await this.repo.findNFT({
-          chainId: updated.toChain!,
-          senderAddress: bridgeContract,
-          tokenId: originalTokenId.tokenId,
+    if (
+      desMinterContract &&
+      destTrxData?.tokenId &&
+      updated?.targetAddress &&
+      updated.toChain
+    ) {
+      console.log(updated.toChain, "updated.toChain");
+      let destNfts = await this.getNfts(updated.toChain, desMinterContract);
 
-        });
-
-        nfts?.filter(n => {
-          if (originalTokenId.xpnftMinter) {
-            return n.contract.toLowerCase() === originalTokenId.xpnftMinter.toLowerCase()
-          } else {
-            return n.contract.toLowerCase() === originalTokenId.originalContractAddress.toLowerCase()
-          }
-        })
-
-        console.log(nfts,' nfts after filter');
-
-        if (!nfts || nfts?.length > 500) {
-          console.log("more than 500 in target chain");
-          return;
+      destNfts = destNfts?.filter((nft) => {
+        if (destTrxData.bridgeMinter) {
+          return (
+            nft.contract.toLowerCase() ===
+              destTrxData.bridgeMinter.toLowerCase() &&
+            nft.tokenId === destTrxData.tokenId
+          );
+        } else {
+          return (
+            nft.contract.toLowerCase() ===
+              destTrxData.originalContractAddress.toLowerCase() &&
+            nft.tokenId === destTrxData.tokenId
+          );
         }
-        console.log(nfts.length);
-        if (nfts.length === 0) {
-          await delay(1000);
-          try {
-            const erc7 = UserNftMinter__factory.connect(
-              originalTokenId.xpnftMinter? originalTokenId.xpnftMinter: originalTokenId.originalContractAddress,
-              originalTokenId.provider
-            );
-              console.log(erc7.address,'erc7.address');
-    
-            const [uri, name, symbol] = await Promise.allSettled([
-              erc7.tokenURI(originalTokenId.tokenId),
-              erc7.name(),
-              erc7.symbol()
-            ]);
+      });
 
-            console.log(uri, name, symbol );
+      if (destNfts?.length > 500) {
+        console.log("more than 500 in target chain");
+        return;
+      }
 
-            if (
-              uri.status === "fulfilled" &&
-              name.status === "fulfilled" &&
-              symbol.status === "fulfilled"
-            ) {
-
-              const alreadyExist = await this.repo.findNFT({
-                tokenId:originalTokenId.tokenId,
-                chainId: updated.toChain!,
-                senderAddress: updated.targetAddress!
-              })
-
-              if (alreadyExist && alreadyExist.length > 0) {
-                console.log('already exist', alreadyExist[0].tokenId);
-                return 
-              }
-
-              const createdTagetNft = new EthNftDto(
-                BigInt(updated.toChain!),
-                BigInt(originalTokenId.tokenId),
-                updated.targetAddress!,
-                contractAddress,
-                newDoc.contractType!,
-                uri.value,
-                name.value,
-                symbol.value
-              );
-
-              await this.repo.createNFT({
-                ents: [createdTagetNft],
-              });
-              console.log(createdTagetNft, 'newCreated');
-        
-            }
-            return
-          } catch (e) {
-            console.log(e, "onCreating new");
-            return
-          }
-        }
-
-        await this.repo.removeNFT({
-          ents: nfts,
-        });
-
-        const targetNft = nfts.find(n => n.chainId && n.tokenId && n.contract && n.contractType && n.symbol && n.name && n.uri);
-        console.log(nfts, 'targetNft');
-        if (!targetNft) return
-        const newTagetNft = new EthNftDto(
-          BigInt(targetNft.chainId),
-          BigInt(targetNft.tokenId),
-          updated.targetAddress,
-          targetNft.contract,
-          targetNft.contractType!,
-          targetNft.uri,
-          targetNft.name,
-          targetNft.symbol
+      if (destNfts.length === 0) {
+        //await delay(1000);
+        console.log('no leftovers');
+        const erc7 = UserNftMinter__factory.connect(
+          destTrxData.bridgeMinter
+            ? destTrxData.bridgeMinter
+            : destTrxData.originalContractAddress,
+          destTrxData.provider
         );
 
-        console.log(newTagetNft, "newTagetNft");
+        const [uri, name, symbol] = await Promise.allSettled([
+          erc7.tokenURI(destTrxData.tokenId),
+          erc7.name(),
+          erc7.symbol(),
+        ]);
 
-        await this.repo.createNFT({
-          ents: [newTagetNft],
-        });
+        if (
+          uri.status === "fulfilled" &&
+          name.status === "fulfilled" &&
+          symbol.status === "fulfilled"
+        ) {
+          console.log(uri.value, name.value, symbol.value);
 
-        console.log("finishing updating target chain");
-      } else {
-        console.log("no bridgeContract or originalTokenId");
-        console.log(bridgeContract);
-        console.log(originalTokenId);
-        console.log(updated.targetAddress);
+          const alreadyExist = await (
+            await this.getNfts(
+              updated.toChain,
+              updated.targetAddress,
+              destTrxData.tokenId
+            )
+          ).filter((nft) => nft.contract === contractAddress);
+
+          if (alreadyExist.length > 0) {
+            console.log("already exist", alreadyExist[0].tokenId);
+            return;
+          }
+
+          const createdTagetNft = new EthNftDto(
+            BigInt(updated.toChain!),
+            BigInt(destTrxData.tokenId),
+            updated.targetAddress!,
+            contractAddress,
+            ownedByBridge.contractType!,
+            uri.value,
+            name.value,
+            symbol.value
+          );
+
+          await this.repo.createNFT({
+            ents: [createdTagetNft],
+          });
+          console.log(createdTagetNft, "finish creating destinationNFTs");
+        }
+
+        return;
       }
+
+      console.log('removing leftovers');
+      await this.repo.removeNFT({
+        ents: destNfts,
+      });
+
+      const targetNft = destNfts.find(
+        (nft) =>
+          nft.chainId &&
+          nft.tokenId &&
+          nft.contract &&
+          nft.contractType &&
+          nft.symbol &&
+          nft.name &&
+          nft.uri
+      );
+      console.log(targetNft, "targetNft");
+      if (!targetNft) return;
+
+      const newTagetNft = new EthNftDto(
+        BigInt(targetNft.chainId),
+        BigInt(targetNft.tokenId),
+        updated.targetAddress,
+        targetNft.contract,
+        targetNft.contractType!,
+        targetNft.uri,
+        targetNft.name,
+        targetNft.symbol
+      );
+
+      await this.repo.createNFT({
+        ents: [newTagetNft],
+      });
+
+      console.log(newTagetNft, "finish updating destinationNFTs");
+    } else {
+      console.log("no bridgeContract or originalTokenId");
+      console.log(updated.targetAddress);
     }
   }
 }
