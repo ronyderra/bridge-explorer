@@ -10,14 +10,12 @@ import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
 import {explorerDB, indexerDb} from "./mikro-orm.config";
-import axios from "axios";
 import http from "http";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater"
-import { UserNftMinter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
+
 const cron = require("node-cron");
 
 export let io: Server;
@@ -40,48 +38,17 @@ export default (async function main() {
 
   app.use("/", txRoutes);
 
-  /*const provider = new JsonRpcProvider("https://polygon-rpc.com");
-
-  
-    const erc7 = UserNftMinter__factory.connect(
-      '0xC254a8D4eF5f825FD31561bDc69551ed2b8db134',
-      provider
-    );
-    const [uri, name, symbol] = await Promise.allSettled([
-      (async () => erc7.tokenURI('30431109045241522795830634386'))(),
-      (async () => erc7.name())(),
-      (async () => erc7.symbol())(),
-    ]);
-
-
-    console.log(uri, name, symbol);
-
-  //const x = await IndexUpdater.instance.getDestTrxData('0x78d1085a53fab4a3da5561d918ca5e289c49f1b35fd40da2b96e2a6ff6e6077b', 'GATECHAIN');
-  //console.log(x);*/
-
-  BridgeEventService(createEventRepo(orm)).listen();;
-
-  // config.web3.map((chain) =>
-  //   contractEventService(
-  //     new providers.JsonRpcProvider(chain.node),
-  //     chain.contract,
-  //     chain.name,
-  //     chain.nonce,
-  //     chain.id,
-  //     createEventRepo(orm),
-  //     axios
-  //   ).listen()
-  // );
+  BridgeEventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
     config.elrond.node,
-    config.elrond.contract,
+    config.elrond.contract, 
     config.elrond.name,
     config.elrond.nonce,
     createEventRepo(orm)
   ).listen();
 
-  false && tezosEventListener(
+  tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,
