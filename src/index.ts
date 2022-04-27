@@ -4,6 +4,7 @@ import { contractEventService } from "./listeners/web3";
 import { BridgeEventService } from "./listeners/bridge";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
+import { AlgorandEventListener } from "./listeners/algorand";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
@@ -30,17 +31,21 @@ export default (async function main() {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   const orm = await MikroORM.init(explorerDB);
-  const indexerOrm = await MikroORM.init(indexerDb);
-  const txRoutes = txRouter(createEventRepo(orm));
 
-  new IndexUpdater(createNFTRepo(indexerOrm))
+  AlgorandEventListener(createEventRepo(orm)).listen();
+  //const indexerOrm = await MikroORM.init(indexerDb);
+  //const txRoutes = txRouter(createEventRepo(orm));
+
+  //new IndexUpdater(createNFTRepo(indexerOrm))
 
 
-  app.use("/", txRoutes);
+  //app.use("/", txRoutes);
 
-  BridgeEventService(createEventRepo(orm)).listen();
 
-  elrondEventListener(
+
+  //BridgeEventService(createEventRepo(orm)).listen();
+
+  false && elrondEventListener(
     config.elrond.node,
     config.elrond.contract, 
     config.elrond.name,
@@ -48,7 +53,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  tezosEventListener(
+  false && tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,
@@ -56,6 +61,8 @@ export default (async function main() {
     config.tezos.id,
     createEventRepo(orm)
   ).listen();
+
+
 
   const server = http.createServer(app);
 
@@ -72,8 +79,8 @@ export default (async function main() {
   server.listen(config.port, async () => {
     console.log(`Listening on port ${process.env.PORT}`);
     const repo = createEventRepo(orm);
-    repo.saveDailyData();
-    cron.schedule("*/30 * * * *", () => repo.saveDailyData());
+    //repo.saveDailyData();
+    //cron.schedule("*/30 * * * *", () => repo.saveDailyData());
   });
 
   return { server, socket: io, app, eventRepo: createEventRepo(orm) };

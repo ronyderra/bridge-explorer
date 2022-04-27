@@ -73,6 +73,7 @@ interface Config {
   web3: ChainConfig[];
   elrond: ChainConfig & { socket: string };
   tezos: ChainConfig & { socket: string; xpnft: string };
+  algorand: ChainConfig  & { indexerNode: string; apiKey: string };
   [key: string]: any;
 }
 
@@ -195,8 +196,20 @@ const config: Config = {
     nonce: getOrThrow("TEZOS_NONCE"),
     id: "tezos",
   },
+  algorand: {
+    name: "ALGORAND",
+    node: getOrThrow("ALGORAND_NODE"),
+    indexerNode: getOrThrow("ALGORAND_INDEXER"),
+    apiKey: getOrThrow("ALGORAND_API_KEY"),
+    //socket: getOrThrow("TEZOS_RPC_URL"),
+    //xpnft: getOrThrow("TEZOS_XPNFT_ADDRESS"),
+    contract: getOrThrow("ALGORAND_APPLICATION"),
+    nonce: getOrThrow("ALGORAND_NONCE"),
+    id: "algorand",
+
+  },
   db: getOrThrow("DB_URL"),
-  indexer_db: getOrThrow("INDEXER_DB"),
+  indexer_db: getOrThrow("XP_INDEXER_DB"),
   port: getOrThrow("PORT"),
   socketUrl: getOrThrow("SOCKET_URL"),
   type: getOrThrow("type_sheets"),
