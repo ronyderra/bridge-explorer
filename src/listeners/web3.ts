@@ -7,9 +7,10 @@ import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { io } from "socket.io-client";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
-
+//import PromiseFulfilledResult from 'express'
 import { saveWallet } from "../db/helpers";
-
+import { ethers } from "ethers";
+import BigNumber from "bignumber.js";
 import config from "../config";
 
 export interface IContractEventListener {
@@ -18,7 +19,11 @@ export interface IContractEventListener {
 
 const socket = io(config.socketUrl);
 
+<<<<<<< HEAD
 export function EventService(eventRepo: IEventRepo): IContractEventListener {
+=======
+/*export function EventService(eventRepo: IEventRepo): IContractEventListener {
+>>>>>>> main
   return {
     listen: () => {
       socket.on(
@@ -34,14 +39,23 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
           // hash is the transaction hash
 
           try {
+<<<<<<< HEAD
             console.log("dsds");
+=======
+            console.log(action_id, "id");
+            console.log(fromChain, "toChain");
+>>>>>>> main
             const updated = await eventRepo.updateEvent(
               action_id,
               fromChain.toString(),
               toChain.toString(),
               hash
             );
+<<<<<<< HEAD
 
+=======
+            if (!updated) return;
+>>>>>>> main
             console.log(updated, "updated");
 
             clientAppSocket.emit("updateEvent", updated);
@@ -52,13 +66,14 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
       );
     },
   };
-}
+}*/
 
 export function contractEventService(
   provider: providers.Provider,
   minterAddress: string,
   chainName: string,
   chainNonce: string,
+  chainId: string,
   eventRepo: IEventRepo,
   axios: AxiosInstance
 ): IContractEventListener {
@@ -68,7 +83,7 @@ export function contractEventService(
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
-
+      
       contract.on(
         transferEvent,
         async (
@@ -86,8 +101,34 @@ export function contractEventService(
             contract,
             provider
           );
+<<<<<<< HEAD
           const nftUri = await NFTcontract.tokenURI(tokenId);
           const senderAddress = (await event.getTransaction()).from;
+=======
+          //const nftUri = await NFTcontract.tokenURI(tokenId);
+          //const senderAddress = (await event.getTransaction()).from;
+
+          let [nftUri, senderAddress, exchangeRate]:
+            | PromiseSettledResult<string>[]
+            | string[] = await Promise.allSettled([
+            (async () => await NFTcontract.tokenURI(tokenId))(),
+            (async () => {
+              const res = await event.getTransaction();
+              return res.from;
+            })(),
+            (async () => {
+              const res = await axios(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+              );
+              return res.data[chainId].usd;
+            })(),
+          ]);
+
+          (nftUri = nftUri.status === "fulfilled" ? nftUri.value : ""),
+            (senderAddress =
+              senderAddress.status === "fulfilled" ? senderAddress.value : "");
+
+>>>>>>> main
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -104,28 +145,46 @@ export function contractEventService(
             senderAddress,
             targetAddress: to,
             nftUri,
+            dollarFees:
+              exchangeRate.status === "fulfilled"
+                ? new BigNumber(ethers.utils.formatEther(txFees.toString()))
+                    .multipliedBy(exchangeRate.value)
+                    .toString()
+                : "",
           };
-          console.log(senderAddress);
-          console.log(to);
+          console.log(eventObj);
 
           Promise.all([
             (async () => {
               return await eventRepo.createEvent(eventObj);
             })(),
             (async () => {
+<<<<<<< HEAD
               await saveWallet(eventRepo, senderAddress, to);
+=======
+              await saveWallet(eventRepo, eventObj.senderAddress, to);
+>>>>>>> main
             })(),
           ])
             .then(([doc]) => {
-              console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
+<<<<<<< HEAD
             })
             .catch(() => {});
+=======
+              setTimeout(async () => {
+                const updated = await eventRepo.errorEvent(
+                  actionId.toString(),
+                  chainNonce
+                );
+>>>>>>> main
 
-          console.log("Transfer", nftUri);
-          console.log(
-            `${chainName} ${chainNonce}  ${targetNonce} ${actionId} ${txFees} ${to} ${tokenId} ${contract}`
-          );
+                if (updated) {
+                  clientAppSocket.emit("updateEvent", updated);
+                }
+              }, 1000 * 60);
+            })
+            .catch(() => {});
         }
       );
 
@@ -143,18 +202,57 @@ export function contractEventService(
           baseUri,
           event
         ) => {
+<<<<<<< HEAD
           const wrappedData = await axios
             .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
             .catch((e: any) => console.log("Could not fetch data"));
+=======
+          //const wrappedData = await axios
+          // .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
+          // .catch((e: any) => console.log("Could not fetch data"));
+>>>>>>> main
           //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
 
+<<<<<<< HEAD
           const senderAddress = (await event.getTransaction()).from;
+=======
+          //const senderAddress = (await event.getTransaction()).from;
+
+          let [wrappedData, senderAddress, exchangeRate]:
+            | PromiseSettledResult<string>[]
+            | any[] = await Promise.allSettled([
+            (async () =>
+              await axios
+                .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
+                .catch((e: any) => console.log("Could not fetch data")))(),
+            (async () => {
+              const res = await event.getTransaction();
+              return res.from;
+            })(),
+            (async () => {
+              const res = await axios(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+              );
+              return res.data[chainId].usd;
+            })(),
+          ]);
+
+          wrappedData =
+            wrappedData.status === "fulfilled" ? wrappedData.value : "";
+          senderAddress =
+            senderAddress.status === "fulfilled" ? senderAddress.value : "";
+
+          console.log(senderAddress, "senderAddress");
+          console.log(exchangeRate);
+
+>>>>>>> main
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
-            tokenId: wrappedData?.data?.wrapped.tokenId,
+            tokenId: wrappedData?.data?.wrapped.tokenId ?? "",
+            initialTokenId: tokenId.toString(),
             fromChain: chainNonce,
             toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
             fromChainName: chainNonceToName(chainNonce),
@@ -166,9 +264,15 @@ export function contractEventService(
             status: "Pending",
             fromHash: event.transactionHash,
             toHash: undefined,
-            senderAddress,
+            senderAddress: senderAddress,
             targetAddress: value.toString(),
             nftUri: wrappedData?.data?.wrapped?.original_uri,
+            dollarFees:
+              exchangeRate.status === "fulfilled"
+                ? new BigNumber(ethers.utils.formatEther(txFees.toString()))
+                    .multipliedBy(exchangeRate.value)
+                    .toString()
+                : "",
           };
 
           Promise.all([
@@ -178,7 +282,11 @@ export function contractEventService(
             (async () => {
               await saveWallet(
                 eventRepo,
+<<<<<<< HEAD
                 senderAddress,
+=======
+                eventObj.senderAddress,
+>>>>>>> main
                 eventObj.targetAddress
               );
             })(),
@@ -186,13 +294,31 @@ export function contractEventService(
             .then(([doc]) => {
               console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
+              setTimeout(async () => {
+                const updated = await eventRepo.errorEvent(
+                  actionId.toString(),
+                  chainNonce
+                );
+
+                if (updated) {
+                  clientAppSocket.emit("updateEvent", updated);
+                }
+              }, 1000 * 60);
             })
             .catch(() => {});
 
+<<<<<<< HEAD
           console.log("unfreeze");
           console.log(
             `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
           );
+=======
+          console.log("unfreeze", {
+            chainName,
+            actionId,
+            fromChain: chainNonce,
+          });
+>>>>>>> main
         }
       );
     },

@@ -9,8 +9,7 @@ import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
-import { io } from "socket.io-client";
-import index from "../index";
+
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
@@ -34,6 +33,7 @@ export function elrondEventListener(
     );
   };
   return {
+
     listen: async () => {
       ws.addEventListener("message", async (ev: any) => {
         const evs: EvResp[] = JSON.parse(ev.data);
@@ -113,6 +113,13 @@ const eventHandler = async (
       console.log("unfreez event: ", eventObj);
       const doc = await eventRepo.createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
+      setTimeout(async () => {
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        console.log(updated, 'in errored');
+        if (updated) {
+          clientAppSocket.emit("updateEvent", updated);
+        }
+    }, 1000 * 60)
     }
     case "freezeSendNft": {
       const to = Base64.atob(event.topics[3]);
@@ -146,6 +153,13 @@ const eventHandler = async (
       console.log("transfer event: ", eventObj);
       const doc = await eventRepo.createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
+      setTimeout(async () => {
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        console.log(updated, 'in errored');
+        if (updated) {
+          clientAppSocket.emit("updateEvent", updated);
+        }
+    }, 1000 * 60)
 
       console.log(
         "transfer",

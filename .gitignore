@@ -3,3 +3,9 @@ build
 .env
 .oldenv
 .mainenv
+<<<<<<< HEAD
+=======
+.testnetenv
+verbibot.json
+events.csv
+>>>>>>> main
