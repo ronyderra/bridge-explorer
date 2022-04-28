@@ -2,17 +2,9 @@ import {
     MikroORM,
     IDatabaseDriver,
     Connection,
-    wrap,
-    QueryOrderKeys,
   } from "@mikro-orm/core";
   import {EthNftDto} from '../entities/NftIndex'
-  import { BridgeEvent, IEvent } from "../entities/IEvent";
-  import { IWallet, Wallet } from "../entities/IWallet";
-  import { DailyData } from "../entities/IDailyData";
-  import { chainNonceToName } from "../config";
-  import moment from "moment";
-  import axios from "axios";
-  import { ObjectId } from "bson";
+
   
   export interface IndexerRepo {
     findNFT({
