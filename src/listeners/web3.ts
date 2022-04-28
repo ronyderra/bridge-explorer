@@ -19,11 +19,7 @@ export interface IContractEventListener {
 
 const socket = io(config.socketUrl);
 
-<<<<<<< HEAD
-export function EventService(eventRepo: IEventRepo): IContractEventListener {
-=======
 /*export function EventService(eventRepo: IEventRepo): IContractEventListener {
->>>>>>> main
   return {
     listen: () => {
       socket.on(
@@ -51,11 +47,7 @@ export function EventService(eventRepo: IEventRepo): IContractEventListener {
               toChain.toString(),
               hash
             );
-<<<<<<< HEAD
-
-=======
             if (!updated) return;
->>>>>>> main
             console.log(updated, "updated");
 
             clientAppSocket.emit("updateEvent", updated);
@@ -101,10 +93,6 @@ export function contractEventService(
             contract,
             provider
           );
-<<<<<<< HEAD
-          const nftUri = await NFTcontract.tokenURI(tokenId);
-          const senderAddress = (await event.getTransaction()).from;
-=======
           //const nftUri = await NFTcontract.tokenURI(tokenId);
           //const senderAddress = (await event.getTransaction()).from;
 
@@ -128,7 +116,6 @@ export function contractEventService(
             (senderAddress =
               senderAddress.status === "fulfilled" ? senderAddress.value : "");
 
->>>>>>> main
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -159,25 +146,16 @@ export function contractEventService(
               return await eventRepo.createEvent(eventObj);
             })(),
             (async () => {
-<<<<<<< HEAD
-              await saveWallet(eventRepo, senderAddress, to);
-=======
               await saveWallet(eventRepo, eventObj.senderAddress, to);
->>>>>>> main
             })(),
           ])
             .then(([doc]) => {
               clientAppSocket.emit("incomingEvent", doc);
-<<<<<<< HEAD
-            })
-            .catch(() => {});
-=======
               setTimeout(async () => {
                 const updated = await eventRepo.errorEvent(
                   actionId.toString(),
                   chainNonce
                 );
->>>>>>> main
 
                 if (updated) {
                   clientAppSocket.emit("updateEvent", updated);
@@ -202,22 +180,13 @@ export function contractEventService(
           baseUri,
           event
         ) => {
-<<<<<<< HEAD
-          const wrappedData = await axios
-            .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
-            .catch((e: any) => console.log("Could not fetch data"));
-=======
           //const wrappedData = await axios
           // .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
           // .catch((e: any) => console.log("Could not fetch data"));
->>>>>>> main
           //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
 
           //const nftUri = await NFTcontract.tokenURI(tokenId);
 
-<<<<<<< HEAD
-          const senderAddress = (await event.getTransaction()).from;
-=======
           //const senderAddress = (await event.getTransaction()).from;
 
           let [wrappedData, senderAddress, exchangeRate]:
@@ -247,7 +216,6 @@ export function contractEventService(
           console.log(senderAddress, "senderAddress");
           console.log(exchangeRate);
 
->>>>>>> main
           const eventObj: IEvent = {
             actionId: actionId.toString(),
             chainName,
@@ -282,11 +250,7 @@ export function contractEventService(
             (async () => {
               await saveWallet(
                 eventRepo,
-<<<<<<< HEAD
-                senderAddress,
-=======
                 eventObj.senderAddress,
->>>>>>> main
                 eventObj.targetAddress
               );
             })(),
@@ -307,18 +271,11 @@ export function contractEventService(
             })
             .catch(() => {});
 
-<<<<<<< HEAD
-          console.log("unfreeze");
-          console.log(
-            `${chainName} ${chainNonce} ${actionId} ${txFees} ${to} ${value}`
-          );
-=======
           console.log("unfreeze", {
             chainName,
             actionId,
             fromChain: chainNonce,
           });
->>>>>>> main
         }
       );
     },

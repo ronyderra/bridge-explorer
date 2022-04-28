@@ -21,7 +21,7 @@ import {
 } from "./helpers";
 
 const algoSocket = io(config.web3socketUrl);
-const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
+const executedSocket = io(config.socketUrl);
 
 export function AlgorandEventListener(
   eventRepo: IEventRepo
@@ -109,26 +109,18 @@ export function AlgorandEventListener(
               console.log(event, "event");
 
               const doc = await eventRepo.createEvent(event);
+
+
+              clientAppSocket.emit("incomingEvent", doc);
+
+   
               console.log("finish creating new event");
             }
           }
         }
       });
 
-      executedSocket.on(
-        "tx_executed_event",
-        async (
-          toChain: any,
-          fromChain: any,
-          action_id: any,
-          hash: any,
-          hash1: any,
-          hash2: any,
-        ) => {
-          console.log(toChain, fromChain, action_id, hash, hash1, hash2);
-       
-        }
-      );
+     
     },
   };
 }

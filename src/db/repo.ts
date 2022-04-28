@@ -19,10 +19,10 @@ export interface IEventRepo {
   findEventByHash(fromHash: string): Promise<BridgeEvent | null>;
   findWallet(address: string): Promise<Wallet | null>;
   updateEvent(
-    actionId: string,
-    toChain: string,
     fromChain: string,
-    toHash: string
+    actionId: string,
+    toHash: string,
+    toChain?: string,
   ): Promise<BridgeEvent | undefined>;
   updateElrond(
     actionId: string,
@@ -228,7 +228,7 @@ export default function createEventRepo({
     async findWallet(address) {
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
-    async updateEvent(actionId, toChain, fromChain, toHash) {
+    async updateEvent(fromChain ,actionId, toHash, toChain) {
       console.log("update", { actionId, fromChain, toChain });
 
       console.log("enter");
@@ -269,8 +269,6 @@ export default function createEventRepo({
         {
           toHash,
           status: "Completed",
-          toChain,
-          toChainName: chainNonceToName(toChain),
         },
         { em }
       );

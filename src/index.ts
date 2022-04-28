@@ -34,39 +34,16 @@ export default (async function main() {
 
   AlgorandEventListener(createEventRepo(orm)).listen();
   //const indexerOrm = await MikroORM.init(indexerDb);
-  //const txRoutes = txRouter(createEventRepo(orm));
+  const txRoutes = txRouter(createEventRepo(orm));
 
   //new IndexUpdater(createNFTRepo(indexerOrm))
 
 
-  //app.use("/", txRoutes);
-
-<<<<<<< HEAD
-  config.web3.map((chain) => {
-    return contractEventService(
-      new providers.JsonRpcProvider(chain.node),
-      chain.contract,
-      chain.name,
-      chain.nonce,
-      createEventRepo(orm),
-      axios
-    ).listen();
-  });
-  EventService(createEventRepo(orm)).listen();
-
-  // elrondEventListener(
-  //   config.elrond.node,
-  //   config.elrond.contract,
-  //   config.elrond.name,
-  //   config.elrond.nonce,
-  //   createEventRepo(orm)
-  // ).listen();
-
-  // const elrondSocket = elrondIo(config.elrond.socket);
-=======
+  app.use("/", txRoutes);
 
 
-  //BridgeEventService(createEventRepo(orm)).listen();
+
+  BridgeEventService(createEventRepo(orm)).listen();
 
   false && elrondEventListener(
     config.elrond.node,
@@ -86,7 +63,6 @@ export default (async function main() {
   ).listen();
 
 
->>>>>>> main
 
   const server = http.createServer(app);
 
@@ -99,42 +75,11 @@ export default (async function main() {
   io.on("connection", (socket) => {
     console.log("a user connected");
   });
-<<<<<<< HEAD
-  // elrondSocket.on(
-  //   "elrond:bridge_tx",
-  //   async (
-  //     fromHash: string,
-  //     sender: string,
-  //     uris: string[],
-  //     actionId: string
-  //   ) => {
-  //     try {
-  //       console.log("dsds");
-  //       const updated = await createEventRepo(orm).updateElrond(
-  //         actionId,
-  //         config.elrond.nonce,
-  //         fromHash,
-  //         sender,
-  //         uris[0]
-  //       );
-
-  //       console.log(updated, "updated");
-
-  //       io.emit("updateEvent", updated);
-  //     } catch (e: any) {
-  //       console.error(e);
-  //     }
-  //   }
-  // );
-
-  server.listen(config.port, () => {
-=======
 
   server.listen(config.port, async () => {
->>>>>>> main
     console.log(`Listening on port ${process.env.PORT}`);
     const repo = createEventRepo(orm);
-    //repo.saveDailyData();
+    repo.saveDailyData();
     //cron.schedule("*/30 * * * *", () => repo.saveDailyData());
   });
 

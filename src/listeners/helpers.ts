@@ -1,6 +1,7 @@
 
 import BigNumber from 'bignumber.js';
 import  { Algodv2, Indexer} from 'algosdk';
+import config from '../config'
 /// ALGORAND
 
 
@@ -26,3 +27,18 @@ export const b64Decode = (raw: string) => Buffer.from(raw, 'base64');
 export const bigIntFromBe = (buf: Buffer) =>
     new BigNumber(`0x${buf.toString('hex')}`, 16);
 
+export const fixActionId = (id:string, nonce:string) => {
+    let chain = config.web3.find((chain) => chain.nonce === nonce);
+
+    if (!chain) {
+
+    for (const key of ["elrond", "tezos", "algorand"]) {
+        //@ts-ignore
+        if (nonce == config[key].nonce) {
+          //@ts-ignore
+          return config[key].name;
+        }
+      }
+
+    }
+}

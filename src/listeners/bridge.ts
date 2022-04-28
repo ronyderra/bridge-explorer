@@ -1,6 +1,6 @@
 import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./web3";
-import config, { chainNonceToId, chainNonceToName } from "../config";
+import config, { chainNonceToId, chainNonceToName, getChain } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
 import { IEvent } from "../entities/IEvent";
@@ -135,7 +135,6 @@ export  function BridgeEventService(
       evmSocket.on(
         "tx_executed_event",
         async (
-          toChain: number,
           fromChain: number,
           action_id: string,
           hash: string
@@ -143,20 +142,22 @@ export  function BridgeEventService(
           // chain is targetChain
           // action id is well, action id
           // hash is the transaction hash
-
+          const id = Number(action_id) - (getChain(fromChain.toString())?.actionIdOffset || 0)
           try {
+        
             console.log(action_id, "id");
-            console.log(fromChain, "toChain");
+            console.log(fromChain, "fromChain");
+            console.log(hash,'hash');
+
             const updated = await eventRepo.updateEvent(
-              action_id,
               fromChain.toString(),
-              toChain.toString(),
+              id.toString(),
               hash
             );
             if (!updated) return;
             console.log(updated, "updated");
             if (updated.status === "Completed") {
-               IndexUpdater.instance.update(updated).catch(e => console.log(e));
+               //IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
             clientAppSocket.emit("updateEvent", updated);
