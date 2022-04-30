@@ -74,7 +74,7 @@ interface Config {
   web3: ChainConfig[];
   elrond: ChainConfig & { socket: string };
   tezos: ChainConfig & { socket: string; xpnft: string };
-  algorand: ChainConfig  & { indexerNode: string; apiKey: string; actionIdOffset: number };
+  algorand: ChainConfig & { indexerNode: string; apiKey: string; actionIdOffset: number };
   [key: string]: any;
 }
 
@@ -219,38 +219,54 @@ const config: Config = {
   private_key_id: '1' || getOrThrow("private_key_id_sheets"),
   private_key: '1' || getOrThrow("private_key_sheet"),
   client_email: '1' || getOrThrow("client_email_sheet"),
-  client_id:'1' ||  getOrThrow("client_id_sheet"),
+  client_id: '1' || getOrThrow("client_id_sheet"),
   auth_uri: '1' || getOrThrow("auth_uri_sheet"),
   token_uri: '1' || getOrThrow("token_uri_sheet"),
-  auth_provider_x509_cert_url: '1' ||  getOrThrow("auth_provider_x509_cert_url"),
+  auth_provider_x509_cert_url: '1' || getOrThrow("auth_provider_x509_cert_url"),
   client_x509_cert_url: '1' || getOrThrow("client_x509_cert_url"),
-  mail_key: '1' ||  getOrThrow("SENDING_BLUE"),
+  mail_key: '1' || getOrThrow("SENDING_BLUE"),
   captcha_secret: '1' || getOrThrow("SECRET_CAPTCHA"),
   web3socketUrl: getOrThrow("WEB3_SOCKET_URL"),
 };
 
 
-export const getChain = (nonce:string) => {
-    
-    try {
-     Object.keys(config).forEach((key: string) => {
-      const item:ChainConfig | ChainConfig[] = config[key];
+export const getChain = (nonce: string) => {
+
+  try {
+    Object.keys(config).forEach((key: string) => {
+      const item: ChainConfig | ChainConfig[] = config[key];
 
       if (Array.isArray(item)) {
-        for(const c of item) {
+        for (const c of item) {
           if (c.nonce === nonce) throw c;
-        }      
+        }
       } else {
         if (item.nonce && item.nonce === nonce) throw item;
       }
     })
   } catch (chain: any) {
-      return chain as ChainConfig
+    return chain as ChainConfig
   }
-} 
+}
+
+
+export const getNounces = () => {
+  const chains: string[] = [];
+  Object.keys(config).forEach((key: string) => {
+    const item: ChainConfig | ChainConfig[] = config[key];
+    if (Array.isArray(item)) {
+      for (const c of item) {
+        chains.push(c.nonce);
+      }
+    } else {
+      if (item.nonce) chains.push(item.nonce);
+    }
+  })
+  return chains
+}
 
 export function chainNonceToName(nonce: string) {
-  
+
   const chain = getChain(nonce);
 
   return chain?.name || "UNKNOWN";
