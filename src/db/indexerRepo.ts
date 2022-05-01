@@ -12,7 +12,7 @@ import {
   import { chainNonceToName } from "../config";
   import moment from "moment";
   import axios from "axios";
-  import { ObjectId } from "bson";
+
   
   export interface IndexerRepo {
     findNFT({

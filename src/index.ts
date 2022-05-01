@@ -17,9 +17,9 @@ import bodyParser from "body-parser";
 import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater"
 import os from 'os'
-import { fork } from "child_process"
+import { fork ,ChildProcess,} from "child_process"
 import path from 'path'
-import { ChildProcess } from 'child_process'
+
 const cron = require("node-cron");
 
 export let io: Server;
@@ -33,29 +33,40 @@ export default (async function main() {
   app.use(bodyParser.json({ limit: "10mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
 
-  const childs: ChildProcess[] = [];
+  const childs:ChildProcess[] = []
+  const childsMap = new Map<ChildProcess, string[]>();
   const chains = getNounces();
   console.log(chains.length, ' chains');
-
-  for (let i = 0; i < os.cpus().length; i++) {
-    const child = fork(path.resolve(__dirname, "./child"))
-    childs.push(child);
+  console.log(path.resolve(__dirname, "../build/child"));
+  
+  for (let i = 0; i < os.cpus().length - 4; i++) {
+    const child = fork(path.resolve(__dirname, "child"), []);
+    childs.push(child)
 
     child.on("close", function (code) {
       console.log("child process exited with code " + code);
     });
   }
 
-  let childIdx = 0;
-  console.log(childs.length);
-  for (const chain of chains) {
-    if (childIdx === childs.length) childIdx = 0;
-    childs[childIdx].send(chain)
-    console.log(childIdx++);
+  
 
+
+
+
+ let childIdx = 0;
+  for (const chainNonce of chains) {
+    if (childIdx === childs.length) childIdx = 0;
+    const child = childsMap.get(childs[childIdx]);
+   
+    child? childsMap.set(childs[childIdx], [...child, chainNonce]): childsMap.set(childs[childIdx], [chainNonce]);
+
+    childIdx++;
   }
 
-
+  childsMap.forEach((value, key, map) => {
+    key.send(value);
+  })
+  
   //[JSON.stringify({ listenForChains: ['1', '2'] })]
 
   const orm = await MikroORM.init(explorerDB);

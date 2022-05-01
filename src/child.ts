@@ -6,14 +6,14 @@ import createEventRepo from "./db/repo";
 const chainsTolisten: string[] = [];
 
 
-async function listen() {
+async function listen(chains: string[]) {
     const orm = await MikroORM.init(explorerDB);
-    BridgeEventService(createEventRepo(orm)).listen();
+    //BridgeEventService(createEventRepo(orm)).listen();
 }
 
-process.on('message', async (chain: string) => {
-    chainsTolisten.push(chain.toString())
-    if (chainsTolisten.length === 1) listen()
+process.on('message', async (chains: string[]) => {
+ 
+    listen(chains)
     //const argument = process.argv.find(arg => arg.includes('listenForChains'));
     //if (!argument) process.exit(9);
 
@@ -26,9 +26,4 @@ process.on('message', async (chain: string) => {
 
 })
 
-
-
-
-
-
-export default true
+export default {}
