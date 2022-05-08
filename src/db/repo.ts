@@ -232,50 +232,54 @@ export default function createEventRepo({
       console.log("update", { actionId, fromChain, toChain });
 
       console.log("enter");
-      const waitEvent = await new Promise<BridgeEvent>(
-        async (resolve, reject) => {
-           
+      try {
+        const waitEvent = await new Promise<BridgeEvent>(
+          async (resolve, reject) => {
 
-          let event = await em.findOne(BridgeEvent, {
-            $and: [
-              { actionId: actionId.toString() },
-              { fromChain: fromChain!.toString() },
-            ],
-          });
 
-          const interval = setInterval(async () => {
-            if (event) {
-              clearInterval(interval);
-              resolve(event);
-              return;
-            }
-            console.log("waiting for event", { actionId, fromChain, toChain });
-            event = await em.findOne(BridgeEvent, {
+            let event = await em.findOne(BridgeEvent, {
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
               ],
             });
-          }, 5000);
 
-          setTimeout(() => {
-            clearInterval(interval);
-            reject("no promise");
-          }, 1000 * 60 * 15);
-        }
-      );
-      if (waitEvent.status === "Completed") return undefined;
-      wrap(waitEvent).assign(
-        {
-          toHash,
-          status: "Completed",
-          toChain,
-          toChainName: chainNonceToName(toChain),
-        },
-        { em }
-      );
-      await em.flush();
-      return waitEvent;
+            const interval = setInterval(async () => {
+              if (event) {
+                clearInterval(interval);
+                resolve(event);
+                return;
+              }
+              console.log("waiting for event", { actionId, fromChain, toChain });
+              event = await em.findOne(BridgeEvent, {
+                $and: [
+                  { actionId: actionId.toString() },
+                  { fromChain: fromChain!.toString() },
+                ],
+              });
+            }, 5000);
+
+            setTimeout(() => {
+              clearInterval(interval);
+              reject("no promise");
+            }, 1000 * 60 * 15);
+          }
+        );
+        if (waitEvent.status === "Completed") return undefined;
+        wrap(waitEvent).assign(
+          {
+            toHash,
+            status: "Completed",
+            toChain,
+            toChainName: chainNonceToName(toChain),
+          },
+          { em }
+        );
+        await em.flush();
+        return waitEvent;
+      } catch (e) {
+        console.log(e);
+      }
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
       const waitEvent = await new Promise<BridgeEvent>(

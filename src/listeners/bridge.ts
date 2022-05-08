@@ -17,11 +17,20 @@ const evmSocket = io(config.socketUrl);
 const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
 
-export  function BridgeEventService(
+export function BridgeEventService(
   eventRepo: IEventRepo
 ): IContractEventListener {
   return {
-    listen: () => {
+    listen: async () => {
+
+
+      //const updated = await eventRepo.updateEvent('10', '4', '23', '0x5b4f88b12bd5ecda840df9310a05a3748d2b8a4ca62b4d06de7b65f7ee25677a').catch((e) => console.log(e))
+
+      await eventRepo.updateEvent('6', '7', '8', '0x57c5948e67661c74987916c061548837ea2fbc06a00982dc377482c594f44442').catch((e) => console.log(e))
+      //await eventRepo.updateEvent('400', '8', '4', '0xfb376b0d75e19d12532ac1ed89efe5f1fff9474f7a7ed2e685eff5a3c608dd97').catch((e) => console.log(e))
+      //await eventRepo.updateEvent('399', '8', '4', '0x11f2d5d704297381847e975bb052437975bb9ec085ceb3468b499a505edc5b70').catch((e) => console.log(e))
+      // await eventRepo.updateEvent('10', '4', '23', '0x5b4f88b12bd5ecda840df9310a05a3748d2b8a4ca62b4d06de7b65f7ee25677a').catch((e) => console.log(e))
+
       web3socket.on(
         "web3:bridge_tx",
         async (
@@ -39,14 +48,14 @@ export  function BridgeEventService(
 
         ) => {
           console.log(eventTokenId, 'eventTokenId');
-          console.log(eventContract,'eventContact');
+          console.log(eventContract, 'eventContact');
           if (actionId && type && txFees && senderAddress) {
 
-          
-            
+
+
             const chainId = chainNonceToId(fromChain?.toString());
 
-            let [exchangeRate, trxData]: any  =
+            let [exchangeRate, trxData]: any =
               await Promise.allSettled([
                 (async () => {
                   const res = await axios(
@@ -56,20 +65,20 @@ export  function BridgeEventService(
                 })(),
 
                 (async () => {
-                    if (eventTokenId && eventContract) return {
-                   
-                        tokenId: eventTokenId,
-                        contractAddr: eventContract
-                    
-                    }
-                    let res = await IndexUpdater.instance.getDepTrxData(fromHash, chainNonceToName(fromChain.toString()));
-                    
+                  if (eventTokenId && eventContract) return {
 
-                    return res
+                    tokenId: eventTokenId,
+                    contractAddr: eventContract
+
+                  }
+                  let res = await IndexUpdater.instance.getDepTrxData(fromHash, chainNonceToName(fromChain.toString()));
+
+
+                  return res
                 })()
               ]);
 
-           
+
 
             const event: IEvent = {
               chainName: chainNonceToName(fromChain.toString()),
@@ -78,7 +87,7 @@ export  function BridgeEventService(
               toChainName: chainNonceToName(toChain?.toString() || ""),
               fromHash,
               actionId: actionId,
-              tokenId:  trxData.status === "fulfilled"? trxData.value.tokenId : undefined,
+              tokenId: trxData.status === "fulfilled" ? trxData.value.tokenId : undefined,
               type,
               status: "Pending",
               toChain: toChain?.toString(),
@@ -86,20 +95,20 @@ export  function BridgeEventService(
               dollarFees:
                 exchangeRate.status === "fulfilled"
                   ? new BigNumber(
-                      ethers.utils.formatEther(txFees?.toString() || "")
-                    )
-                      .multipliedBy(exchangeRate.value)
-                      .toString()
+                    ethers.utils.formatEther(txFees?.toString() || "")
+                  )
+                    .multipliedBy(exchangeRate.value)
+                    .toString()
                   : "",
               senderAddress,
               targetAddress,
               nftUri,
-              contract: trxData.status === "fulfilled"? trxData.value.contractAddr : undefined
+              contract: trxData.status === "fulfilled" ? trxData.value.contractAddr : undefined
             };
-            console.log(event.tokenId,'tokenId');
-            console.log(event.contract,'contract');
+            console.log(event.tokenId, 'tokenId');
+            console.log(event.contract, 'contract');
             console.log(event);
-          
+
             Promise.all([
               (async () => {
                 return await eventRepo.createEvent(event);
@@ -115,7 +124,7 @@ export  function BridgeEventService(
               .then(([doc]) => {
                 console.log(doc, 'doc');
                 clientAppSocket.emit("incomingEvent", doc);
-              
+
                 setTimeout(async () => {
                   const updated = await eventRepo.errorEvent(
                     actionId.toString(),
@@ -127,7 +136,7 @@ export  function BridgeEventService(
                   }
                 }, 1000 * 60);
               })
-              .catch(() => {});
+              .catch(() => { });
           }
         }
       );
@@ -156,7 +165,7 @@ export  function BridgeEventService(
             if (!updated) return;
             console.log(updated, "updated");
             if (updated.status === "Completed") {
-               IndexUpdater.instance.update(updated).catch(e => console.log(e));
+              IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
             clientAppSocket.emit("updateEvent", updated);
