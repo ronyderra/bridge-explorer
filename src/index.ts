@@ -19,6 +19,8 @@ import IndexUpdater from "./services/indexUpdater"
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 
+import { IEvent,BridgeEvent } from "./entities/IEvent";
+import { DailyData } from "./entities/IDailyData";
 
 const cron = require("node-cron");
 
@@ -41,17 +43,29 @@ export default (async function main() {
   //AlgorandEventListener(createEventRepo(orm)).listen();
   const indexerOrm = await MikroORM.init(indexerDb);
   const txRoutes = txRouter(createEventRepo(orm));
-
   new IndexUpdater(createNFTRepo(indexerOrm))
-
-
   app.use("/", txRoutes);
 
+  /*(const events = await orm.em.find(
+    BridgeEvent, {})
+ 
+    let dailis = await orm.em.find(
+      DailyData, {})
 
+
+      dailis = dailis.map(d => {
+
+        return {
+          ...d,
+          txNumber
+        }
+      })*/
+   
+    
 
   BridgeEventService(createEventRepo(orm)).listen();
 
-  false && elrondEventListener(
+  elrondEventListener(
     config.elrond.node,
     config.elrond.contract,
     config.elrond.name,
@@ -59,7 +73,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  false && tezosEventListener(
+  tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,

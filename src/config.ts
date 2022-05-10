@@ -17,6 +17,7 @@ export const currency: any = {
   "12": "ONE",
   "18": "TEZ",
   "23": "GT",
+  "25": "VET",
 };
 
 export const txExplorers: any = {
@@ -34,6 +35,7 @@ export const txExplorers: any = {
   "12": "https://explorer.harmony.one/tx/",
   "18": "https://tezblock.io/transaction/",
   "23": "https://gatescan.org/tx/",
+  "25": "https://explore.vechain.org/transactions/",
 };
 
 export const addressExplorers: any = {
@@ -51,6 +53,7 @@ export const addressExplorers: any = {
   "12": "https://explorer.harmony.one/address/",
   "18": "https://tezblock.io/account/",
   "23": "https://gatescan.org/address/",
+  "25": "https://explore.vechain.org/accounts/"
 };
 
 function getOrThrow(key: string): string {
@@ -172,12 +175,14 @@ const config: Config = {
       id: "gatechain-wormhole",
     },
 
-    // {
-    //   name: "UNIQUE",
-    //   node: getOrThrow("UNIQUE_RPC_URL"),
-    //   contract: getOrThrow("UNIQUE_MINTER_ADDRESS"),
-    //   nonce: getOrThrow("UNIQUE_NONCE"),
-    // },
+    {
+      name: "VECHAIN",
+      node: getOrThrow("VECHAIN_RPC_URL"),
+      contract: getOrThrow("VECHAIN_MINTER_ADDRESS"),
+      nonce: getOrThrow("VECHAIN_NONCE"),
+      id: "vechain",
+    },
+
   ],
   elrond: {
     name: "ELROND",

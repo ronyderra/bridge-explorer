@@ -3,7 +3,7 @@ import { IContractEventListener } from "./web3";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
-import { IEvent } from "../entities/IEvent";
+import { IEvent,BridgeEvent } from "../entities/IEvent";
 import { ethers } from "ethers";
 import axios from "axios";
 import { BigNumber } from "bignumber.js";
@@ -11,6 +11,8 @@ import { saveWallet } from "../db/helpers";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from '@ethersproject/providers';
 import IndexUpdater from "../services/indexUpdater";
+
+
 
 
 const evmSocket = io(config.socketUrl);
@@ -24,12 +26,7 @@ export function BridgeEventService(
     listen: async () => {
 
 
-      //const updated = await eventRepo.updateEvent('10', '4', '23', '0x5b4f88b12bd5ecda840df9310a05a3748d2b8a4ca62b4d06de7b65f7ee25677a').catch((e) => console.log(e))
 
-      await eventRepo.updateEvent('6', '7', '8', '0x57c5948e67661c74987916c061548837ea2fbc06a00982dc377482c594f44442').catch((e) => console.log(e))
-      //await eventRepo.updateEvent('400', '8', '4', '0xfb376b0d75e19d12532ac1ed89efe5f1fff9474f7a7ed2e685eff5a3c608dd97').catch((e) => console.log(e))
-      //await eventRepo.updateEvent('399', '8', '4', '0x11f2d5d704297381847e975bb052437975bb9ec085ceb3468b499a505edc5b70').catch((e) => console.log(e))
-      // await eventRepo.updateEvent('10', '4', '23', '0x5b4f88b12bd5ecda840df9310a05a3748d2b8a4ca62b4d06de7b65f7ee25677a').catch((e) => console.log(e))
 
       web3socket.on(
         "web3:bridge_tx",
