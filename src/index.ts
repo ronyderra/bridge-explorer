@@ -37,7 +37,7 @@ export default (async function main() {
   const txRoutes = txRouter(createEventRepo(orm));
 
   //new IndexUpdater(createNFTRepo(indexerOrm))
-
+//ds
 
   app.use("/", txRoutes);
 
