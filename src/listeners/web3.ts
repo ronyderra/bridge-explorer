@@ -71,6 +71,7 @@ export function contractEventService(
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
+      //const a = contract.filters.
       
       contract.on(
         transferEvent,

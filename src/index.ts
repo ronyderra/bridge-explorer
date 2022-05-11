@@ -6,7 +6,7 @@ import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
 import config from "./config";
-import { MikroORM } from "@mikro-orm/core";
+import { MikroORM,wrap } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
@@ -18,9 +18,9 @@ import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater"
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-
+import moment, {Moment} from "moment";
 import { IEvent,BridgeEvent } from "./entities/IEvent";
-import { DailyData } from "./entities/IDailyData";
+import { DailyData, IDailyData } from "./entities/IDailyData";
 
 const cron = require("node-cron");
 
@@ -46,22 +46,8 @@ export default (async function main() {
   new IndexUpdater(createNFTRepo(indexerOrm))
   app.use("/", txRoutes);
 
-  /*(const events = await orm.em.find(
-    BridgeEvent, {})
+  
  
-    let dailis = await orm.em.find(
-      DailyData, {})
-
-
-      dailis = dailis.map(d => {
-
-        return {
-          ...d,
-          txNumber
-        }
-      })*/
-   
-    
 
   BridgeEventService(createEventRepo(orm)).listen();
 
