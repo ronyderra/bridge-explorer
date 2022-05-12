@@ -9,6 +9,7 @@ import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io as clientAppSocket } from "../index";
+const util = require('util')
 
 
 // TODO: Save bridge events to db
@@ -63,6 +64,8 @@ const eventHandler = async (
   if (event.topics.length < 5) {
     return undefined;
   }
+
+  console.log(util.inspect(event, false, null, true /* enable colors */))
 
   const action_id = bigIntFromBe(Base64.toUint8Array(event.topics[1]));
   const tx_fees = bigIntFromBe(

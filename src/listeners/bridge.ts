@@ -181,7 +181,9 @@ export function BridgeEventService(
           actionId: string
         ) => {
           try {
-            console.log("elrond event incoming");
+            console.log("elrond event incoming elrond:bridge_tx");
+            console.log(fromHash, sender, uris, actionId);
+       
             const updated = await eventRepo.updateElrond(
               actionId,
               config.elrond.nonce,

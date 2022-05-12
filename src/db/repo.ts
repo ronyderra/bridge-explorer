@@ -282,6 +282,9 @@ export default function createEventRepo({
       }
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
+      console.log('update Elrond', {
+        actionId, fromChain, fromHash, senderAddress, nftUri
+      });
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
           let event = await em.findOne(BridgeEvent, {
