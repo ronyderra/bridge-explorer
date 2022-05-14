@@ -47,6 +47,8 @@ export default class IndexUpdater {
         }
       });
 
+      //console.log(descs[0]);
+
       if (descs[0].name === "UnfreezeNft") {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
@@ -133,7 +135,7 @@ export default class IndexUpdater {
   }
 
 
-  
+
 
   public async update(updated: BridgeEvent) {
     const {
@@ -258,13 +260,13 @@ export default class IndexUpdater {
         if (destTrxData.bridgeMinter) {
           return (
             nft.contract.toLowerCase() ===
-              destTrxData.bridgeMinter.toLowerCase() &&
+            destTrxData.bridgeMinter.toLowerCase() &&
             nft.tokenId === destTrxData.tokenId
           );
         } else {
           return (
             nft.contract.toLowerCase() ===
-              destTrxData.originalContractAddress.toLowerCase() &&
+            destTrxData.originalContractAddress.toLowerCase() &&
             nft.tokenId === destTrxData.tokenId
           );
         }
@@ -315,7 +317,7 @@ export default class IndexUpdater {
             BigInt(updated.toChain!),
             BigInt(destTrxData.tokenId),
             updated.targetAddress!,
-            destTrxData.originalContractAddress? destTrxData.originalContractAddress: destTrxData.bridgeMinter,
+            destTrxData.originalContractAddress ? destTrxData.originalContractAddress : destTrxData.bridgeMinter,
             ownedByBridge.contractType!,
             uri.value,
             name.value,
