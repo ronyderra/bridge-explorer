@@ -17,6 +17,7 @@
     "prisma": "^3.8.1"
   },
   "dependencies": {
+    "@elrondnetwork/erdjs": "9.2.4",
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/mongodb": "^4.5.10",
     "@taquito/rpc": "^12.0.0",

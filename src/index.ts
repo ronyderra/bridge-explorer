@@ -49,17 +49,13 @@ export default (async function main() {
   
  
 
-  BridgeEventService(createEventRepo(orm)).listen();
+  false && BridgeEventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
-    config.elrond.node,
-    config.elrond.contract,
-    config.elrond.name,
-    config.elrond.nonce,
     createEventRepo(orm)
   ).listen();
 
-  tezosEventListener(
+  false && tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,

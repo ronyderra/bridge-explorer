@@ -15,6 +15,7 @@ import config from "../config";
 
 export interface IContractEventListener {
   listen(): void;
+  listenBridge? : FunctionStringCallback
 }
 
 const socket = io(config.socketUrl);
