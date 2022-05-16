@@ -30,9 +30,6 @@ export default (async function main() {
 
 
 
-
-
-
   const app = express();
   app.use(cors());
   app.use(bodyParser.json({ limit: "10mb" }));
@@ -40,7 +37,7 @@ export default (async function main() {
 
   const orm = await MikroORM.init(explorerDB);
 
-  //AlgorandEventListener(createEventRepo(orm)).listen();
+  
   const indexerOrm = await MikroORM.init(indexerDb);
   const txRoutes = txRouter(createEventRepo(orm));
   new IndexUpdater(createNFTRepo(indexerOrm))
@@ -49,13 +46,14 @@ export default (async function main() {
   
  
 
-  false && BridgeEventService(createEventRepo(orm)).listen();
+  BridgeEventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
     createEventRepo(orm)
   ).listen();
 
-  false && tezosEventListener(
+
+tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,
@@ -63,6 +61,8 @@ export default (async function main() {
     config.tezos.id,
     createEventRepo(orm)
   ).listen();
+
+  AlgorandEventListener(createEventRepo(orm)).listen();
 
 
 

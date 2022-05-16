@@ -19,6 +19,9 @@ const evmSocket = io(config.socketUrl);
 const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
 
+const evmNonces = config.web3.map(c => c.nonce);
+
+
 export function BridgeEventService(
   eventRepo: IEventRepo
 ): IContractEventListener {
@@ -146,13 +149,15 @@ export function BridgeEventService(
           action_id: string,
           hash: string
         ) => {
-          // chain is targetChain
-          // action id is well, action id
-          // hash is the transaction hash
+          console.log({
+            toChain,
+          fromChain,
+          action_id,
+          hash,
+          },  "tx_executed_event");
 
           try {
-            console.log(action_id, "id");
-            console.log(fromChain, "toChain");
+        
             const updated = await eventRepo.updateEvent(
               action_id,
               fromChain.toString(),
@@ -161,7 +166,7 @@ export function BridgeEventService(
             );
             if (!updated) return;
             console.log(updated, "updated");
-            if (updated.status === "Completed") {
+            if (updated.status === "Completed" &&  updated.fromChain && evmNonces.includes(updated.fromChain)) {
               IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 

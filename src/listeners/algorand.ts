@@ -20,6 +20,8 @@ import {
   assetUrlFromId,
 } from "./helpers";
 
+const util = require('util')
+
 const algoSocket = io(config.web3socketUrl);
 const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
 
@@ -37,12 +39,13 @@ export function AlgorandEventListener(
         config.algorand.apiKey
       );
 
+ 
       algoSocket.on("algorand:bridge_tx", async (hash) => {
-        console.log(hash, "args");
+      
         const txRes = await indexerClient.lookupTransactionByID(hash).do();
         const txnInfo = txRes["transaction"];
         if (txnInfo == undefined || txnInfo?.logs.length == 0) {
-          console.log("not trx info");
+ 
           return;
         }
 
@@ -51,7 +54,7 @@ export function AlgorandEventListener(
           txnInfo["application-transaction"]["application-id"] ==
             config.algorand.contract
         ) {
-          console.log("starting data decode");
+
           const actionType = b64Decode(txnInfo.logs[0]).toString("utf-8");
           // Base64 to big number
           const actionCnt = bigIntFromBe(b64Decode(txnInfo.logs[1])).toString();
@@ -67,68 +70,70 @@ export function AlgorandEventListener(
             b64Decode(txnInfo.logs[txnInfo.logs.length - 1])
           );
 
-          console.log(actionType, "actionType");
-          console.log(actionCnt.toString(), "actionCnt");
-          console.log(targetChainNonce, "targetChainNonce");
-          console.log(to, "to");
-          console.log(mintWith, "mintWith");
-          console.log(txnFee.toString(), "txnFee");
+
+
+          let assetID = "";
+          let assetUrl = "";
 
           switch (actionType) {
             case "action_type:freeze_nft": {
-              const assetID = b64Decode(txnInfo.logs[5])
-                .readBigUInt64BE(0)
-                .toString();
-              console.log(assetID, "assetID");
+              assetID =
+                b64Decode(txnInfo?.logs[5])
+                  ?.readBigUInt64BE(0)
+                  ?.toString() || "";
+            
 
-              const assetUrl = await assetUrlFromId(algodClient, +assetID);
+               assetUrl = await assetUrlFromId(algodClient, +assetID);
 
-              const event: IEvent = {
-                chainName: "ALGORAND",
-                type:
-                  actionType === "action_type:freeze_nft"
-                    ? "Transfer"
-                    : "Unfreeze",
-                fromChain: config.algorand.nonce,
-                toChain: targetChainNonce,
-                fromChainName: "ALGORAND",
-                toChainName: chainNonceToName(targetChainNonce),
-                actionId: actionCnt,
-                txFees: txnFee.shiftedBy(-6).toString(),
-                dollarFees: "",
-                tokenId: assetID,
-                status: "Pending",
-                fromHash: hash,
-                toHash: undefined,
-                targetAddress: to,
-                senderAddress: txnInfo["sender"],
-                nftUri: assetUrl,
-                contract: mintWith,
-              };
+            }
 
-              console.log(event, "event");
-
-              const doc = await eventRepo.createEvent(event);
-              console.log("finish creating new event");
+            case "action_type:withdraw_nft": {
+              assetUrl = b64Decode(txnInfo.logs[5]).toString("utf-8");
             }
           }
+
+          const event: IEvent = {
+            chainName: "ALGORAND",
+            type:
+              actionType === "action_type:freeze_nft" ? "Transfer" : "Unfreeze",
+            fromChain: config.algorand.nonce,
+            toChain: targetChainNonce,
+            fromChainName: "ALGORAND",
+            toChainName: chainNonceToName(targetChainNonce),
+            actionId: actionCnt,
+            txFees: txnFee.shiftedBy(-6).toString(),
+            dollarFees: "",
+            tokenId: assetID,
+            status: "Pending",
+            fromHash: hash,
+            toHash: undefined,
+            targetAddress: to,
+            senderAddress: txnInfo["sender"],
+            nftUri: assetUrl,
+            contract: mintWith,
+          };
+
+
+          Promise.all([
+            (async () => {
+              return await eventRepo.createEvent(event);
+            })(),
+            (async () => {
+              await saveWallet(
+                eventRepo,
+                event.senderAddress,
+                event.targetAddress
+              );
+            })(),
+          ])
+            .then(([doc]) => {
+              console.log(doc, 'doc');
+              clientAppSocket.emit("incomingEvent", doc);
+
+            })
+
         }
       });
-
-      executedSocket.on(
-        "tx_executed_event",
-        async (
-          toChain: any,
-          fromChain: any,
-          action_id: any,
-          hash: any,
-          hash1: any,
-          hash2: any,
-        ) => {
-          console.log(toChain, fromChain, action_id, hash, hash1, hash2);
-       
-        }
-      );
     },
   };
 }
