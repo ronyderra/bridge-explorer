@@ -76,12 +76,12 @@ export default class IndexUpdater {
       const wait = await provider.waitForTransaction(trx);
       console.log(wait.transactionHash, "trxHash");
       const res = await provider.getTransaction(trx);
-      console.log(res.blockHash, "blockHash");
+     
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
 
-      console.log(decoded);
+    
 
       const tokenId =
         decoded.name === "validateTransferNft"

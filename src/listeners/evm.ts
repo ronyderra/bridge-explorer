@@ -134,7 +134,7 @@ export function EvmEventService(
                   if (updated) {
                     clientAppSocket.emit("updateEvent", updated);
                   }
-                }, 1000 * 60);
+                }, 1000 * 120);
               })
               .catch(() => { });
           }
@@ -168,7 +168,7 @@ export function EvmEventService(
             );
             if (!updated) return;
             console.log(updated, "updated");
-            if (updated.status === "Completed") {
+            if (updated.status === "Completed" && updated.toChain && evmNonces.includes(updated.toChain)) {
               IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
