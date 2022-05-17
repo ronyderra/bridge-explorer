@@ -1,5 +1,5 @@
 import { IEventRepo } from "../db/repo";
-import { IContractEventListener } from "./web3";
+import { IContractEventListener } from "./old";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
@@ -22,8 +22,9 @@ import {
 
 const util = require('util')
 
+const executedSocket = io(config.socketUrl);
 const algoSocket = io(config.web3socketUrl);
-const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
+//const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
 
 export function AlgorandEventListener(
   eventRepo: IEventRepo
@@ -134,6 +135,46 @@ export function AlgorandEventListener(
 
         }
       });
+
+
+      executedSocket.on(
+        "tx_executed_event",
+        async (
+          fromChain: number,
+          toChain: number,
+          action_id: string,
+          hash: string
+        ) => {
+          if (!fromChain || fromChain.toString() !== config.algorand.nonce) return
+
+          console.log({
+            toChain,
+          fromChain,
+          action_id,
+          hash,
+          },  "algo:tx_executed_event");
+
+      
+
+          try {
+        
+            const updated = await eventRepo.updateEvent(
+              action_id,
+              toChain.toString(),
+              fromChain.toString(),
+              hash
+            );
+            if (!updated) return;
+            console.log(updated, "updated");
+           
+
+            clientAppSocket.emit("updateEvent", updated);
+          } catch (e: any) {
+            console.error(e);
+          }
+        }
+      );
+
     },
   };
 }

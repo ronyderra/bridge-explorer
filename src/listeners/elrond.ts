@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { Base64 } from "js-base64";
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./web3";
+import { IContractEventListener } from "./old";
 import { EvResp } from "../entities/EvResp";
 import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";
@@ -30,11 +30,15 @@ import {
 } from '@elrondnetwork/erdjs';
 
 import { TransactionWatcher } from '@elrondnetwork/erdjs/out/transactionWatcher';
+import {eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs} from './helpers'
 
 const util = require('util')
 
 
 const elrondSocket = io(config.elrond.socket);
+const executedSocket = io(config.socketUrl);
+
+
 const provider = new ProxyProvider(config.elrond.node);
 const providerRest = axios.create({ baseURL: config.elrond.node });
 const minterAddr = new Address(config.elrond.contract);
@@ -85,7 +89,7 @@ export function elrondEventListener(
 
 
 
-            const evs = await eventFromTxn(fromHash);
+            const evs = await eventFromTxn(fromHash, provider, providerRest);
 
             evs && evs.forEach(async e => {
 
@@ -99,8 +103,8 @@ export function elrondEventListener(
             }
 
   
-              const action_id = bigIntFromBe(Base64.toUint8Array(e.topics[1]));
-              const tx_fees = bigIntFromBe(
+              const action_id = bigIntFromBeElrd(Base64.toUint8Array(e.topics[1]));
+              const tx_fees = bigIntFromBeElrd(
                 Base64.toUint8Array(e.topics[e.topics.length - 1])
             );
        
@@ -150,7 +154,7 @@ export function elrondEventListener(
                   const to = Base64.atob(e.topics[3]);
                   const mintWith = Base64.atob(e.topics[4]);
                   const tokenId = Base64.decode(e.topics[5]);
-                  const nonce = bigIntFromBe(
+                  const nonce = bigIntFromBeElrd(
                       Base64.toUint8Array(e.topics[6])
                   );
                   const name = Base64.decode(e.topics[7]);
@@ -172,6 +176,43 @@ export function elrondEventListener(
         }
       );
 
+
+      executedSocket.on(
+        "tx_executed_event",
+        async (
+          fromChain: number,
+          toChain: number,
+          action_id: string,
+          hash: string
+        ) => {
+          if (!fromChain || fromChain.toString() !== config.elrond.nonce ) return
+          console.log({
+            toChain,
+          fromChain,
+          action_id,
+          hash,
+          },  "elrond:tx_executed_event");
+
+
+          try {
+        
+            const updated = await eventRepo.updateEvent(
+              action_id,
+              toChain.toString(),
+              fromChain.toString(),
+              hash
+            );
+            if (!updated) return;
+            console.log(updated, "updated");
+          
+
+            clientAppSocket.emit("updateEvent", updated);
+          } catch (e: any) {
+            console.error(e);
+          }
+        }
+      );
+
       setTimeout(() => console.log(elrondSocket.connected && 'Listening to Elrond'), 1000)
 
     }, 
@@ -184,100 +225,11 @@ export type Erc721Attrs = {
 };
 
 
-async function getFrozenTokenAttrs(
-  token: string,
-  nonce: BigNumber,
-): Promise<[Erc721Attrs[] | undefined, string | undefined]> {
-  //@ts-ignore
-  const tokenInfo = await provider.getAddressNft(minterAddr, token, nonce);
-  let metadataUrl: undefined | string = tokenInfo.uris[1];
-  if (!tokenInfo.attributes?.length) {
-      return [undefined, metadataUrl]
-  }
-  const attrs = Buffer.from(tokenInfo.attributes, "base64").toString("utf-8");
-  if (attrs.includes('\ufffd')) {
-      return [[{
-          trait_type: "Base64 Attributes",
-          value: tokenInfo.attributes
-      }], metadataUrl];
-  }
-  const splitAttrs: Erc721Attrs[] = attrs.split(";").map((v: string, i) => {
-      const res: Array<string> = v.split(":");
-      if (res.length == 2) {
-          if (res[0] == "metadata") {
-    if (res[1].startsWith("http") || res[1].startsWith("ipfs")) {
-      metadataUrl = res[1];
-    } else {
-      metadataUrl = `ipfs://${res[1]}`;
-    }
-  }
-          return {
-              trait_type: res[0],
-              value: res[1]
-          };
-      } else if (res.length == 1) {
-          return {
-              trait_type: `Attr #${i}`,
-              value: res[0]
-          }
-      } else {
-          return {
-              trait_type: res[0],
-              value: res.slice(1).join(":")
-          };
-      }
-  });
-
-  return [splitAttrs, metadataUrl];
-}
-
-
-
-async function eventFromTxn(txHash: string): Promise<EvResp[] | undefined> {
-  let hashSan: TransactionHash;
-  try {
-      hashSan = new TransactionHash(txHash);
-  } catch (_) {
-      console.warn('elrond: received invalid txn hash', txHash);
-      return undefined;
-  }
-  const watcher = new TransactionWatcher(hashSan, provider);
-  await watcher
-      .awaitNotarized()
-      .catch((e) =>
-          console.warn(
-              `elrond: transaction ${txHash} not notarized, err`,
-              e
-          )
-      );
-
-  const apiResp = await providerRest
-      .get<{ data?: { transaction?: { logs?: { events?: EvResp[] } } } }>(
-          `/transaction/${txHash}?withResults=true`
-      )
-      .catch((e: AxiosError) => {
-          console.warn(
-              'elrond: failed to fetch transaction from API',
-              e.message
-          );
-          return undefined;
-      });
-  if (!apiResp) return undefined;
-
-  const evs = apiResp.data.data?.transaction?.logs?.events;
-  if (!evs?.length) {
-      console.warn('elrond: no events found in txn', txHash);
-  }
-  return evs;
-}
 
 
 
 
-function bigIntFromBe(buf: Uint8Array): BigNumber {
-  // TODO: something better than this hack
-  return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16);
-}
+/*
 
 const eventHandler = async (
   event: EvResp,
@@ -289,7 +241,6 @@ const eventHandler = async (
     return undefined;
   }
 
-  console.log(util.inspect(event, false, null, true /* enable colors */))
 
   const action_id = bigIntFromBe(Base64.toUint8Array(event.topics[1]));
   const tx_fees = bigIntFromBe(
@@ -400,3 +351,4 @@ const eventHandler = async (
       return undefined;
   }
 };
+*/

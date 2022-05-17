@@ -1,7 +1,7 @@
 import express from "express";
 import { providers } from "ethers";
-import { contractEventService } from "./listeners/web3";
-import { BridgeEventService } from "./listeners/bridge";
+import { contractEventService } from "./listeners/old";
+import { EvmEventService } from "./listeners/evm";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
@@ -46,14 +46,14 @@ export default (async function main() {
   
  
 
-  BridgeEventService(createEventRepo(orm)).listen();
+  EvmEventService(createEventRepo(orm)).listen();
 
   elrondEventListener(
     createEventRepo(orm)
   ).listen();
 
 
-tezosEventListener(
+  tezosEventListener(
     config.tezos.socket,
     config.tezos.contract,
     config.tezos.name,

@@ -1,7 +1,7 @@
 
 
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./web3";
+import { IContractEventListener } from "./old";
 import { bytes2Char, char2Bytes } from "@taquito/utils";
 import { saveWallet } from "../db/helpers";
 import { IEventRepo } from "../db/repo";
@@ -10,6 +10,7 @@ import axios from "axios";
 import { io as clientAppSocket } from "../index";
 import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../entities/IEvent";
+import { io } from "socket.io-client";
 
 const util = require('util')
 
@@ -30,6 +31,8 @@ import {
   OperationContent,
   TezosToolkit,
 } from "@taquito/taquito";
+
+const executedSocket = io(config.socketUrl);
 
 function isTransactionResult(
   data: OperationContent | OperationContentsAndResult
@@ -248,6 +251,44 @@ export function tezosEventListener(
           }
         }
       );
+
+      executedSocket.on(
+        "tx_executed_event",
+        async (
+          fromChain: number,
+          toChain: number,
+          action_id: string,
+          hash: string
+        ) => {
+          if (!fromChain || fromChain.toString() !== config.tezos.nonce) return
+          console.log({
+            toChain,
+          fromChain,
+          action_id,
+          hash,
+          },  "tezos:tx_executed_event");
+
+
+          try {
+        
+            const updated = await eventRepo.updateEvent(
+              action_id,
+              toChain.toString(),
+              fromChain.toString(),
+              hash
+            );
+            if (!updated) return;
+            console.log(updated, "updated");
+          
+
+            clientAppSocket.emit("updateEvent", updated);
+          } catch (e: any) {
+            console.error(e);
+          }
+        }
+      );
+
+  
     },
   };
 }

@@ -229,9 +229,9 @@ export default function createEventRepo({
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
-      console.log("update", { actionId, fromChain, toChain });
+      console.log("enter update", { actionId, fromChain, toChain });
 
-      console.log("enter");
+
       try {
         const waitEvent = await new Promise<BridgeEvent>(
           async (resolve, reject) => {
@@ -255,6 +255,7 @@ export default function createEventRepo({
                 $and: [
                   { actionId: actionId.toString() },
                   { fromChain: fromChain!.toString() },
+
                 ],
               });
             }, 5000);
@@ -265,7 +266,7 @@ export default function createEventRepo({
             }, 1000 * 60 * 15);
           }
         );
-        if (waitEvent.status === "Completed") return undefined;
+        if (waitEvent.status === "Completed" && waitEvent.toHash !== 'N/A') return undefined;
         wrap(waitEvent).assign(
           {
             toHash,

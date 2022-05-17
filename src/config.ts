@@ -234,10 +234,10 @@ const config: Config = {
 
 export function chainNonceToName(nonce: string) {
   let chain = config.web3.find((chain) => chain.nonce === nonce);
-  console.log(nonce, '----', chain?.name);
+
   if (chain) return chain.name;
 
-  for (const key of ["elrond", "tezos"]) {
+  for (const key of ["elrond", "tezos", "algorand"]) {
     //@ts-ignore
     if (nonce == config[key].nonce) {
       //@ts-ignore
@@ -248,7 +248,7 @@ export function chainNonceToName(nonce: string) {
   return "UNKNOWN";
 }
 
-console.log(chainNonceToName("23"));
+console.log(chainNonceToName("15"));
 
 export const chainNonceToId = (nonce: string) => {
   let chain = config.web3.find((chain) => chain.nonce === nonce);

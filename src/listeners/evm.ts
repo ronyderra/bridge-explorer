@@ -1,5 +1,5 @@
 import { IEventRepo } from "../db/repo";
-import { IContractEventListener } from "./web3";
+import { IContractEventListener } from "./old";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
@@ -15,14 +15,14 @@ import IndexUpdater from "../services/indexUpdater";
 
 
 
-const evmSocket = io(config.socketUrl);
+const executedSocket = io(config.socketUrl);
 const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
 
 const evmNonces = config.web3.map(c => c.nonce);
 
 
-export function BridgeEventService(
+export function EvmEventService(
   eventRepo: IEventRepo
 ): IContractEventListener {
   return {
@@ -141,14 +141,15 @@ export function BridgeEventService(
         }
       );
 
-      evmSocket.on(
+      executedSocket.on(
         "tx_executed_event",
         async (
-          toChain: number,
           fromChain: number,
+          toChain: number,
           action_id: string,
           hash: string
         ) => {
+          if (!fromChain || !evmNonces.includes(fromChain.toString())) return
           console.log({
             toChain,
           fromChain,
@@ -156,17 +157,18 @@ export function BridgeEventService(
           hash,
           },  "tx_executed_event");
 
+
           try {
         
             const updated = await eventRepo.updateEvent(
               action_id,
-              fromChain.toString(),
               toChain.toString(),
+              fromChain.toString(),
               hash
             );
             if (!updated) return;
             console.log(updated, "updated");
-            if (updated.status === "Completed" &&  updated.fromChain && evmNonces.includes(updated.fromChain)) {
+            if (updated.status === "Completed") {
               IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
@@ -177,34 +179,7 @@ export function BridgeEventService(
         }
       );
 
-      elrondSocket.on(
-        "elrond:bridge_tx",
-        async (
-          fromHash: string,
-          sender: string,
-          uris: string[],
-          actionId: string
-        ) => {
-          try {
-            console.log("elrond event incoming elrond:bridge_tx");
-            console.log(fromHash, sender, uris, actionId);
-       
-            const updated = await eventRepo.updateElrond(
-              actionId,
-              config.elrond.nonce,
-              fromHash,
-              sender,
-              uris[0]
-            );
-
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
-            console.error(e);
-          }
-        }
-      );
+  
     },
   };
 }
