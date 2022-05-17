@@ -2,7 +2,7 @@ import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { ObjectId } from "@mikro-orm/mongodb";
 export interface IEvent {
   chainName: string;
-  type: "Transfer" | "Unfreeze";
+  type: "Transfer" | "Unfreeze" | string;
   fromChain?: string;
   toChain?: string;
   fromChainName?: string;

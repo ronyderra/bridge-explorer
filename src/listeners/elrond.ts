@@ -102,6 +102,8 @@ export function elrondEventListener(
                 return undefined;
             }
 
+
+
   
               const action_id = bigIntFromBeElrd(Base64.toUint8Array(e.topics[1]));
               const tx_fees = bigIntFromBeElrd(
@@ -116,56 +118,67 @@ export function elrondEventListener(
            
 
             console.log(util.inspect(e, false, null, true /* enable colors */));
+            console.log(e.topics);
+
+            const to = Base64.atob(e.topics[3]);
+            const nftMinterContact = Base64.decode(e.topics[4]);
+            let uri = ''
+            let tokenId = ''
+            let chain_nonce = new Uint32Array(Base64.toUint8Array(e.topics[2]))[0]; 
+            const nonce = bigIntFromBeElrd(
+              Base64.toUint8Array(e.topics[6])
+          );
+
+          console.log({
+            chain_nonce,
+            nftMinterContact,
+            nonce
+          });
+
+          let type = "Unfreeze"
 
             switch (e.identifier) {
               case 'withdrawNft': {
-                  const to = Base64.atob(e.topics[3]);
-                  const burner = Base64.decode(e.topics[4]);
-                  const uri = Base64.decode(e.topics[5]);
+                  type = "Unfreeze"
+                   uri = Base64.decode(e.topics[5]);
                   const wrappedData = await axios.get<IERC721WrappedMeta>(uri);
-                  console.log({
-                    to, burner, uri, wrappedData
-                  }, 'withdrawNft');
-
-
-                  const eventObj: IEvent = {
-                    actionId: action_id.toString(),
-                    chainName: 'ELROND',
-                    tokenId: wrappedData?.data?.wrapped.tokenId,
-                    fromChain: '2',
-                    toChain: '',
-                    fromChainName: chainNonceToName('2'),
-                    toChainName: '',
-                    fromHash,
-                    txFees: tx_fees.toString(),
-                    type: "Unfreeze",
-                    status: "Pending",
-                    toHash: '',
-                    senderAddress: "N/A",
-                    targetAddress: to,
-                    nftUri: "N/A",
-                  };
-            
-                  console.log("transfer event: ", eventObj);
-                  const doc = await eventRepo.createEvent(eventObj);
+                  tokenId = wrappedData?.data?.wrapped.tokenId;
               
               }
               case 'freezeSendNft': {
-                  const to = Base64.atob(e.topics[3]);
-                  const mintWith = Base64.atob(e.topics[4]);
-                  const tokenId = Base64.decode(e.topics[5]);
-                  const nonce = bigIntFromBeElrd(
-                      Base64.toUint8Array(e.topics[6])
-                  );
+                  type = "Transfer"
+                   tokenId = Base64.decode(e.topics[5]);
+
                   const name = Base64.decode(e.topics[7]);
-                  const image = Base64.decode(e.topics[8]);
+                  uri = Base64.decode(e.topics[8]);
                   const [attrs, metadataUrl] = await getFrozenTokenAttrs(tokenId, nonce);
 
-                  console.log({
-                    to, mintWith, tokenId, nonce, name, image, metadataUrl
-                  }, 'freezeSendNft');
+                  
 
                 }}
+
+               
+
+                const eventObj: IEvent = {
+                  actionId: action_id.toString(),
+                  chainName: 'ELROND',
+                  tokenId: tokenId,
+                  fromChain: '2',
+                  toChain: nonce?.toString(),
+                  fromChainName: chainNonceToName('2'),
+                  toChainName: chainNonceToName(nonce?.toString()) || '',
+                  fromHash,
+                  txFees: tx_fees.toString(),
+                  type,
+                  status: "Pending",
+                  toHash: '',
+                  senderAddress: "N/A",
+                  targetAddress: to,
+                  nftUri: uri,
+                };
+          
+                console.log("transfer event: ", eventObj);
+                const doc = await eventRepo.createEvent(eventObj);
                 
                 }) 
        
