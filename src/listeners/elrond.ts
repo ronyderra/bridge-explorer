@@ -5,7 +5,7 @@ import { IContractEventListener } from "./old";
 import { EvResp } from "../entities/EvResp";
 import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";
-import axios, {AxiosError, AxiosInstance} from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
@@ -26,18 +26,16 @@ import {
   TransactionPayload,
   U64Value,
   VariadicValue,
-  BigIntType
-} from '@elrondnetwork/erdjs';
+  BigIntType,
+} from "@elrondnetwork/erdjs";
 
-import { TransactionWatcher } from '@elrondnetwork/erdjs/out/transactionWatcher';
-import {eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs} from './helpers'
+import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
+import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
 
-const util = require('util')
-
+const util = require("util");
 
 const elrondSocket = io(config.elrond.socket);
 const executedSocket = io(config.socketUrl);
-
 
 const provider = new ProxyProvider(config.elrond.node);
 const providerRest = axios.create({ baseURL: config.elrond.node });
@@ -47,9 +45,7 @@ const minterAddr = new Address(config.elrond.contract);
 export function elrondEventListener(
   eventRepo: IEventRepo
 ): IContractEventListener {
-
-
- /* ws.onopen = () => {
+  /* ws.onopen = () => {
     ws.send(
       JSON.stringify({
         subscriptionEntries: [
@@ -60,7 +56,6 @@ export function elrondEventListener(
       })
     );
   };*/
-
 
   /**
    * 
@@ -74,140 +69,129 @@ export function elrondEventListener(
    * 
    */
 
+  const uria = Base64.decode(
+    "aHR0cHM6Ly9uZnQueHAubmV0d29yay93LzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA2MjU3MDM0MGU2NTMzNWJkNzg5OTE5YzE="
+  );
 
+  axios.get<IERC721WrappedMeta>(uria).then((res) => console.log(res));
 
   return {
-
     listen: async () => {
-      elrondSocket.on(
-        "elrond:bridge_tx",
-        async (
-          fromHash: string,
-        ) => {
-          try {
-            console.log(fromHash, 'fromHash');
+      elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
+        try {
+          console.log(fromHash, "fromHash");
 
+          const evs = await eventFromTxn(fromHash, provider, providerRest);
 
-
-            const evs = await eventFromTxn(fromHash, provider, providerRest);
-
-            evs && evs.forEach(async e => {
-
-             
-
+          evs &&
+            evs.forEach(async (e) => {
               if (e.topics.length < 5) {
                 return undefined;
-            }
-            if (e.address != config.elrond.contract) {
+              }
+              if (e.address != config.elrond.contract) {
                 return undefined;
-            }
+              }
 
-
-
-  
-              const action_id = bigIntFromBeElrd(Base64.toUint8Array(e.topics[1]));
+              const action_id = bigIntFromBeElrd(
+                Base64.toUint8Array(e.topics[1])
+              );
               const tx_fees = bigIntFromBeElrd(
                 Base64.toUint8Array(e.topics[e.topics.length - 1])
-            );
-       
+              );
 
-            console.log({
-              action_id: action_id.toString(),
-              tx_fees: tx_fees.toString(),
-            });
-           
+              console.log({
+                action_id: action_id.toString(),
+                tx_fees: tx_fees.toString(),
+              });
 
-            console.log(util.inspect(e, false, null, true /* enable colors */));
-            console.log(e.topics);
+              console.log(
+                util.inspect(e, false, null, true /* enable colors */)
+              );
+              console.log(e.topics);
 
-            const to = Base64.atob(e.topics[3]);
-            const nftMinterContact = Base64.decode(e.topics[4]);
-            let uri = ''
-            let tokenId = ''
-            let chain_nonce = new Uint32Array(Base64.toUint8Array(e.topics[2]))[0]; 
-            const nonce = bigIntFromBeElrd(
-              Base64.toUint8Array(e.topics[6])
-          );
+              const to = Base64.atob(e.topics[3]); //
+              const nftMinterContact = Base64.decode(e.topics[4]); //
+              let uri = "";
+              let tokenId = "";
+              let chain_nonce = new Uint32Array(
+                Base64.toUint8Array(e.topics[2])
+              )[0]; //
+              const nonce = bigIntFromBeElrd(Base64.toUint8Array(e.topics[6]));
 
-          console.log({
-            chain_nonce,
-            nftMinterContact,
-            nonce
-          });
+              console.log({
+                chain_nonce,
+                nftMinterContact,
+                nonce,
+              });
+              console.log(e.topics[5]);
+              let type = "Unfreeze";
 
-          let type = "Unfreeze"
-
-            switch (e.identifier) {
-              case 'withdrawNft': {
-                  type = "Unfreeze"
-                   uri = Base64.decode(e.topics[5]);
-                  const wrappedData = await axios.get<IERC721WrappedMeta>(uri);
-                  tokenId = wrappedData?.data?.wrapped.tokenId;
-              
-              }
-              case 'freezeSendNft': {
-                  type = "Transfer"
-                   tokenId = Base64.decode(e.topics[5]);
+              switch (e.identifier) {
+                case "withdrawNft": {
+                  type = "Unfreeze";
+                  try {
+                    uri = Base64.decode(e.topics[5]); //
+                    const wrappedData = await axios.get<IERC721WrappedMeta>(
+                      uri
+                    );
+                    tokenId = wrappedData?.data?.wrapped.tokenId;
+                  } catch (e) {
+                    tokenId = "";
+                  }
+                }
+                case "freezeSendNft": {
+                  type = "Transfer";
+                  tokenId = Base64.decode(e.topics[5]);
 
                   const name = Base64.decode(e.topics[7]);
                   uri = Base64.decode(e.topics[8]);
-                  const [attrs, metadataUrl] = await getFrozenTokenAttrs(tokenId, nonce);
+                  const [attrs, metadataUrl] = await getFrozenTokenAttrs(
+                    tokenId,
+                    nonce
+                  );
 
-               console.log({
-                name, 
-                metadataUrl,
-                attrs
+                  console.log({
+                    name,
+                    metadataUrl,
+                    attrs,
+                  });
+                }
+              }
+
+              const eventObj: IEvent = {
+                actionId: action_id?.toString(),
+                chainName: "ELROND",
+                tokenId,
+                fromChain: "2",
+                toChain: chain_nonce?.toString(),
+                fromChainName: chainNonceToName("2"),
+                toChainName: chainNonceToName(nonce?.toString()) || "",
+                fromHash,
+                txFees: tx_fees?.toString(),
+                type,
+                status: "Pending",
+                toHash: "",
+                senderAddress: "N/A",
+                targetAddress: to,
+                nftUri: uri,
+              };
+
+              console.log("transfer event: ", eventObj);
+
+              Promise.all([
+                (async () => {
+                  return await eventRepo.createEvent(eventObj);
+                })(),
+                (async () => {})(),
+              ]).then(([doc]) => {
+                console.log(doc, "doc");
+                clientAppSocket.emit("incomingEvent", doc);
               });
-
-                  
-
-                }}
-
-
-                const eventObj: IEvent = {
-                  actionId: action_id?.toString(),
-                  chainName: 'ELROND',
-                  tokenId,
-                  fromChain: '2',
-                  toChain: nonce?.toString(),
-                  fromChainName: chainNonceToName('2'),
-                  toChainName: chainNonceToName(nonce?.toString()) || '',
-                  fromHash,
-                  txFees: tx_fees?.toString(),
-                  type,
-                  status: "Pending",
-                  toHash: '',
-                  senderAddress: "N/A",
-                  targetAddress: to,
-                  nftUri: uri,
-                };
-          
-                console.log("transfer event: ", eventObj);
-
-
-                Promise.all([
-                  (async () => {
-                    return await eventRepo.createEvent(eventObj);
-                  })(),
-                  (async () => {
-                  
-                  })(),
-                ])
-                  .then(([doc]) => {
-                    console.log(doc, 'doc');
-                    clientAppSocket.emit("incomingEvent", doc);
-
-                  })
-                
-                }) 
-       
-              
-          } catch (e: any) {
-            console.log(e,'elrond Error');
-          }
+            });
+        } catch (e) {
+          console.log(e, "elrond Error");
         }
-      );
-
+      });
 
       executedSocket.on(
         "tx_executed_event",
@@ -217,17 +201,19 @@ export function elrondEventListener(
           action_id: string,
           hash: string
         ) => {
-          if (!fromChain || fromChain.toString() !== config.elrond.nonce ) return
-          console.log({
-            toChain,
-          fromChain,
-          action_id,
-          hash,
-          },  "elrond:tx_executed_event");
-
+          if (!fromChain || fromChain.toString() !== config.elrond.nonce)
+            return;
+          console.log(
+            {
+              toChain,
+              fromChain,
+              action_id,
+              hash,
+            },
+            "elrond:tx_executed_event"
+          );
 
           try {
-        
             const updated = await eventRepo.updateEvent(
               action_id,
               toChain.toString(),
@@ -236,18 +222,19 @@ export function elrondEventListener(
             );
             if (!updated) return;
             console.log(updated, "updated");
-          
 
             clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
+          } catch (e) {
             console.error(e);
           }
         }
       );
 
-      setTimeout(() => console.log(elrondSocket.connected && 'Listening to Elrond'), 1000)
-
-    }, 
+      setTimeout(
+        () => console.log(elrondSocket.connected && "Listening to Elrond"),
+        1000
+      );
+    },
   };
 }
 
@@ -255,11 +242,6 @@ export type Erc721Attrs = {
   trait_type: string;
   value: string;
 };
-
-
-
-
-
 
 /*
 
