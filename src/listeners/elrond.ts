@@ -45,35 +45,26 @@ const minterAddr = new Address(config.elrond.contract);
 export function elrondEventListener(
   eventRepo: IEventRepo
 ): IContractEventListener {
-  /* ws.onopen = () => {
-    ws.send(
-      JSON.stringify({
-        subscriptionEntries: [
-          {
-            address: contract,
-          },
-        ],
-      })
-    );
-  };*/
-
-  /**
-   * 
-   * 'VW5mcmVlemVOZnQ=',
-    'GA==',
-    'BA==',
-    'MHg0N0JmMGRhZTZlOTJlNDlhM2M5NWU1YjBjNzE0MjI4OTFENWNkNEZF',
-    'WFBORlQtY2I3NDgy',
-    'aHR0cHM6Ly9uZnQueHAubmV0d29yay93LzYyMjBjY2UwMWE1ODExNjFmMTIwMGZiZg==',
-    'NfcCUYpf8w=='
-   * 
-   */
-
-  const uria = Base64.decode(
+  /* console.log(Base64.decode(
     "aHR0cHM6Ly9uZnQueHAubmV0d29yay93LzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA2MjU3MDM0MGU2NTMzNWJkNzg5OTE5YzE="
-  );
+  ));
 
-  axios.get<IERC721WrappedMeta>(uria).then((res) => console.log(res));
+console.log(Base64.decode('MHg0N0JmMGRhZTZlOTJlNDlhM2M5NWU1YjBjNzE0MjI4OTFENWNkNEZF'));
+
+eventFromTxn('7058d0ab0a8ab25f7bdd7b4c77b5582a748f23705d49e78ff3c61a9f8b8e2c4e', provider, providerRest).then((evs) => {
+  evs?.evs!.forEach(async (e) => {
+
+    if (e.address != config.elrond.contract) {
+      return undefined;
+    }
+
+    if (e.topics.length < 5) return
+
+
+   
+console.log(Base64.decode(e.topics[5]));
+  })
+});*/
 
   return {
     listen: async () => {
@@ -81,10 +72,12 @@ export function elrondEventListener(
         try {
           console.log(fromHash, "fromHash");
 
-          const evs = await eventFromTxn(fromHash, provider, providerRest);
+          const event = await eventFromTxn(fromHash, provider, providerRest);
 
-          evs &&
-            evs.forEach(async (e) => {
+          if (!event) return;
+
+          event.evs.length &&
+            event.evs.forEach(async (e) => {
               if (e.topics.length < 5) {
                 return undefined;
               }
@@ -104,9 +97,6 @@ export function elrondEventListener(
                 tx_fees: tx_fees.toString(),
               });
 
-              console.log(
-                util.inspect(e, false, null, true /* enable colors */)
-              );
               console.log(e.topics);
 
               const to = Base64.atob(e.topics[3]); //
@@ -123,7 +113,7 @@ export function elrondEventListener(
                 nftMinterContact,
                 nonce,
               });
-              console.log(e.topics[5]);
+           
               let type = "Unfreeze";
 
               switch (e.identifier) {
@@ -171,9 +161,9 @@ export function elrondEventListener(
                 type,
                 status: "Pending",
                 toHash: "",
-                senderAddress: "N/A",
+                senderAddress: event.sender,
                 targetAddress: to,
-                nftUri: uri,
+                nftUri: uri || "",
               };
 
               console.log("transfer event: ", eventObj);
