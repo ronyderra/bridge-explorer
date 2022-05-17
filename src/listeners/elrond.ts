@@ -153,22 +153,27 @@ export function elrondEventListener(
                   uri = Base64.decode(e.topics[8]);
                   const [attrs, metadataUrl] = await getFrozenTokenAttrs(tokenId, nonce);
 
+               console.log({
+                name, 
+                metadataUrl,
+                attrs
+              });
+
                   
 
                 }}
 
-               
 
                 const eventObj: IEvent = {
-                  actionId: action_id.toString(),
+                  actionId: action_id?.toString(),
                   chainName: 'ELROND',
-                  tokenId: tokenId,
+                  tokenId,
                   fromChain: '2',
                   toChain: nonce?.toString(),
                   fromChainName: chainNonceToName('2'),
                   toChainName: chainNonceToName(nonce?.toString()) || '',
                   fromHash,
-                  txFees: tx_fees.toString(),
+                  txFees: tx_fees?.toString(),
                   type,
                   status: "Pending",
                   toHash: '',
@@ -178,7 +183,21 @@ export function elrondEventListener(
                 };
           
                 console.log("transfer event: ", eventObj);
-                const doc = await eventRepo.createEvent(eventObj);
+
+
+                Promise.all([
+                  (async () => {
+                    return await eventRepo.createEvent(eventObj);
+                  })(),
+                  (async () => {
+                  
+                  })(),
+                ])
+                  .then(([doc]) => {
+                    console.log(doc, 'doc');
+                    clientAppSocket.emit("incomingEvent", doc);
+
+                  })
                 
                 }) 
        
