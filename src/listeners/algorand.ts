@@ -85,11 +85,13 @@ export function AlgorandEventListener(
             
 
                assetUrl = await assetUrlFromId(algodClient, +assetID);
+               break;
 
             }
 
             case "action_type:withdraw_nft": {
               assetUrl = b64Decode(txnInfo.logs[5]).toString("utf-8");
+              break;
             }
           }
 

@@ -122,6 +122,7 @@ export function EvmEventService(
               })(),
             ])
               .then(([doc]) => {
+                if (!doc) return;
                 console.log(doc, 'doc');
                 clientAppSocket.emit("incomingEvent", doc);
 
@@ -134,7 +135,7 @@ export function EvmEventService(
                   if (updated) {
                     clientAppSocket.emit("updateEvent", updated);
                   }
-                }, 1000 * 120);
+                }, 1000 * 120 * 2);
               })
               .catch(() => { });
           }
