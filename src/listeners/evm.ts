@@ -168,11 +168,21 @@ export function EvmEventService(
             );
             if (!updated) return;
             console.log(updated, "updated");
+
             if (updated.status === "Completed" && updated.toChain && evmNonces.includes(updated.toChain)) {
               IndexUpdater.instance.update(updated).catch(e => console.log(e));
             }
 
+            if (updated.toChain === config.algorand.nonce) {
+              if (updated.toHash?.split("-").length! > 2) {
+                clientAppSocket.emit("updateEvent", updated);
+              }
+              return;
+            }
+
+
             clientAppSocket.emit("updateEvent", updated);
+
           } catch (e: any) {
             console.error(e);
           }

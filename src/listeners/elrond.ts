@@ -45,13 +45,9 @@ const minterAddr = new Address(config.elrond.contract);
 export function elrondEventListener(
   eventRepo: IEventRepo
 ): IContractEventListener {
-  /* console.log(Base64.decode(
-    "aHR0cHM6Ly9uZnQueHAubmV0d29yay93LzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA2MjU3MDM0MGU2NTMzNWJkNzg5OTE5YzE="
-  ));
+  
 
-console.log(Base64.decode('MHg0N0JmMGRhZTZlOTJlNDlhM2M5NWU1YjBjNzE0MjI4OTFENWNkNEZF'));
-
-eventFromTxn('7058d0ab0a8ab25f7bdd7b4c77b5582a748f23705d49e78ff3c61a9f8b8e2c4e', provider, providerRest).then((evs) => {
+/*eventFromTxn('ffa8103ab5acd4bcc60582c1d1014c5d7277809fa4b008ee2ea6b0900c46a6a3', provider, providerRest).then((evs) => {
   evs?.evs!.forEach(async (e) => {
 
     if (e.address != config.elrond.contract) {
@@ -62,7 +58,9 @@ eventFromTxn('7058d0ab0a8ab25f7bdd7b4c77b5582a748f23705d49e78ff3c61a9f8b8e2c4e',
 
 
    
-console.log(Base64.decode(e.topics[5]));
+
+    //@ts-ignore
+    console.log(Base64.decode(null));
   })
 });*/
 
@@ -119,15 +117,14 @@ console.log(Base64.decode(e.topics[5]));
               switch (e.identifier) {
                 case "withdrawNft": {
                   type = "Unfreeze";
-                  try {
+           
                     uri = Base64.decode(e.topics[5]); //
                     const wrappedData = await axios.get<IERC721WrappedMeta>(
                       uri
                     );
-                    tokenId = wrappedData?.data?.wrapped.tokenId;
-                  } catch (e) {
-                    tokenId = "";
-                  }
+                    tokenId = wrappedData?.data?.wrapped?.tokenId;
+
+                  break;
                 }
                 case "freezeSendNft": {
                   type = "Transfer";
@@ -145,6 +142,7 @@ console.log(Base64.decode(e.topics[5]));
                     metadataUrl,
                     attrs,
                   });
+                  break;
                 }
               }
 

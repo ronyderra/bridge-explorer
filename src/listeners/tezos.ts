@@ -1,5 +1,3 @@
-
-
 import BigNumber from "bignumber.js";
 import { IContractEventListener } from "./old";
 import { bytes2Char, char2Bytes } from "@taquito/utils";
@@ -12,7 +10,7 @@ import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
 
-const util = require('util')
+const util = require("util");
 
 import {
   MichelsonV1Expression,
@@ -64,22 +62,21 @@ export function tezosEventListener(
     fa2Address: string,
     tokenId: string
   ): Promise<string> {
-    ;
     const contract = await tezos.contract.at(fa2Address);
     const storage = await contract.storage<{
       token_metadata: BigMapAbstraction;
     }>();
-   
+
     const tokenStorage = await storage.token_metadata.get<{
       token_info: MichelsonMap<string, string>;
     }>(tokenId);
- 
+
     return bytes2Char(tokenStorage!.token_info.get("")!);
   }
 
   return {
     listen: async () => {
-        console.log('listen tezos');
+      console.log("listen tezos");
 
       sub.on(
         "data",
@@ -88,24 +85,23 @@ export function tezosEventListener(
             | OperationContent
             | (OperationContentsAndResult & { hash: string })
         ) => {
-       
           if (
             !isTransactionResult(data) ||
             !data.parameters ||
             data.metadata.operation_result.status != "applied" ||
             data.destination != contract
           ) {
-        
             return;
           }
 
           switch (data.parameters.entrypoint) {
             case "freeze_fa2": {
-                console.log(util.inspect(data, false, null, true /* enable colors */))
+              console.log(
+                util.inspect(data, false, null, true /* enable colors */)
+              );
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
-              const fullParmams =
-                params.args as MichelsonV1ExpressionExtended[];
+              const fullParmams = params.args as MichelsonV1ExpressionExtended[];
               const param1 = fullParmams[0] as MichelsonV1ExpressionExtended;
               const param2 = fullParmams[1] as MichelsonV1ExpressionExtended;
 
@@ -128,7 +124,9 @@ export function tezosEventListener(
                 fromChainName: chainNonceToName(chainNonce),
                 toChainName: chainNonceToName(tchainNonce.int!),
                 fromHash: data.hash,
-                txFees: new BigNumber(data.amount).multipliedBy(1e12).toString(),
+                txFees: new BigNumber(data.amount)
+                  .multipliedBy(1e12)
+                  .toString(),
                 type: "Transfer",
                 status: "Pending",
                 toHash: undefined,
@@ -141,16 +139,25 @@ export function tezosEventListener(
                 //const url = await getUriFa2(fa2Address.string!, tokenId.int!);
                 //console.log(url);
 
-                let [url, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
-                  (async () => await getUriFa2(fa2Address.string!, tokenId.int!))(),
-                  (async () =>  {
-                    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`);
+                let [url, exchangeRate]:
+                  | PromiseSettledResult<string>[]
+                  | string[] = await Promise.allSettled([
+                  (async () =>
+                    await getUriFa2(fa2Address.string!, tokenId.int!))(),
+                  (async () => {
+                    const res = await axios(
+                      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                    );
                     return res.data[chainId].usd;
-                  } )(),
-              ])
-                eventObj.nftUri = url.status === 'fulfilled'? url.value : '';
-                eventObj.dollarFees = exchangeRate.status === 'fulfilled' ? new BigNumber(ethers.utils.formatEther(eventObj.txFees)).multipliedBy(exchangeRate.value).toString() : '';
-
+                  })(),
+                ]);
+                eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
+                eventObj.dollarFees =
+                  exchangeRate.status === "fulfilled"
+                    ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
+                        .multipliedBy(exchangeRate.value)
+                        .toString()
+                    : "";
               } catch (e) {
                 console.log(e);
               }
@@ -166,26 +173,26 @@ export function tezosEventListener(
                     eventObj.targetAddress
                   );
                 })(),
-              ])
-                .then(([doc]) => {
-                    console.log('end');
-                    clientAppSocket.emit("incomingEvent", doc);
-                })
+              ]).then(([doc]) => {
+                console.log("end");
+                clientAppSocket.emit("incomingEvent", doc);
+              });
               break;
             }
-   
+
             case "withdraw_nft": {
-              console.log(util.inspect(data, false, null, true /* enable colors */))
+              console.log(
+                util.inspect(data, false, null, true /* enable colors */)
+              );
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
               const to = params.args![0] as MichelsonV1ExpressionBase;
-                //@ts-ignore
-              const tokenId = params?.args[1]?.args[1]?.int//data?.metadata?.operation_result?.storage[0][3]?.int;
+              //@ts-ignore
+              const tokenId = params?.args[1]?.args[1]?.int; //data?.metadata?.operation_result?.storage[0][3]?.int;
               const actionId = getActionId(data.metadata.operation_result);
               //@ts-ignore
               const tchainNonce = to.args[1].int; // TODO
               const burner = ""; // TODO
-
 
               const eventObj: IEvent = {
                 actionId: actionId.toString(),
@@ -196,8 +203,10 @@ export function tezosEventListener(
                 fromChainName: chainNonceToName(chainNonce),
                 toChainName: chainNonceToName(tchainNonce),
                 fromHash: data.hash,
-                txFees: new BigNumber(data.amount).multipliedBy(1e12).toString(),
-                //dollarFees: 
+                txFees: new BigNumber(data.amount)
+                  .multipliedBy(1e12)
+                  .toString(),
+                //dollarFees:
                 type: "Unfreeze",
                 status: "Pending",
                 toHash: undefined,
@@ -214,21 +223,28 @@ export function tezosEventListener(
                 ); // TODO: extract from storage
                 eventObj.nftUri = uri;*/
 
-
-                let [url, exchangeRate]:PromiseSettledResult<string>[] | string[] = await Promise.allSettled([
-                  (async () => await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
-                  (async () =>  {
-                    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`);
+                let [url, exchangeRate]:
+                  | PromiseSettledResult<string>[]
+                  | string[] = await Promise.allSettled([
+                  (async () =>
+                    await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
+                  (async () => {
+                    const res = await axios(
+                      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                    );
                     return res.data[chainId].usd;
-                  } )(),
-              ])
-                eventObj.nftUri = url.status === 'fulfilled'? url.value : '';
-                eventObj.dollarFees = exchangeRate.status === 'fulfilled' ? new BigNumber(ethers.utils.formatEther(eventObj.txFees)).multipliedBy(exchangeRate.value).toString() : '';
-
+                  })(),
+                ]);
+                eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
+                eventObj.dollarFees =
+                  exchangeRate.status === "fulfilled"
+                    ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
+                        .multipliedBy(exchangeRate.value)
+                        .toString()
+                    : "";
               } catch (e) {
                 console.log(e);
               }
-             
 
               Promise.all([
                 (async () => {
@@ -241,10 +257,9 @@ export function tezosEventListener(
                     eventObj.targetAddress
                   );
                 })(),
-              ])
-                .then(([doc]) => {
-                    clientAppSocket.emit("incomingEvent", doc);
-                })
+              ]).then(([doc]) => {
+                clientAppSocket.emit("incomingEvent", doc);
+              });
 
               break;
             }
@@ -260,17 +275,18 @@ export function tezosEventListener(
           action_id: string,
           hash: string
         ) => {
-          if (!fromChain || fromChain.toString() !== config.tezos.nonce) return
-          console.log({
-            toChain,
-          fromChain,
-          action_id,
-          hash,
-          },  "tezos:tx_executed_event");
-
+          if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
+          console.log(
+            {
+              toChain,
+              fromChain,
+              action_id,
+              hash,
+            },
+            "tezos:tx_executed_event"
+          );
 
           try {
-        
             const updated = await eventRepo.updateEvent(
               action_id,
               toChain.toString(),
@@ -279,16 +295,20 @@ export function tezosEventListener(
             );
             if (!updated) return;
             console.log(updated, "updated");
-          
+
+            if (updated.toChain === config.algorand.nonce) {
+              if (updated.toHash?.split("-").length! > 2) {
+                clientAppSocket.emit("updateEvent", updated);
+              }
+              return;
+            }
 
             clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
+          } catch (e) {
             console.error(e);
           }
         }
       );
-
-  
     },
   };
 }

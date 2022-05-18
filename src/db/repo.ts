@@ -11,6 +11,7 @@ import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
 import moment from "moment";
 import axios from "axios";
+import config from "../config";
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | null>;
@@ -230,7 +231,7 @@ export default function createEventRepo({
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
       console.log("enter update", { actionId, fromChain, toChain });
-
+      if (toHash === 'N/A') return undefined;
 
       try {
         const waitEvent = await new Promise<BridgeEvent>(
@@ -241,6 +242,7 @@ export default function createEventRepo({
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
+              
               ],
             });
 
@@ -266,10 +268,14 @@ export default function createEventRepo({
             }, 1000 * 60 * 15);
           }
         );
-        if (waitEvent.status === "Completed" && waitEvent.toHash !== 'N/A') return undefined;
+
+       
+        if (waitEvent.status === "Completed" && toChain !== config.algorand.nonce) return undefined;
+       
+ 
         wrap(waitEvent).assign(
           {
-            toHash,
+            toHash: waitEvent.toHash ? waitEvent.toHash + '-' + toHash: toHash,
             status: "Completed",
             toChain,
             toChainName: chainNonceToName(toChain),
