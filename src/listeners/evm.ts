@@ -175,6 +175,8 @@ export function EvmEventService(
             }
 
             if (updated.toChain === config.algorand.nonce) {
+              console.log('algo update');
+              console.log(updated.toHash?.split("-"));
               if (updated.toHash?.split("-").length! > 2) {
                 clientAppSocket.emit("updateEvent", updated);
               }
