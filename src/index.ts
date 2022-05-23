@@ -48,7 +48,7 @@ export default (async function main() {
 
   EvmEventService(createEventRepo(orm)).listen();
 
-  elrondEventListener(
+ elrondEventListener(
     createEventRepo(orm)
   ).listen();
 
@@ -62,7 +62,7 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
-  AlgorandEventListener(createEventRepo(orm)).listen();
+ AlgorandEventListener(createEventRepo(orm)).listen();
 
 
 

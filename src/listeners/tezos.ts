@@ -74,9 +74,15 @@ export function tezosEventListener(
     return bytes2Char(tokenStorage!.token_info.get("")!);
   }
 
+
+  
+
   return {
     listen: async () => {
       console.log("listen tezos");
+
+      //const a = await getUriFa2('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', '517745');
+      //console.log(a);
 
       sub.on(
         "data",
@@ -96,9 +102,7 @@ export function tezosEventListener(
 
           switch (data.parameters.entrypoint) {
             case "freeze_fa2": {
-              console.log(
-                util.inspect(data, false, null, true /* enable colors */)
-              );
+
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
               const fullParmams = params.args as MichelsonV1ExpressionExtended[];
@@ -111,14 +115,15 @@ export function tezosEventListener(
               const to = param2.args![0] as MichelsonV1ExpressionBase;
               const tokenId = param2.args![1] as MichelsonV1ExpressionBase;
               const actionId = getActionId(data.metadata.operation_result);
-
-              console.log(tokenId);
+                 //@ts-ignore
+              console.log(tokenId?.args[1].int!);
               console.log(tchainNonce);
 
               const eventObj: IEvent = {
                 actionId: actionId.toString(),
                 chainName,
-                tokenId: tokenId.int!,
+                //@ts-ignore
+                tokenId: tokenId.args[1].int.toString(),
                 fromChain: chainNonce,
                 toChain: tchainNonce.int,
                 fromChainName: chainNonceToName(chainNonce),
@@ -132,18 +137,14 @@ export function tezosEventListener(
                 toHash: undefined,
                 senderAddress: data.source,
                 targetAddress: to.string,
-                nftUri: "",
+                nftUri: '',
               };
 
               try {
-                //const url = await getUriFa2(fa2Address.string!, tokenId.int!);
-                //console.log(url);
-
                 let [url, exchangeRate]:
                   | PromiseSettledResult<string>[]
                   | string[] = await Promise.allSettled([
-                  (async () =>
-                    await getUriFa2(fa2Address.string!, tokenId.int!))(),
+                  (async () => fa2Address?.string && eventObj.tokenId && (await getUriFa2(fa2Address.string, eventObj.tokenId)))(),
                   (async () => {
                     const res = await axios(
                       `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
@@ -217,11 +218,7 @@ export function tezosEventListener(
               };
 
               try {
-                /*const uri = await getUriFa2(
-                   config.tezos.xpnft,
-                  tokenId
-                ); // TODO: extract from storage
-                eventObj.nftUri = uri;*/
+
 
                 let [url, exchangeRate]:
                   | PromiseSettledResult<string>[]
@@ -267,6 +264,7 @@ export function tezosEventListener(
         }
       );
 
+      
       executedSocket.on(
         "tx_executed_event",
         async (
