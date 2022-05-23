@@ -1,39 +1,39 @@
-import { Entity, Index, PrimaryKey, Property, Unique } from "@mikro-orm/core";
-import { ObjectId } from "@mikro-orm/mongodb";
+import { Entity, Index, PrimaryKey, Property, Unique } from "@mikro-orm/core"
+import { ObjectId } from "@mikro-orm/mongodb"
 
 @Entity()
 @Index({ properties: ["chainId", "owner"] })
 @Unique({ properties: ["chainId", "tokenId", "contract"] })
 export class EthNftDto {
     @PrimaryKey()
-    _id!: ObjectId;
+    _id!: ObjectId
 
     @Property()
-    chainId: string;
+    chainId: string
 
     @Property()
-    tokenId: string;
+    tokenId: string
 
     @Property()
-    owner: string;
+    owner: string
 
     @Property()
-    uri?: string;
+    uri?: string
 
     @Property()
-    name?: string;
+    name?: string
 
     @Property()
-    symbol?: string;
+    symbol?: string
 
     @Property()
-    contract: string;
+    contract: string
 
     @Property()
-    contractType?: "ERC1155" | "ERC721";
+    contractType?: "ERC1155" | "ERC721"
 
     @Property({ onUpdate: () => new Date(), onCreate: () => new Date() })
-    updatedAt!: Date;
+    updatedAt!: Date
 
     constructor(
         chainId: bigint,
@@ -45,13 +45,13 @@ export class EthNftDto {
         name?: string,
         symbol?: string
     ) {
-        this.chainId = chainId.toString();
-        this.tokenId = tokenId.toString();
-        this.owner = owner;
-        this.uri = uri;
-        this.contract = contract;
-        this.contractType = contractType;
-        this.name = name;
-        this.symbol = symbol;
+        this.chainId = chainId.toString()
+        this.tokenId = tokenId.toString()
+        this.owner = owner
+        this.uri = uri
+        this.contract = contract
+        this.contractType = contractType
+        this.name = name
+        this.symbol = symbol
     }
 }

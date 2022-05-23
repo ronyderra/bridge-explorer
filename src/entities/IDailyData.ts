@@ -1,5 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { ObjectId } from "@mikro-orm/mongodb";
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core"
+import { ObjectId } from "@mikro-orm/mongodb"
 
 export interface IDailyData {
     txNumber: number,
@@ -14,10 +14,10 @@ export interface IDailyData {
 @Entity()
 export class DailyData {
   @PrimaryKey()
-  _id!: ObjectId;
+  _id!: ObjectId
 
   @Property()
-  txNumber: number;
+  txNumber: number
 
  // @Property()
   //exchangeRates: {
@@ -33,9 +33,9 @@ export class DailyData {
 
 
   constructor(obj:IDailyData) {
-      this.txNumber = obj.txNumber;
+      this.txNumber = obj.txNumber
       //this.exchangeRates = obj.exchangeRates;
-      this.walletsNumber = obj.walletsNumber;
+      this.walletsNumber = obj.walletsNumber
       this.date = obj.date
   }
 

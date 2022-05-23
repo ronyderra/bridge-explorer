@@ -4,13 +4,16 @@ import {
   Connection,
   wrap,
   QueryOrderKeys,
-} from "@mikro-orm/core";
-import { BridgeEvent, IEvent } from "../entities/IEvent";
-import { IWallet, Wallet } from "../entities/IWallet";
-import { DailyData } from "../entities/IDailyData";
-import { chainNonceToName } from "../config";
-import moment from "moment";
-import axios from "axios";
+} from "@mikro-orm/core"
+
+import moment from "moment"
+
+import axios from "axios"
+
+import { BridgeEvent, IEvent } from "../entities/IEvent"
+import { IWallet, Wallet } from "../entities/IWallet"
+import { DailyData } from "../entities/IDailyData"
+import { chainNonceToName } from "../config"
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | null>;
@@ -67,28 +70,28 @@ export default function createEventRepo({
       searchQuery = undefined
     ) {
       // get events between startDate and endDate
-      let events = await em.find(BridgeEvent, {});
+      let events = await em.find(BridgeEvent, {})
 
       // filter by startDate and endDate
 
       if (startDate && endDate) {
         events = events.filter((e) => {
-          const date = moment(e.createdAt);
+          const date = moment(e.createdAt)
           return (
             date.isSameOrAfter(new Date(startDate)) &&
             date.isSameOrBefore(new Date(endDate))
-          );
-        });
+          )
+        })
       } else if (startDate) {
         events = events.filter((e) => {
-          const date = moment(e.createdAt);
-          return date.isSameOrAfter(new Date(startDate));
-        });
+          const date = moment(e.createdAt)
+          return date.isSameOrAfter(new Date(startDate))
+        })
       } else if (endDate) {
         events = events.filter((e) => {
-          const date = moment(e.createdAt);
-          return date.isSameOrBefore(new Date(endDate));
-        });
+          const date = moment(e.createdAt)
+          return date.isSameOrBefore(new Date(endDate))
+        })
       }
 
       if (searchQuery) {
@@ -98,10 +101,10 @@ export default function createEventRepo({
             e?.targetAddress?.includes(searchQuery) ||
             e?.fromChainName?.includes(searchQuery) ||
             e?.toChainName?.includes(searchQuery)
-        );
+        )
       }
 
-      return events;
+      return events
     },
     async getAllEvents(
       sort = "DESC",
@@ -124,10 +127,10 @@ export default function createEventRepo({
           limit: 50,
           offset: offset * 50,
         }
-      );
+      )
 
       if (fromChain) {
-        events = await em.find(BridgeEvent, { fromChain });
+        events = await em.find(BridgeEvent, { fromChain })
       } else if (status) {
         events = await em.find(
           BridgeEvent,
@@ -136,14 +139,14 @@ export default function createEventRepo({
             cache: true,
             orderBy: { createdAt: sort === "DESC" ? "DESC" : "ASC" },
           }
-        );
+        )
 
-        count = events.length;
-        events = events.slice(offset * 50, offset * 50 + 50);
+        count = events.length
+        events = events.slice(offset * 50, offset * 50 + 50)
       } else if (fromHash) {
-        events = await em.find(BridgeEvent, { fromHash });
+        events = await em.find(BridgeEvent, { fromHash })
       } else if (pendingSearch) {
-        console.log("d");
+        console.log("d")
         events = await em.find(
           BridgeEvent,
           {
@@ -153,7 +156,7 @@ export default function createEventRepo({
             cache: true,
             orderBy: { createdAt: sort === "DESC" ? "DESC" : "ASC" },
           }
-        );
+        )
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(pendingSearch.toUpperCase()) ||
@@ -164,10 +167,10 @@ export default function createEventRepo({
             event?.senderAddress?.includes(pendingSearch) ||
             event?.toChain?.includes(pendingSearch) ||
             event?.createdAt?.toDateString()?.includes(pendingSearch)
-          );
-        });
-        count = events.length;
-        events = events.slice(offset * 50, offset * 50 + 50);
+          )
+        })
+        count = events.length
+        events = events.slice(offset * 50, offset * 50 + 50)
       } else if (chainName) {
         events = await em.find(
           BridgeEvent,
@@ -178,7 +181,7 @@ export default function createEventRepo({
               createdAt: sort === "DESC" ? "DESC" : "ASC",
             } /*offset: offset * 50*/,
           }
-        );
+        )
         events = events.filter((event) => {
           return (
             event?.toChainName?.includes(chainName.toUpperCase()) ||
@@ -189,48 +192,48 @@ export default function createEventRepo({
             event?.senderAddress?.includes(chainName) ||
             event?.toChain?.includes(chainName) ||
             event?.createdAt?.toDateString()?.includes(chainName)
-          );
-        });
-        count = events.length;
-        events = events.slice(offset * 50, offset * 50 + 50);
+          )
+        })
+        count = events.length
+        events = events.slice(offset * 50, offset * 50 + 50)
       }
-      console.log(count);
+      console.log(count)
 
-      return { events, count };
+      return { events, count }
     },
     async createEvent(e) {
-      const event = new BridgeEvent(e);
+      const event = new BridgeEvent(e)
       const same = await em.findOne(BridgeEvent, {
         fromHash: event.fromHash,
         fromChain: event.fromChain
-      });
-      if (same) return null;
-      await em.persistAndFlush(event);
-      return event;
+      })
+      if (same) return null
+      await em.persistAndFlush(event)
+      return event
     },
     async createWallet(e) {
       const wallet = new Wallet({
         ...e,
         address: e.address.toLowerCase(),
-      });
-      await em.persistAndFlush(wallet);
-      return wallet;
+      })
+      await em.persistAndFlush(wallet)
+      return wallet
     },
     async findEvent(targetAddress) {
-      return await em.findOne(BridgeEvent, { targetAddress });
+      return await em.findOne(BridgeEvent, { targetAddress })
     },
     async findEventByHash(fromHash) {
       return await em.findOne(BridgeEvent, {
         fromHash,
-      });
+      })
     },
     async findWallet(address) {
-      return await em.findOne(Wallet, { address: address.toLowerCase() });
+      return await em.findOne(Wallet, { address: address.toLowerCase() })
     },
     async updateEvent(fromChain ,actionId, toHash, toChain) {
-      console.log("update", { actionId, fromChain, toChain });
+      console.log("update", { actionId, fromChain, toChain })
 
-      console.log("enter");
+      console.log("enter")
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
            
@@ -240,39 +243,39 @@ export default function createEventRepo({
               { actionId: actionId.toString() },
               { fromChain: fromChain!.toString() },
             ],
-          });
+          })
 
           const interval = setInterval(async () => {
             if (event) {
-              clearInterval(interval);
-              resolve(event);
-              return;
+              clearInterval(interval)
+              resolve(event)
+              return
             }
-            console.log("waiting for event", { actionId, fromChain, toChain });
+            console.log("waiting for event", { actionId, fromChain, toChain })
             event = await em.findOne(BridgeEvent, {
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
               ],
-            });
-          }, 5000);
+            })
+          }, 5000)
 
           setTimeout(() => {
-            clearInterval(interval);
-            reject("no promise");
-          }, 1000 * 60 * 15);
+            clearInterval(interval)
+            reject("no promise")
+          }, 1000 * 60 * 15)
         }
-      );
-      if (waitEvent.status === "Completed") return undefined;
+      )
+      if (waitEvent.status === "Completed") return undefined
       wrap(waitEvent).assign(
         {
           toHash,
           status: "Completed",
         },
         { em }
-      );
-      await em.flush();
-      return waitEvent;
+      )
+      await em.flush()
+      return waitEvent
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
       const waitEvent = await new Promise<BridgeEvent>(
@@ -282,34 +285,34 @@ export default function createEventRepo({
               { actionId: actionId.toString() },
               { fromChain: fromChain.toString() },
             ],
-          });
+          })
 
           const interval = setInterval(async () => {
             if (event) {
-              clearInterval(interval);
-              resolve(event);
-              return;
+              clearInterval(interval)
+              resolve(event)
+              return
             }
             event = await em.findOne(BridgeEvent, {
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
               ],
-            });
-          }, 500);
+            })
+          }, 500)
 
           setTimeout(() => {
-            clearInterval(interval);
-            reject("no promise");
-          }, 60000);
+            clearInterval(interval)
+            reject("no promise")
+          }, 60000)
         }
-      );
+      )
       wrap(waitEvent).assign(
         { fromHash, status: "Completed", senderAddress, nftUri },
         { em }
-      );
-      await em.flush();
-      return waitEvent;
+      )
+      await em.flush()
+      return waitEvent
     },
     async errorEvent(actionId, fromChain) {
       const event = await em.findOne(BridgeEvent, {
@@ -317,31 +320,31 @@ export default function createEventRepo({
           { actionId: actionId.toString() },
           { fromChain: fromChain.toString() },
         ],
-      });
+      })
 
       if (event && event.status === "Pending") {
-        wrap(event).assign({ status: "Failed" }, { em });
-        await em.flush();
-        return event;
+        wrap(event).assign({ status: "Failed" }, { em })
+        await em.flush()
+        return event
       }
 
-      return undefined;
+      return undefined
     },
     async getMetrics() {
-      const totalTx = await em.count(BridgeEvent, {});
-      const totalWallets = await em.count(Wallet, {});
+      const totalTx = await em.count(BridgeEvent, {})
+      const totalWallets = await em.count(Wallet, {})
 
       return {
         totalTx,
         totalWallets,
-      };
+      }
     },
     async saveDailyData() {
-      const now = new Date();
-      var start = new Date();
-      start.setUTCHours(0, 0, 0, 0);
+      const now = new Date()
+      const start = new Date()
+      start.setUTCHours(0, 0, 0, 0)
 
-      let [events, count] = await em.findAndCount(
+      const [events, count] = await em.findAndCount(
         BridgeEvent,
         {
           createdAt: {
@@ -350,20 +353,20 @@ export default function createEventRepo({
           },
         },
         { cache: true, orderBy: { createdAt: "DESC" } }
-      );
+      )
 
-      const users: string[] = [];
+      const users: string[] = []
 
       for (const event of events) {
-        const sender = event.senderAddress;
-        const reciver = event.targetAddress;
+        const sender = event.senderAddress
+        const reciver = event.targetAddress
 
         if (sender && !users.includes(sender)) {
-          users.push(sender);
+          users.push(sender)
         }
 
         if (reciver && !users.includes(reciver)) {
-          users.push(reciver);
+          users.push(reciver)
         }
       }
 
@@ -384,35 +387,35 @@ export default function createEventRepo({
         walletsNumber: users.length,
         date:
           now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate(),
-      });
+      })
 
-      console.log(dailyData);
+      console.log(dailyData)
 
       const data = await em.findOne(DailyData, {
         date: dailyData.date,
-      });
+      })
 
       if (data) {
-        const { txNumber, walletsNumber /*exchangeRates*/ } = dailyData;
+        const { txNumber, walletsNumber /*exchangeRates*/ } = dailyData
 
         wrap(data).assign(
           { txNumber, walletsNumber /*exchangeRates */ },
           { em }
-        );
-        return await em.flush();
+        )
+        return await em.flush()
       }
-      await em.persistAndFlush(dailyData);
+      await em.persistAndFlush(dailyData)
     },
     async getDashboard(period) {
-      if (period && period > 30) return [];
+      if (period && period > 30) return []
 
-      let events = await em.find(
+      const events = await em.find(
         DailyData,
         {},
         { cache: true, orderBy: { createdAt: "DESC" }, limit: period }
-      );
+      )
 
-      return events;
+      return events
     },
-  };
+  }
 }

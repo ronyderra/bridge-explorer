@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
+import dotenv from "dotenv"
 
-dotenv.config();
+dotenv.config()
 
 export const currency: any = {
   "4": "BNB",
@@ -17,7 +17,7 @@ export const currency: any = {
   "12": "ONE",
   "18": "TEZ",
   "23": "GT",
-};
+}
 
 export const txExplorers: any = {
   "4": "https://bscscan.com/tx/",
@@ -34,7 +34,7 @@ export const txExplorers: any = {
   "12": "https://explorer.harmony.one/tx/",
   "18": "https://tezblock.io/transaction/",
   "23": "https://gatescan.org/tx/",
-};
+}
 
 export const addressExplorers: any = {
   "4": "https://bscscan.com//address/",
@@ -51,14 +51,14 @@ export const addressExplorers: any = {
   "12": "https://explorer.harmony.one/address/",
   "18": "https://tezblock.io/account/",
   "23": "https://gatescan.org/address/",
-};
+}
 
 function getOrThrow(key: string): string {
-  const value = process.env[key];
+  const value = process.env[key]
   if (!value) {
-    throw new Error(`Missing env var ${key}`);
+    throw new Error(`Missing env var ${key}`)
   }
-  return value;
+  return value
 }
 
 export interface ChainConfig {
@@ -227,21 +227,21 @@ const config: Config = {
   mail_key: '1' ||  getOrThrow("SENDING_BLUE"),
   captcha_secret: '1' || getOrThrow("SECRET_CAPTCHA"),
   web3socketUrl: getOrThrow("WEB3_SOCKET_URL"),
-};
+}
 
 
 export const getChain = (nonce:string) => {
     
     try {
      Object.keys(config).forEach((key: string) => {
-      const item:ChainConfig | ChainConfig[] = config[key];
+      const item:ChainConfig | ChainConfig[] = config[key]
 
       if (Array.isArray(item)) {
         for(const c of item) {
-          if (c.nonce === nonce) throw c;
+          if (c.nonce === nonce) throw c
         }      
       } else {
-        if (item.nonce && item.nonce === nonce) throw item;
+        if (item.nonce && item.nonce === nonce) throw item
       }
     })
   } catch (chain: any) {
@@ -251,18 +251,18 @@ export const getChain = (nonce:string) => {
 
 export function chainNonceToName(nonce: string) {
   
-  const chain = getChain(nonce);
+  const chain = getChain(nonce)
 
-  return chain?.name || "UNKNOWN";
+  return chain?.name || "UNKNOWN"
 }
 
-console.log(chainNonceToName("6"));
+console.log(chainNonceToName("6"))
 
 export const chainNonceToId = (nonce: string) => {
-  const chain = getChain(nonce);
+  const chain = getChain(nonce)
 
-  return chain?.id || "unknown";
-};
+  return chain?.id || "unknown"
+}
 
-export default config;
+export default config
 

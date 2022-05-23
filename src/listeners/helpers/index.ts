@@ -1,12 +1,14 @@
-import { IEvent } from "../../entities/IEvent";
-import { chainNonceToName } from "../../config";
-import { IEventRepo } from "../../db/repo";
-import { saveWallet } from "../../db/helpers";
-import { chainNonceToId } from "../../config";
-import { io as clientAppSocket } from "../../index";
-import axios from "axios";
-import { ethers } from "ethers";
-import BigNumber from "bignumber.js";
+import axios from "axios"
+
+import { ethers } from "ethers"
+
+import BigNumber from "bignumber.js"
+
+import { IEvent } from "../../entities/IEvent"
+import { chainNonceToName , chainNonceToId } from "../../config"
+import { IEventRepo } from "../../db/repo"
+import { saveWallet } from "../../db/helpers"
+import { io as clientAppSocket } from "../../index"
 
 export interface IEventhandler {
   actionId: string;
@@ -54,40 +56,40 @@ export const eventHandler = (eventRepo: IEventRepo) =>  async ({
     nftUri: uri,
     dollarFees,
     contract,
-  };
+  }
 
 
   const [doc] = await Promise.all([
     (async () => {
-      return await eventRepo.createEvent(event);
+      return await eventRepo.createEvent(event)
     })(),
     (async () => {
       await saveWallet(
         eventRepo,
         event.senderAddress,
         event.targetAddress
-      );
+      )
     })(),
   ])
 
   if (doc) {
-    console.log(doc);
-    clientAppSocket.emit("incomingEvent", doc);
+    console.log(doc)
+    clientAppSocket.emit("incomingEvent", doc)
 
     setTimeout(async () => {
         const updated = await eventRepo.errorEvent(
           actionId,
           from
-        );
+        )
 
         if (updated) {
-          clientAppSocket.emit("updateEvent", updated);
+          clientAppSocket.emit("updateEvent", updated)
         }
-      }, 1000 * 120 * 2);
+      }, 1000 * 120 * 2)
   }
 
 
-};
+}
 
 
 
@@ -95,9 +97,9 @@ export const getExchageRate = async (chain:string) => {
 
     const id = chainNonceToId(chain)
 
-    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+    const res = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`)
 
-      return res.data[id].usd;
+      return res.data[id].usd
 }
 
 

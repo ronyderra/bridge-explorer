@@ -1,5 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { ObjectId } from "@mikro-orm/mongodb";
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core"
+import { ObjectId } from "@mikro-orm/mongodb"
 
 export interface IWallet {
     address: string;
@@ -8,14 +8,14 @@ export interface IWallet {
 @Entity()
 export class Wallet {
   @PrimaryKey()
-  _id!: ObjectId;
+  _id!: ObjectId
 
   @Property()
-  address: string;
+  address: string
 
 
   constructor(obj:IWallet) {
-      this.address = obj.address;
+      this.address = obj.address
   }
 
 }

@@ -2,7 +2,8 @@ import {
     MikroORM,
     IDatabaseDriver,
     Connection,
-  } from "@mikro-orm/core";
+  } from "@mikro-orm/core"
+
   import {EthNftDto} from '../entities/NftIndex'
 
   
@@ -34,9 +35,9 @@ import {
     return {
       async findNFT({chainId, address, tokenId}) {
         if (tokenId) {
-          return await em.find(EthNftDto, { chainId, owner: address, tokenId });
+          return await em.find(EthNftDto, { chainId, owner: address, tokenId })
         }
-        return await em.find(EthNftDto, { chainId, owner: address });
+        return await em.find(EthNftDto, { chainId, owner: address })
       },
       async createNFT({ents}) {
         return await em.persistAndFlush(ents)
@@ -45,6 +46,6 @@ import {
           await em.removeAndFlush(ents)
       }
 
-    };
+    }
   }
   

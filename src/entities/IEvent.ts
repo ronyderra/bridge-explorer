@@ -1,5 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
-import { ObjectId } from "@mikro-orm/mongodb";
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core"
+import { ObjectId } from "@mikro-orm/mongodb"
 export interface IEvent {
   chainName: string;
   type: "Transfer" | "Unfreeze";
@@ -24,64 +24,64 @@ export interface IEvent {
 @Entity()
 export class BridgeEvent {
   @PrimaryKey()
-  _id!: ObjectId;
+  _id!: ObjectId
 
   @Property({ nullable: true })
-  chainName?: string;
+  chainName?: string
 
   @Property({ nullable: true })
-  type?: string;
+  type?: string
 
   @Property({ nullable: true })
-  fromChain?: string;
+  fromChain?: string
 
   @Property({ nullable: true })
-  toChain?: string;
+  toChain?: string
 
   @Property({ nullable: true })
-  fromChainName?: string;
+  fromChainName?: string
 
   @Property({ nullable: true })
-  toChainName?: string;
+  toChainName?: string
 
   @Property({ nullable: true })
-  actionId?: string;
+  actionId?: string
 
   @Property({ nullable: true })
-  txFees?: string;
+  txFees?: string
 
   @Property({ nullable: true })
-  dollarFees?: string;
+  dollarFees?: string
 
   @Property({ nullable: true })
-  tokenId?: string;
+  tokenId?: string
 
   @Property({ nullable: true })
-  initialTokenId?: string;
+  initialTokenId?: string
 
   @Property({ nullable: true })
-  status?: string;
+  status?: string
 
   @Property({ nullable: true })
-  fromHash?: string;
+  fromHash?: string
 
   @Property({ nullable: true })
-  toHash?: string;
+  toHash?: string
 
   @Property({ nullable: true })
-  targetAddress?: string;
+  targetAddress?: string
 
   @Property({ nullable: true })
-  senderAddress?: string;
+  senderAddress?: string
 
   @Property({ nullable: true })
-  nftUri?: string;
+  nftUri?: string
 
   @Property({ nullable: true })
-  contract?: string;
+  contract?: string
 
   @Property()
-  createdAt: Date = new Date();
+  createdAt: Date = new Date()
 
   constructor({
     actionId,
@@ -103,21 +103,21 @@ export class BridgeEvent {
     initialTokenId,
     contract
   }: IEvent) {
-    this.actionId = actionId;
-    this.chainName = chainName;
-    this.fromHash = fromHash;
-    this.senderAddress = senderAddress;
-    this.status = status;
-    this.toChain = toChain;
-    this.txFees = txFees;
-    this.type = type;
-    this.tokenId = tokenId;
-    this.fromChain = fromChain;
-    this.targetAddress = targetAddress;
-    this.toHash = toHash;
-    this.nftUri = nftUri;
-    this.fromChainName = fromChainName;
-    this.toChainName = toChainName;
+    this.actionId = actionId
+    this.chainName = chainName
+    this.fromHash = fromHash
+    this.senderAddress = senderAddress
+    this.status = status
+    this.toChain = toChain
+    this.txFees = txFees
+    this.type = type
+    this.tokenId = tokenId
+    this.fromChain = fromChain
+    this.targetAddress = targetAddress
+    this.toHash = toHash
+    this.nftUri = nftUri
+    this.fromChainName = fromChainName
+    this.toChainName = toChainName
     this.dollarFees = dollarFees
     this.initialTokenId = initialTokenId
     this.contract = contract

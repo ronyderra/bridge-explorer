@@ -1,29 +1,33 @@
-import { AxiosInstance } from "axios";
-import { providers } from "ethers";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { chainNonceToName } from "../config";
-import { IEventRepo } from "../db/repo";
-import { IERC721WrappedMeta } from "../entities/ERCMeta";
-import { io } from "socket.io-client";
-import { IEvent } from "../entities/IEvent";
-import { io as clientAppSocket } from "../index";
-//import PromiseFulfilledResult from 'express'
-import { saveWallet } from "../db/helpers";
-import { ethers } from "ethers";
-import BigNumber from "bignumber.js";
-import config from "../config";
-import axios from "axios";
-import { handleBridgeEvent, handleNativeTransferEvent, handleNativeUnfreezeEvent } from "./helpers/evm";
-import { eventHandler } from "./helpers/index";
+import axios, { AxiosInstance } from "axios"
+import { providers , ethers } from "ethers"
+import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts"
 
-import { ChainConfig } from "../config";
+import { io } from "socket.io-client"
+
+import BigNumber from "bignumber.js"
+
+import config, { chainNonceToName , ChainConfig } from "../config"
+import { IEventRepo } from "../db/repo"
+import { IERC721WrappedMeta } from "../entities/ERCMeta"
+import { IEvent } from "../entities/IEvent"
+import { io as clientAppSocket } from "../index"
+//import PromiseFulfilledResult from 'express'
+import { saveWallet } from "../db/helpers"
+
+
+
+
+import { handleBridgeEvent, handleNativeTransferEvent, handleNativeUnfreezeEvent } from "./helpers/evm"
+import { eventHandler } from "./helpers/index"
+
+
 const util = require('util')
 
 export interface IContractEventListener {
   listen(): void;
 }
 
-const evmSocket = io(config.socketUrl);
+const evmSocket = io(config.socketUrl)
 
 export function nativeEvmListener(
   chain: ChainConfig,
@@ -31,11 +35,11 @@ export function nativeEvmListener(
 ): IContractEventListener {
   return {
     listen: () => {
-      const provider =  new providers.JsonRpcProvider(chain.node);
-      const contract = Minter__factory.connect(chain.contract, provider);
+      const provider =  new providers.JsonRpcProvider(chain.node)
+      const contract = Minter__factory.connect(chain.contract, provider)
 
-      const transferEvent = contract.filters.TransferErc721();
-      const unfreezeEvent = contract.filters.UnfreezeNft();
+      const transferEvent = contract.filters.TransferErc721()
+      const unfreezeEvent = contract.filters.UnfreezeNft()
 
 
 
@@ -62,7 +66,7 @@ export function nativeEvmListener(
             contract,
             tokenData,
             mintWith,
-          });
+          })
 
           const eventData = await handleNativeTransferEvent(chain.nonce, provider)({
             actionId,
@@ -79,7 +83,7 @@ export function nativeEvmListener(
           eventData && (await eventHandler(eventRepo)(eventData))
 
         }
-      );
+      )
 
       // NOTE: will work when the only when the new bridge is used
 
@@ -112,7 +116,7 @@ export function nativeEvmListener(
           eventData && (await eventHandler(eventRepo)(eventData))
 
         }
-      );
+      )
     },
-  };
+  }
 }

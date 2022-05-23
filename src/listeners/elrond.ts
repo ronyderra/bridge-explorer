@@ -1,14 +1,17 @@
-import WebSocket from "ws";
-import { Base64 } from "js-base64";
-import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./web3";
-import { EvResp } from "../entities/EvResp";
-import { IEventRepo } from "../db/repo";
-import config, { chainNonceToName } from "../config";
-import axios from "axios";
-import { IERC721WrappedMeta } from "../entities/ERCMeta";
-import { IEvent } from "../entities/IEvent";
-import { io as clientAppSocket } from "../index";
+import WebSocket from "ws"
+import { Base64 } from "js-base64"
+import BigNumber from "bignumber.js"
+
+import axios from "axios"
+
+import { EvResp } from "../entities/EvResp"
+import { IEventRepo } from "../db/repo"
+import config, { chainNonceToName } from "../config"
+import { IERC721WrappedMeta } from "../entities/ERCMeta"
+import { IEvent } from "../entities/IEvent"
+import { io as clientAppSocket } from "../index"
+
+import { IContractEventListener } from "./web3"
 
 
 // TODO: Save bridge events to db
@@ -19,8 +22,8 @@ export function elrondEventListener(
   chainNonce: string,
   eventRepo: IEventRepo
 ): IContractEventListener {
-  console.log(rpc);
-  const ws = new WebSocket(rpc);
+  console.log(rpc)
+  const ws = new WebSocket(rpc)
   ws.onopen = () => {
     ws.send(
       JSON.stringify({
@@ -30,28 +33,28 @@ export function elrondEventListener(
           },
         ],
       })
-    );
-  };
+    )
+  }
   return {
 
     listen: async () => {
       ws.addEventListener("message", async (ev: any) => {
-        const evs: EvResp[] = JSON.parse(ev.data);
-        console.log(evs);
+        const evs: EvResp[] = JSON.parse(ev.data)
+        console.log(evs)
         await Promise.all(
           evs.map(
             async (ev) =>
               await eventHandler(ev, chainName, chainNonce, eventRepo)
           )
-        );
-      });
+        )
+      })
     },
-  };
+  }
 }
 
 function bigIntFromBe(buf: Uint8Array): BigNumber {
   // TODO: something better than this hack
-  return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16);
+  return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16)
 }
 
 const eventHandler = async (
@@ -61,13 +64,13 @@ const eventHandler = async (
   eventRepo: IEventRepo
 ) => {
   if (event.topics.length < 5) {
-    return undefined;
+    return undefined
   }
 
-  const action_id = bigIntFromBe(Base64.toUint8Array(event.topics[1]));
+  const action_id = bigIntFromBe(Base64.toUint8Array(event.topics[1]))
   const tx_fees = bigIntFromBe(
     Base64.toUint8Array(event.topics[event.topics.length - 1])
-  );
+  )
 
   switch (event.identifier) {
     // case "withdraw": {
@@ -79,18 +82,18 @@ const eventHandler = async (
     //   console.log(action_id, chain_nonce, tx_fees, to, value);
     // }
     case "withdrawNft": {
-      const to = Base64.atob(event.topics[3]);
-      const burner = Base64.decode(event.topics[4]);
-      const uri = Base64.decode(event.topics[5]);
-      const wrappedData = await axios.get<IERC721WrappedMeta>(uri);
-      console.log("wrapped", wrappedData);
+      const to = Base64.atob(event.topics[3])
+      const burner = Base64.decode(event.topics[4])
+      const uri = Base64.decode(event.topics[5])
+      const wrappedData = await axios.get<IERC721WrappedMeta>(uri)
+      console.log("wrapped", wrappedData)
       console.log(
         "Unfreez",
         action_id.toString(),
         tx_fees.toString(),
         to,
         Base64.decode(event.topics[3])
-      );
+      )
       const eventObj: IEvent = {
         actionId: action_id.toString(),
         chainName: chainName,
@@ -109,27 +112,27 @@ const eventHandler = async (
         senderAddress: "N/A",
         targetAddress: to.toString(),
         nftUri: wrappedData?.data?.wrapped?.original_uri,
-      };
-      console.log("unfreez event: ", eventObj);
-      const doc = await eventRepo.createEvent(eventObj);
-      clientAppSocket.emit("incomingEvent", doc);
+      }
+      console.log("unfreez event: ", eventObj)
+      const doc = await eventRepo.createEvent(eventObj)
+      clientAppSocket.emit("incomingEvent", doc)
       setTimeout(async () => {
-        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
-        console.log(updated, 'in errored');
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce)
+        console.log(updated, 'in errored')
         if (updated) {
-          clientAppSocket.emit("updateEvent", updated);
+          clientAppSocket.emit("updateEvent", updated)
         }
     }, 1000 * 60)
     }
     case "freezeSendNft": {
-      const to = Base64.atob(event.topics[3]);
+      const to = Base64.atob(event.topics[3])
       const chain_nonce = new Uint32Array(
         Base64.toUint8Array(event.topics[2])
-      )[0]; // TODO: Consider LO
-      const tokenId = Base64.decode(event.topics[4]);
-      const nonce = bigIntFromBe(Base64.toUint8Array(event.topics[5]));
-      const name = Base64.decode(event.topics[6]);
-      const image = Base64.decode(event.topics[7]);
+      )[0] // TODO: Consider LO
+      const tokenId = Base64.decode(event.topics[4])
+      const nonce = bigIntFromBe(Base64.toUint8Array(event.topics[5]))
+      const name = Base64.decode(event.topics[6])
+      const image = Base64.decode(event.topics[7])
 
       // TODO: add event to db
       const eventObj: IEvent = {
@@ -148,16 +151,16 @@ const eventHandler = async (
         senderAddress: "N/A",
         targetAddress: to,
         nftUri: "N/A",
-      };
+      }
 
-      console.log("transfer event: ", eventObj);
-      const doc = await eventRepo.createEvent(eventObj);
-      clientAppSocket.emit("incomingEvent", doc);
+      console.log("transfer event: ", eventObj)
+      const doc = await eventRepo.createEvent(eventObj)
+      clientAppSocket.emit("incomingEvent", doc)
       setTimeout(async () => {
-        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
-        console.log(updated, 'in errored');
+        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce)
+        console.log(updated, 'in errored')
         if (updated) {
-          clientAppSocket.emit("updateEvent", updated);
+          clientAppSocket.emit("updateEvent", updated)
         }
     }, 1000 * 60)
 
@@ -167,9 +170,9 @@ const eventHandler = async (
         chain_nonce.toString(),
         tx_fees.toString(),
         to
-      );
+      )
     }
     default:
-      return undefined;
+      return undefined
   }
-};
+}
