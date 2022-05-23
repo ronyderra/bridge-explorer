@@ -1,6 +1,6 @@
 import express from "express";
 import { ethers, providers, BigNumber as EthBN } from "ethers";
-import { contractEventService } from "./listeners/web3";
+import { nativeEvmListener } from "./listeners/web3";
 import { BridgeEventService } from "./listeners/bridge";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
@@ -51,50 +51,26 @@ export default (async function main() {
 
   BridgeEventService(createEventRepo(orm)).listen();
 
-  const provider = new providers.JsonRpcProvider('https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/polygon/mumbai/archive')
-
-  //const contract = Minter__factory.connect('0x224f78681099d66ceedf4e52ee62e5a98ccb4b9e', provider);
-
-  //const res = await provider.getTransaction('0xbcd346c34b93111d9ae7766981f155bb6ed880425bef0fdceae51eecdc73c663');
-
-  //console.log(ethers.utils.defaultAbiCoder.decode(["tuple(uint256 networkId, address targetContract, uint256 actionId, address to, uint256 nftId, address mintWith)"], res.data));
-
-  console.log(new BigNumber('0x1d5cd4fe0000000000000000000000000000000000000000627ff87e2ff454ed').toString());
-
-  //contract.interface.decodeFunctionResult()
-
-
-  //const a = ethers.utils.defaultAbiCoder.decode(["tuple(uint256 networkId, address targetContract, uint256 actionId, address to, uint256 nftId, address mintWith)"], ethers.utils.hexDataSlice('0x00000000000000000000000000000000000000000000000000216eed5e2e37c30000000000000000000000000000000000000000000000000f4d222fd7fbceec0000000000000000000000000000000000000000000001ffd65e43cf55e307850000000000000000000000000000000000000000000000000f2bb34279cd97290000000000000000000000000000000000000000000001ffd67fb2bcb4113f48', 4));
 
 
 
 
-  //console.log(new BigNumber('0x6c4e'));
 
-  /* setInterval(async () => {
-     const num = await provider.getBlockNumber();
-     const trxs = (await provider.getBlockWithTransactions(num)).transactions
-     const ofContract = trxs.filter(trx => trx.to?.toLowerCase() === '0x224f78681099d66ceedf4e52ee62e5a98ccb4b9e'.toLowerCase());
-     console.log(ofContract.length);
-     if (ofContract.length) {
-       for (const trx of ofContract) {
-         const completed = await trx.wait();
- 
- 
-         console.log(completed.logs.map(log => log.data));
-         console.log(completed.logs.map(log => log.topics), 'completed');
-       }
-     }
-   }, 5000)*/
-
-
-  false && elrondEventListener(
-    config.elrond.node,
-    config.elrond.contract,
-    config.elrond.name,
-    config.elrond.nonce,
+  nativeEvmListener(
+    config.web3.find(c => c.nonce === '4')!,
     createEventRepo(orm)
-  ).listen();
+   ).listen()
+
+   nativeEvmListener(
+    config.web3.find(c => c.nonce === '7')!,
+    createEventRepo(orm)
+   ).listen()
+
+
+
+  /*false && elrondEventListener(
+    createEventRepo(orm)
+  ).listen();*/
 
   false && tezosEventListener(
     config.tezos.socket,

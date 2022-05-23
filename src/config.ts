@@ -61,7 +61,7 @@ function getOrThrow(key: string): string {
   return value;
 }
 
-interface ChainConfig {
+export interface ChainConfig {
   name: string;
   node: string;
   contract: string;

@@ -201,11 +201,10 @@ export default function createEventRepo({
     async createEvent(e) {
       const event = new BridgeEvent(e);
       const same = await em.findOne(BridgeEvent, {
-        actionId: event.actionId,
-        tokenId: event.tokenId,
         fromHash: event.fromHash,
+        fromChain: event.fromChain
       });
-      if (same) return same;
+      if (same) return null;
       await em.persistAndFlush(event);
       return event;
     },
