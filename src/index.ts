@@ -5,6 +5,7 @@ import { EvmEventService } from "./listeners/evm";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
+import { TronEventListener } from "./listeners/tron";
 import config from "./config";
 import { MikroORM, wrap } from "@mikro-orm/core";
 import cors from "cors";
@@ -50,24 +51,28 @@ server.listen(config.port, async () => {
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
+  false && EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
 
-  config.web3.map((chain) =>
-    EvmEventService(createEventRepo(orm)).listenNative(chain)
-  ); // listen all evm chain native events
+  false &&
+    config.web3.map((chain) =>
+      EvmEventService(createEventRepo(orm)).listenNative(chain)
+    ); // listen all evm chain native events
 
-  elrondEventListener(createEventRepo(orm)).listen();
+  false && elrondEventListener(createEventRepo(orm)).listen();
 
-  tezosEventListener(
-    config.tezos.socket,
-    config.tezos.contract,
-    config.tezos.name,
-    config.tezos.nonce,
-    config.tezos.id,
-    createEventRepo(orm)
-  ).listen();
+  false &&
+    tezosEventListener(
+      config.tezos.socket,
+      config.tezos.contract,
+      config.tezos.name,
+      config.tezos.nonce,
+      config.tezos.id,
+      createEventRepo(orm)
+    ).listen();
 
-  AlgorandEventListener(createEventRepo(orm)).listen();
+  false && AlgorandEventListener(createEventRepo(orm)).listen();
+
+  TronEventListener(createEventRepo(orm)).listen();
 
   const repo = createEventRepo(orm);
   repo.saveDailyData();

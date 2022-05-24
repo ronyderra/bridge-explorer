@@ -137,7 +137,7 @@ export const eventHandler = (eventRepo: IEventRepo) => async ({
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
       }
-    }, 1000 * 120 * 2);
+    }, 1000 * 60 * 30);
   }
 };
 
