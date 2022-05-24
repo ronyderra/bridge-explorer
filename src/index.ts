@@ -29,6 +29,8 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const listen = true;
+
 export const server = http.createServer(app);
 
 export const clientAppSocket = new Server(server, {
@@ -51,16 +53,16 @@ server.listen(config.port, async () => {
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  false && EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
+  listen && EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
 
-  false &&
+  listen &&
     config.web3.map((chain) =>
       EvmEventService(createEventRepo(orm)).listenNative(chain)
     ); // listen all evm chain native events
 
-  false && elrondEventListener(createEventRepo(orm)).listen();
+  listen && elrondEventListener(createEventRepo(orm)).listen();
 
-  false &&
+  listen &&
     tezosEventListener(
       config.tezos.socket,
       config.tezos.contract,
@@ -70,9 +72,9 @@ server.listen(config.port, async () => {
       createEventRepo(orm)
     ).listen();
 
-  false && AlgorandEventListener(createEventRepo(orm)).listen();
+  listen && AlgorandEventListener(createEventRepo(orm)).listen();
 
-  TronEventListener(createEventRepo(orm)).listen();
+  listen && TronEventListener(createEventRepo(orm)).listen();
 
   const repo = createEventRepo(orm);
   repo.saveDailyData();
