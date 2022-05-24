@@ -113,21 +113,14 @@ export function contractEventService(
       
   const fromData = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress[0], fromProvider)
 
-          let [nftUri, senderAddress, exchangeRate]:
-            | PromiseSettledResult<string>[]
-            | string[] = await Promise.allSettled([
-            (async () => await NFTcontract.tokenURI(tokenId))(),
-            (async () => {
-              const res = await event.getTransaction();
-              return res.from;
-            })(),
-            (async () => {
-              const res = await axios(
-                `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-              );
-              return res.data[chainId].usd;
-            })(),
-          ]);
+  //to chain data
+  if (toChain) {
+    const toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain);
+    const toRpc = Object.keys(TestNetRpcUri).filter(e => TestNetRpcUri[e] === toChainName);
+    const toContractAddress = Object.keys(contractAddresses).filter(e => contractAddresses[e] === toChainName);
+    const toLastBlockScraped = 1000;
+    const toProvider = new ethers.providers.JsonRpcProvider(toRpc[0]);
+    const toCurrentBlock = await fromProvider.getBlockNumber()
 
           (nftUri = nftUri.status === "fulfilled" ? nftUri.value : ""),
             (senderAddress =
