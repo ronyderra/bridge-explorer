@@ -89,9 +89,9 @@ export async function contractEventService(fromChain: number, toChain?: number |
     const fromCurrentBlock = await fromProvider.getBlockNumber()
     const fromLastBlockScraped = fromCurrentBlock - 30;
 
-    const fromData = await getData( fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
+    const fromData: Data = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
     console.log("-----------------------fromData----------------------------")
-    console.log(fromData[0])
+    console.log(fromData)
 
     //to chain data
     let toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain)[0];
@@ -101,20 +101,20 @@ export async function contractEventService(fromChain: number, toChain?: number |
     const toCurrentBlock = await fromProvider.getBlockNumber()
     const toLastBlockScraped = toCurrentBlock - 30;
 
-    const toData = await getData( toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
+    const toData: Data = await getData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
     console.log("------------------------toData---------------------------")
-    console.log(toData[0])
+    console.log(toData)
 
     //preparing data for push to mongo   
     const event = {
       chainName: fromChainName,
       fromChain: fromChain.toString(),//number
       toChain: toChainName,
-      txFees:fromData[0].gasPrice ,
-      fromHash: fromData[0].hash && fromData[0].hash.toString(),
-      toHash: toData[0].hash && toData[0].hash.toString(),
-      targetAddress: toData[0].clientAddress,
-      senderAddress: fromData[0].clientAddress,
+      txFees: fromData.gasPrice,
+      fromHash: fromData.hash && fromData.hash.toString(),
+      toHash: toData.hash && toData.hash.toString(),
+      targetAddress: toData.clientAddress,
+      senderAddress: fromData.clientAddress,
       // nftUri: ,
     };
     console.log("event_____________________")
@@ -131,9 +131,9 @@ async function getData(
   LastBlockScraped: number,
   currentBlock: number,
   contractAddress: string,
-  provider: ethers.providers.JsonRpcProvider): Promise<Data[]> {
+  provider: ethers.providers.JsonRpcProvider): Promise<{}> {
 
-  let transactions: Data[] = []
+  let transactions: Data = {};
   for (let i = 19588860; i <= 19588870; i++) {
     console.log(i)
     const blockData = await provider.getBlockWithTransactions(i);
@@ -141,11 +141,13 @@ async function getData(
 
     const relavantItem = allTransaction.filter((item) => { if (item.to === contractAddress || item.from === contractAddress) { return item } })
     if (relavantItem.length > 0) {
-      transactions.push({
+      let add = {
         clientAddress: relavantItem[0].from === contractAddress ? relavantItem[0].to : relavantItem[0].from,
         hash: relavantItem[0].hash,
-        gasPrice: relavantItem[0].value ? ethers.utils.formatEther(relavantItem[0].value) : null,
-      })
+        gasPrice: relavantItem[0].value ? ethers.utils.formatEther(relavantItem[0].value) : null
+      }
+      transactions = { ...transactions, ...add }
+      return transactions;
     }
   }
   return transactions;
