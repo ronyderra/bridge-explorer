@@ -1,5 +1,5 @@
 import axios from "axios";
-import config from "../../config";
+import config, { getChain } from "../../config";
 import { ethers } from "ethers";
 import IndexUpdater from "../../services/indexUpdater";
 import BigNumber from "bignumber.js";
@@ -52,9 +52,11 @@ export const executedEventHandler = (
     "tx_executed_event"
   );
 
+  const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
+
   try {
     const updated = await eventRepo.updateEvent(
-      action_id,
+      String(Number(action_id) - actionIdOffset),
       toChain.toString(),
       fromChain.toString(),
       hash
@@ -137,7 +139,7 @@ export const eventHandler = (eventRepo: IEventRepo) => async ({
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
       }
-    }, 1000 * 120 * 2);
+    }, 1000 * 60 * 30);
   }
 };
 

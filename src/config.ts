@@ -70,6 +70,7 @@ export interface ChainConfig {
   contract: string;
   nonce: string;
   id: string;
+  actionIdOffset?: number;
 }
 
 interface Config {
@@ -130,6 +131,7 @@ const config: Config = {
       contract: getOrThrow("IOTEX_MINTER_ADDRESS"),
       nonce: getOrThrow("IOTEX_NONCE"),
       id: "iotex",
+      actionIdOffset: 10,
     },
     {
       name: "FANTOM",
