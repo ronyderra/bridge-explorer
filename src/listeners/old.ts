@@ -1,21 +1,10 @@
-import { AxiosInstance } from "axios";
-import { providers } from "ethers";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { chainNonceToName } from "../config";
-import { IEventRepo } from "../db/repo";
-import { IERC721WrappedMeta } from "../entities/ERCMeta";
-import { io } from "socket.io-client";
-import { IEvent } from "../entities/IEvent";
-import { io as clientAppSocket } from "../index";
-//import PromiseFulfilledResult from 'express'
-import { saveWallet } from "../db/helpers";
 import { ethers } from "ethers";
-import BigNumber from "bignumber.js";
-import config from "../config";
+import { IEvent } from "../entities/IEvent";
 
-export interface IContractEventListener {
-  listen(): void;
-  listenBridge? : FunctionStringCallback
+interface Data {
+  hash?: string | undefined,
+  clientAddress?: string | undefined,
+  gasPrice?: string | null,
 }
 
 const TestNetRpcUri: any = {
@@ -88,164 +77,80 @@ const contractAddresses: any = {
   // GODWOKEN: 22, // 22
   // GATECHAIN: 23, // 23
   VECHAIN: "0x4096e08C5d6270c8cd873daDbEAB575670aad8Bc", // 25
-          }
+}
 
-export function contractEventService(
-  provider: providers.Provider,
-  minterAddress: string,
-  chainName: string,
-  chainNonce: string,
-  chainId: string,
-  eventRepo: IEventRepo,
-  axios: AxiosInstance
-): IContractEventListener {
-  return {
-    listen: () => {
-      const contract = Minter__factory.connect(minterAddress, provider);
+export async function contractEventService(fromChain: number, toChain?: number | undefined): Promise<any> {
+  try {
+    //from chain data
+    let fromChainName = Object.keys(Chain).filter(e => Chain[e] === fromChain)[0];
+    const fromRpc = TestNetRpcUri[fromChainName];
+    const fromContractAddress = contractAddresses[fromChainName];
+    const fromProvider = await new ethers.providers.JsonRpcProvider(fromRpc);
+    const fromCurrentBlock = await fromProvider.getBlockNumber()
+    const fromLastBlockScraped = fromCurrentBlock - 30;
 
-  //from chain data
-  const fromChainName = Object.keys(Chain).filter(e => Chain[e] === fromChain);
-  const fromRpc = Object.keys(TestNetRpcUri).filter(e => TestNetRpcUri[e] === fromChainName);
-  const fromContractAddress = Object.keys(contractAddresses).filter(e => contractAddresses[e] === fromChainName);
-  const fromLastBlockScraped = 1000;
-  const fromProvider = new ethers.providers.JsonRpcProvider(fromRpc[0]);
-  const fromCurrentBlock = await fromProvider.getBlockNumber()
-      
-  const fromData = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress[0], fromProvider)
+    const fromData = await getData( fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
+    console.log("-----------------------fromData----------------------------")
+    console.log(fromData[0])
 
-  //to chain data
-  if (toChain) {
-    const toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain);
-    const toRpc = Object.keys(TestNetRpcUri).filter(e => TestNetRpcUri[e] === toChainName);
-    const toContractAddress = Object.keys(contractAddresses).filter(e => contractAddresses[e] === toChainName);
-    const toLastBlockScraped = 1000;
-    const toProvider = new ethers.providers.JsonRpcProvider(toRpc[0]);
+    //to chain data
+    let toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain)[0];
+    const toRpc = TestNetRpcUri[toChainName];
+    const toContractAddress = contractAddresses[toChainName];
+    const toProvider = await new ethers.providers.JsonRpcProvider(toRpc);
     const toCurrentBlock = await fromProvider.getBlockNumber()
+    const toLastBlockScraped = toCurrentBlock - 30;
 
-          (nftUri = nftUri.status === "fulfilled" ? nftUri.value : ""),
-            (senderAddress =
-              senderAddress.status === "fulfilled" ? senderAddress.value : "");
+    const toData = await getData( toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
+    console.log("------------------------toData---------------------------")
+    console.log(toData[0])
 
-          const eventObj: IEvent = {
-            actionId: actionId.toString(),
-            chainName,
-            tokenId: tokenId.toString(),
-            fromChain: chainNonce,
-            toChain: targetNonce.toString(),
-            fromChainName: chainNonceToName(chainNonce),
-            toChainName: chainNonceToName(targetNonce.toString()),
-            fromHash: event.transactionHash,
-            txFees: txFees.toString(),
-            type: "Transfer",
-            status: "Pending",
-            toHash: undefined,
-            senderAddress,
-            targetAddress: to,
-            nftUri,
-            dollarFees:
-              exchangeRate.status === "fulfilled"
-                ? new BigNumber(ethers.utils.formatEther(txFees.toString()))
-                    .multipliedBy(exchangeRate.value)
-                    .toString()
-                : "",
-          };
-          console.log(eventObj);
+    //preparing data for push to mongo   
+    const event = {
+      chainName: fromChainName,
+      fromChain: fromChain.toString(),//number
+      toChain: toChainName,
+      txFees:fromData[0].gasPrice ,
+      fromHash: fromData[0].hash && fromData[0].hash.toString(),
+      toHash: toData[0].hash && toData[0].hash.toString(),
+      targetAddress: toData[0].clientAddress,
+      senderAddress: fromData[0].clientAddress,
+      // nftUri: ,
+    };
+    console.log("event_____________________")
+    console.log(event)
 
-          Promise.all([
-            (async () => {
-              return await eventRepo.createEvent(eventObj);
-            })(),
-            (async () => {
-              await saveWallet(eventRepo, eventObj.senderAddress, to);
-            })(),
-          ])
-            .then(([doc]) => {
-              clientAppSocket.emit("incomingEvent", doc);
-              setTimeout(async () => {
-                const updated = await eventRepo.errorEvent(
-                  actionId.toString(),
-                  chainNonce
-                );
 
-                if (updated) {
-                  clientAppSocket.emit("updateEvent", updated);
-                }
-              }, 1000 * 60);
-            })
-            .catch(() => {});
-        }
-      );
-
-      // NOTE: will work when the only when the new bridge is used
-
-      contract.on(
-        unfreezeEvent,
-        async (
-          actionId,
-          to,
-          txFees,
-          value,
-          burner,
-          tokenId,
-          baseUri,
-          event
-        ) => {
-          //const wrappedData = await axios
-          // .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
-          // .catch((e: any) => console.log("Could not fetch data"));
-          //const NFTcontract = UserNftMinter__factory.connect(contract,provider);
-
-          //const nftUri = await NFTcontract.tokenURI(tokenId);
-
-          //const senderAddress = (await event.getTransaction()).from;
-
-          let [wrappedData, senderAddress, exchangeRate]:
-            | PromiseSettledResult<string>[]
-            | any[] = await Promise.allSettled([
-            (async () =>
-              await axios
-                .get<IERC721WrappedMeta>(baseUri.split("{id}")[0] + tokenId)
-                .catch((e: any) => console.log("Could not fetch data")))(),
-            (async () => {
-              const res = await event.getTransaction();
-              return res.from;
-            })(),
-            (async () => {
-              const res = await axios(
-                `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-              );
-              return res.data[chainId].usd;
-            })(),
-          ]);
+    return 'success'
+  } catch (err: any) {
+    console.log(err.message)
+  }
+}
 
 async function getData(
   LastBlockScraped: number,
   currentBlock: number,
   contractAddress: string,
-  provider: ethers.providers.JsonRpcProvider): Promise<[Data]> {
+  provider: ethers.providers.JsonRpcProvider): Promise<Data[]> {
 
-  let transactions: [Data] = [{}]
-
-  for (let i = LastBlockScraped; i <= currentBlock; i++) {
-
+  let transactions: Data[] = []
+  for (let i = 19588860; i <= 19588870; i++) {
+    console.log(i)
     const blockData = await provider.getBlockWithTransactions(i);
     const allTransaction = blockData.transactions;
 
-    allTransaction.filter((item) => {
-      if (item.to === contractAddress[0]) {
-        transactions.push({
-          to: item.to,
-          from: item.from,
-          fromHash: item.hash,
-          gasPrice: item.gasPrice ? item.gasPrice.toString() : null,
-          chainId: item.chainId,
-          blockNumber: item.blockNumber,
-          lastBlock: currentBlock
-        })
-                }
-            })
-        }
-      );
-    },
-  };
+    const relavantItem = allTransaction.filter((item) => { if (item.to === contractAddress || item.from === contractAddress) { return item } })
+    if (relavantItem.length > 0) {
+      transactions.push({
+        clientAddress: relavantItem[0].from === contractAddress ? relavantItem[0].to : relavantItem[0].from,
+        hash: relavantItem[0].hash,
+        gasPrice: relavantItem[0].value ? ethers.utils.formatEther(relavantItem[0].value) : null,
+      })
+    }
+  }
+  return transactions;
+}
+
+async function pushToMongo() {
+
 }
