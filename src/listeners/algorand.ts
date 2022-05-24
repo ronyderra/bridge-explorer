@@ -2,7 +2,7 @@ import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./old";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
-import { io as clientAppSocket } from "../index";
+import { clientAppSocket } from "../index";
 import { IEvent } from "../entities/IEvent";
 import { ethers } from "ethers";
 import axios from "axios";
@@ -20,7 +20,7 @@ import {
   assetUrlFromId,
 } from "./helpers";
 
-const util = require('util')
+const util = require("util");
 
 const executedSocket = io(config.socketUrl);
 const algoSocket = io(config.web3socketUrl);
@@ -40,13 +40,10 @@ export function AlgorandEventListener(
         config.algorand.apiKey
       );
 
- 
       algoSocket.on("algorand:bridge_tx", async (hash) => {
-      
         const txRes = await indexerClient.lookupTransactionByID(hash).do();
         const txnInfo = txRes["transaction"];
         if (txnInfo == undefined || txnInfo?.logs.length == 0) {
- 
           return;
         }
 
@@ -55,7 +52,6 @@ export function AlgorandEventListener(
           txnInfo["application-transaction"]["application-id"] ==
             config.algorand.contract
         ) {
-
           const actionType = b64Decode(txnInfo.logs[0]).toString("utf-8");
           // Base64 to big number
           const actionCnt = bigIntFromBe(b64Decode(txnInfo.logs[1])).toString();
@@ -71,8 +67,6 @@ export function AlgorandEventListener(
             b64Decode(txnInfo.logs[txnInfo.logs.length - 1])
           );
 
-
-
           let assetID = "";
           let assetUrl = "";
 
@@ -82,11 +76,9 @@ export function AlgorandEventListener(
                 b64Decode(txnInfo?.logs[5])
                   ?.readBigUInt64BE(0)
                   ?.toString() || "";
-            
 
-               assetUrl = await assetUrlFromId(algodClient, +assetID);
-               break;
-
+              assetUrl = await assetUrlFromId(algodClient, +assetID);
+              break;
             }
 
             case "action_type:withdraw_nft": {
@@ -116,7 +108,6 @@ export function AlgorandEventListener(
             contract: mintWith,
           };
 
-
           Promise.all([
             (async () => {
               return await eventRepo.createEvent(event);
@@ -128,16 +119,12 @@ export function AlgorandEventListener(
                 event.targetAddress
               );
             })(),
-          ])
-            .then(([doc]) => {
-              console.log(doc, 'doc');
-              clientAppSocket.emit("incomingEvent", doc);
-
-            })
-
+          ]).then(([doc]) => {
+            console.log(doc, "doc");
+            clientAppSocket.emit("incomingEvent", doc);
+          });
         }
       });
-
 
       executedSocket.on(
         "tx_executed_event",
@@ -147,19 +134,20 @@ export function AlgorandEventListener(
           action_id: string,
           hash: string
         ) => {
-          if (!fromChain || fromChain.toString() !== config.algorand.nonce) return
+          if (!fromChain || fromChain.toString() !== config.algorand.nonce)
+            return;
 
-          console.log({
-            toChain,
-          fromChain,
-          action_id,
-          hash,
-          },  "algo:tx_executed_event");
-
-      
+          console.log(
+            {
+              toChain,
+              fromChain,
+              action_id,
+              hash,
+            },
+            "algo:tx_executed_event"
+          );
 
           try {
-        
             const updated = await eventRepo.updateEvent(
               action_id,
               toChain.toString(),
@@ -168,15 +156,13 @@ export function AlgorandEventListener(
             );
             if (!updated) return;
             console.log(updated, "updated");
-           
 
             clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
+          } catch (e) {
             console.error(e);
           }
         }
       );
-
     },
   };
 }

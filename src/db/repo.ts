@@ -203,7 +203,7 @@ export default function createEventRepo({
       const event = new BridgeEvent(e);
       const same = await em.findOne(BridgeEvent, {
         fromHash: event.fromHash,
-        fromChain: event.fromChain
+        fromChain: event.fromChain,
       });
       if (same) return undefined;
       await em.persistAndFlush(event);
@@ -230,18 +230,15 @@ export default function createEventRepo({
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
       console.log("enter update", { actionId, fromChain, toChain });
-      if (toHash === 'N/A') return undefined;
+      if (toHash === "N/A") return undefined;
 
       try {
         const waitEvent = await new Promise<BridgeEvent>(
           async (resolve, reject) => {
-
-
             let event = await em.findOne(BridgeEvent, {
               $and: [
                 { actionId: actionId.toString() },
                 { fromChain: fromChain!.toString() },
-              
               ],
             });
 
@@ -251,12 +248,15 @@ export default function createEventRepo({
                 resolve(event);
                 return;
               }
-              console.log("waiting for event", { actionId, fromChain, toChain });
+              console.log("waiting for event", {
+                actionId,
+                fromChain,
+                toChain,
+              });
               event = await em.findOne(BridgeEvent, {
                 $and: [
                   { actionId: actionId.toString() },
                   { fromChain: fromChain!.toString() },
-
                 ],
               });
             }, 5000);
@@ -268,13 +268,15 @@ export default function createEventRepo({
           }
         );
 
-       
-        if (waitEvent.status === "Completed" && toChain !== config.algorand.nonce) return undefined;
-       
- 
+        if (
+          waitEvent.status === "Completed" &&
+          toChain !== config.algorand.nonce
+        )
+          return undefined;
+
         wrap(waitEvent).assign(
           {
-            toHash: waitEvent.toHash ? waitEvent.toHash + '-' + toHash: toHash,
+            toHash: waitEvent.toHash ? waitEvent.toHash + "-" + toHash : toHash,
             status: "Completed",
             toChain,
             toChainName: chainNonceToName(toChain),
@@ -288,8 +290,12 @@ export default function createEventRepo({
       }
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
-      console.log('update Elrond', {
-        actionId, fromChain, fromHash, senderAddress, nftUri
+      console.log("update Elrond", {
+        actionId,
+        fromChain,
+        fromHash,
+        senderAddress,
+        nftUri,
       });
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
@@ -429,14 +435,9 @@ export default function createEventRepo({
       );
 
       return events;
-    }
+    },
   };
 }
-
-
-
-
-
 
 /**
 const events = await orm.em.find(

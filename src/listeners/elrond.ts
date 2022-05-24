@@ -9,7 +9,7 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
-import { io as clientAppSocket } from "../index";
+import { clientAppSocket } from "../index";
 import {
   Account,
   Address,
@@ -45,9 +45,7 @@ const minterAddr = new Address(config.elrond.contract);
 export function elrondEventListener(
   eventRepo: IEventRepo
 ): IContractEventListener {
-  
-
-/*eventFromTxn('ffa8103ab5acd4bcc60582c1d1014c5d7277809fa4b008ee2ea6b0900c46a6a3', provider, providerRest).then((evs) => {
+  /*eventFromTxn('ffa8103ab5acd4bcc60582c1d1014c5d7277809fa4b008ee2ea6b0900c46a6a3', provider, providerRest).then((evs) => {
   evs?.evs!.forEach(async (e) => {
 
     if (e.address != config.elrond.contract) {
@@ -111,18 +109,16 @@ export function elrondEventListener(
                 nftMinterContact,
                 nonce,
               });
-           
+
               let type = "Unfreeze";
 
               switch (e.identifier) {
                 case "withdrawNft": {
                   type = "Unfreeze";
-           
-                    uri = Base64.decode(e.topics[5]); //
-                    const wrappedData = await axios.get<IERC721WrappedMeta>(
-                      uri
-                    );
-                    tokenId = wrappedData?.data?.wrapped?.tokenId;
+
+                  uri = Base64.decode(e.topics[5]); //
+                  const wrappedData = await axios.get<IERC721WrappedMeta>(uri);
+                  tokenId = wrappedData?.data?.wrapped?.tokenId;
 
                   break;
                 }

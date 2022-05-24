@@ -6,7 +6,7 @@ import { IEventRepo } from "../db/repo";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { io } from "socket.io-client";
 import { IEvent } from "../entities/IEvent";
-import { io as clientAppSocket } from "../index";
+import { clientAppSocket } from "../index";
 //import PromiseFulfilledResult from 'express'
 import { saveWallet } from "../db/helpers";
 import { ethers } from "ethers";
@@ -15,7 +15,7 @@ import config from "../config";
 
 export interface IContractEventListener {
   listen(): void;
-  listenBridge? : FunctionStringCallback
+  listenBridge?: FunctionStringCallback;
 }
 
 const socket = io(config.socketUrl);
@@ -73,7 +73,7 @@ export function contractEventService(
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
       //const a = contract.filters.
-      
+
       contract.on(
         transferEvent,
         async (

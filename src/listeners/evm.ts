@@ -1,36 +1,32 @@
 import { IEventRepo } from "../db/repo";
-import { IContractEventListener } from "./old";
-import config, { chainNonceToId, chainNonceToName } from "../config";
+import config, { ChainConfig } from "../config";
 import { io } from "socket.io-client";
-import { io as clientAppSocket } from "../index";
-import { IEvent,BridgeEvent } from "../entities/IEvent";
-import { ethers } from "ethers";
-import axios from "axios";
+import { clientAppSocket } from "../index";
+
 import { BigNumber } from "bignumber.js";
-import { saveWallet } from "../db/helpers";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from '@ethersproject/providers';
 import IndexUpdater from "../services/indexUpdater";
+import { eventHandler, executedEventHandler } from "./helpers/index";
+import {
+  handleBridgeEvent,
+  handleNativeTransferEvent,
+  handleNativeUnfreezeEvent,
+} from "./helpers/evm";
+import { Minter__factory } from "xpnet-web3-contracts";
+import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 
-
-
+interface IContractEventListener {
+  //listen(): void;
+  listenBridge(): void;
+  listenNative(chain: ChainConfig): void;
+}
 
 const executedSocket = io(config.socketUrl);
-const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
 
-const evmNonces = config.web3.map(c => c.nonce);
-
-
-export function EvmEventService(
-  eventRepo: IEventRepo
-): IContractEventListener {
+export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
   return {
-    listen: async () => {
-
-
-
-
+    listenBridge: async () => {
+      console.log("listen --NOTIFIER--");
       web3socket.on(
         "web3:bridge_tx",
         async (
@@ -44,101 +40,103 @@ export function EvmEventService(
           targetAddress?: string,
           nftUri?: string,
           eventTokenId?: string,
-          eventContract?: string,
-
+          eventContract?: string
         ) => {
-          console.log(eventTokenId, 'eventTokenId');
-          console.log(eventContract, 'eventContact');
-          if (actionId && type && txFees && senderAddress) {
+          const eventData = await handleBridgeEvent({
+            fromChain,
+            fromHash,
+            actionId,
+            type,
+            toChain,
+            txFees,
+            senderAddress,
+            targetAddress,
+            nftUri,
+            eventTokenId,
+            eventContract,
+          });
 
+          eventData && (await eventHandler(eventRepo)(eventData));
+        }
+      );
+    },
+    listenNative: async (chain: ChainConfig) => {
+      const provider = new JsonRpcProvider(chain.node);
+      const contract = Minter__factory.connect(chain.contract, provider);
 
+      const transferEvent = contract.filters.TransferErc721();
+      const unfreezeEvent = contract.filters.UnfreezeNft();
+      console.log(`listen ${chain.name}`);
+      contract.on(
+        transferEvent,
+        async (
+          actionId,
+          targetNonce,
+          txFees,
+          to,
+          tokenId,
+          contract,
+          tokenData,
+          mintWith,
+          event
+        ) => {
+          console.log({
+            actionId,
+            targetNonce,
+            txFees,
+            to,
+            tokenId,
+            contract,
+            tokenData,
+            mintWith,
+          });
 
-            const chainId = chainNonceToId(fromChain?.toString());
+          const eventData = await handleNativeTransferEvent(
+            chain.nonce,
+            provider
+          )({
+            actionId,
+            targetNonce,
+            txFees,
+            to,
+            tokenId,
+            contract,
+            tokenData,
+            mintWith,
+            event,
+          });
 
-            let [exchangeRate, trxData]: any =
-              await Promise.allSettled([
-                (async () => {
-                  const res = await axios(
-                    `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-                  );
-                  return res.data[chainId].usd;
-                })(),
+          eventData && (await eventHandler(eventRepo)(eventData));
+        }
+      );
 
-                (async () => {
-                  if (eventTokenId && eventContract) return {
+      contract.on(
+        unfreezeEvent,
+        async (
+          actionId,
+          _,
+          txFees,
+          target,
+          burner,
+          tokenId,
+          baseUri,
+          event
+        ) => {
+          const eventData = await handleNativeUnfreezeEvent(
+            chain.nonce,
+            provider
+          )({
+            actionId,
+            _,
+            txFees,
+            target,
+            burner,
+            tokenId,
+            baseUri,
+            event,
+          });
 
-                    tokenId: eventTokenId,
-                    contractAddr: eventContract
-
-                  }
-                  let res = await IndexUpdater.instance.getDepTrxData(fromHash, chainNonceToName(fromChain.toString()));
-
-
-                  return res
-                })()
-              ]);
-
-
-
-            const event: IEvent = {
-              chainName: chainNonceToName(fromChain.toString()),
-              fromChain: fromChain.toString(),
-              fromChainName: chainNonceToName(fromChain.toString()),
-              toChainName: chainNonceToName(toChain?.toString() || ""),
-              fromHash,
-              actionId: actionId,
-              tokenId: trxData.status === "fulfilled" ? trxData.value.tokenId : undefined,
-              type,
-              status: "Pending",
-              toChain: toChain?.toString(),
-              txFees: txFees?.toString(),
-              dollarFees:
-                exchangeRate.status === "fulfilled"
-                  ? new BigNumber(
-                    ethers.utils.formatEther(txFees?.toString() || "")
-                  )
-                    .multipliedBy(exchangeRate.value)
-                    .toString()
-                  : "",
-              senderAddress,
-              targetAddress,
-              nftUri,
-              contract: trxData.status === "fulfilled" ? trxData.value.contractAddr : undefined
-            };
-            console.log(event.tokenId, 'tokenId');
-            console.log(event.contract, 'contract');
-            console.log(event);
-
-            Promise.all([
-              (async () => {
-                return await eventRepo.createEvent(event);
-              })(),
-              (async () => {
-                await saveWallet(
-                  eventRepo,
-                  event.senderAddress,
-                  event.targetAddress
-                );
-              })(),
-            ])
-              .then(([doc]) => {
-                if (!doc) return;
-                console.log(doc, 'doc');
-                clientAppSocket.emit("incomingEvent", doc);
-
-                setTimeout(async () => {
-                  const updated = await eventRepo.errorEvent(
-                    actionId.toString(),
-                    fromChain.toString()
-                  );
-
-                  if (updated) {
-                    clientAppSocket.emit("updateEvent", updated);
-                  }
-                }, 1000 * 120 * 2);
-              })
-              .catch(() => { });
-          }
+          eventData && (await eventHandler(eventRepo)(eventData));
         }
       );
 
@@ -150,49 +148,17 @@ export function EvmEventService(
           action_id: string,
           hash: string
         ) => {
-          if (!fromChain || !evmNonces.includes(fromChain.toString())) return
-          console.log({
+          executedEventHandler(
+            eventRepo,
+            chain.nonce
+          )({
+            fromChain,
             toChain,
-          fromChain,
-          action_id,
-          hash,
-          },  "tx_executed_event");
-
-
-          try {
-        
-            const updated = await eventRepo.updateEvent(
-              action_id,
-              toChain.toString(),
-              fromChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            if (updated.status === "Completed" && updated.toChain && evmNonces.includes(updated.toChain)) {
-              IndexUpdater.instance.update(updated).catch(e => console.log(e));
-            }
-
-            if (updated.toChain === config.algorand.nonce) {
-              console.log('algo update');
-              console.log(updated.toHash?.split("-"));
-              if (updated.toHash?.split("-").length! > 2) {
-                clientAppSocket.emit("updateEvent", updated);
-              }
-              return;
-            }
-
-
-            clientAppSocket.emit("updateEvent", updated);
-
-          } catch (e: any) {
-            console.error(e);
-          }
+            action_id,
+            hash,
+          });
         }
       );
-
-  
     },
   };
 }

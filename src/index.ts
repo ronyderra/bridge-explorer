@@ -6,52 +6,57 @@ import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
 import config from "./config";
-import { MikroORM,wrap } from "@mikro-orm/core";
+import { MikroORM, wrap } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
 import { explorerDB, indexerDb } from "./mikro-orm.config";
 import http from "http";
-import { Server } from "socket.io";
 import bodyParser from "body-parser";
+import cron from "node-cron";
 import createNFTRepo from "./db/indexerRepo";
-import IndexUpdater from "./services/indexUpdater"
+import IndexUpdater from "./services/indexUpdater";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-import moment, {Moment} from "moment";
-import { IEvent,BridgeEvent } from "./entities/IEvent";
+import moment, { Moment } from "moment";
+import { IEvent, BridgeEvent } from "./entities/IEvent";
 import { DailyData, IDailyData } from "./entities/IDailyData";
+import { Server } from "socket.io";
 
-const cron = require("node-cron");
+const app = express();
+app.use(cors());
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-export let io: Server;
+export const server = http.createServer(app);
 
-export default (async function main() {
+export const clientAppSocket = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
+clientAppSocket.on("connection", (socket) => {
+  console.log("a user connected ", socket.id);
+});
 
-
-  const app = express();
-  app.use(cors());
-  app.use(bodyParser.json({ limit: "10mb" }));
-  app.use(bodyParser.urlencoded({ extended: true }));
+server.listen(config.port, async () => {
+  console.log(`Listening on port ${process.env.PORT}`);
 
   const orm = await MikroORM.init(explorerDB);
 
-  
   const indexerOrm = await MikroORM.init(indexerDb);
   const txRoutes = txRouter(createEventRepo(orm));
-  new IndexUpdater(createNFTRepo(indexerOrm))
+  new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  
- 
+  EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
 
-  EvmEventService(createEventRepo(orm)).listen();
+  config.web3.map((chain) =>
+    EvmEventService(createEventRepo(orm)).listenNative(chain)
+  ); // listen all evm chain native events
 
- elrondEventListener(
-    createEventRepo(orm)
-  ).listen();
-
+  elrondEventListener(createEventRepo(orm)).listen();
 
   tezosEventListener(
     config.tezos.socket,
@@ -62,28 +67,9 @@ export default (async function main() {
     createEventRepo(orm)
   ).listen();
 
- AlgorandEventListener(createEventRepo(orm)).listen();
+  AlgorandEventListener(createEventRepo(orm)).listen();
 
-
-
-  const server = http.createServer(app);
-
-  io = new Server(server, {
-    cors: {
-      origin: "*",
-    },
-  });
-
-  io.on("connection", (socket) => {
-    console.log("a user connected");
-  });
-
-  server.listen(config.port, async () => {
-    console.log(`Listening on port ${process.env.PORT}`);
-    const repo = createEventRepo(orm);
-    repo.saveDailyData();
-    cron.schedule("*/30 * * * *", () => repo.saveDailyData());
-  });
-
-  return { server, socket: io, app, eventRepo: createEventRepo(orm) };
-})();
+  const repo = createEventRepo(orm);
+  repo.saveDailyData();
+  cron.schedule("*/30 * * * *", () => repo.saveDailyData());
+});

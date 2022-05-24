@@ -53,7 +53,7 @@ export const addressExplorers: any = {
   "12": "https://explorer.harmony.one/address/",
   "18": "https://tezblock.io/account/",
   "23": "https://gatescan.org/address/",
-  "25": "https://explore.vechain.org/accounts/"
+  "25": "https://explore.vechain.org/accounts/",
 };
 
 function getOrThrow(key: string): string {
@@ -64,7 +64,7 @@ function getOrThrow(key: string): string {
   return value;
 }
 
-interface ChainConfig {
+export interface ChainConfig {
   name: string;
   node: string;
   contract: string;
@@ -76,7 +76,7 @@ interface Config {
   web3: ChainConfig[];
   elrond: ChainConfig & { socket: string };
   tezos: ChainConfig & { socket: string; xpnft: string };
-  algorand: ChainConfig  & { indexerNode: string; apiKey: string };
+  algorand: ChainConfig & { indexerNode: string; apiKey: string };
   [key: string]: any;
 }
 
@@ -182,7 +182,6 @@ const config: Config = {
       nonce: getOrThrow("VECHAIN_NONCE"),
       id: "vechain",
     },
-
   ],
   elrond: {
     name: "ELROND",
@@ -211,7 +210,6 @@ const config: Config = {
     contract: getOrThrow("ALGORAND_APPLICATION"),
     nonce: getOrThrow("ALGORAND_NONCE"),
     id: "algorand",
-
   },
   db: getOrThrow("DB_URL"),
   indexer_db: getOrThrow("XP_INDEXER_DB"),
@@ -233,28 +231,31 @@ const config: Config = {
 };
 
 export function chainNonceToName(nonce: string) {
-  let chain = config.web3.find((chain) => chain.nonce === nonce);
-
-  if (chain) return chain.name;
-
-  for (const key of ["elrond", "tezos", "algorand"]) {
-    //@ts-ignore
-    if (nonce == config[key].nonce) {
-      //@ts-ignore
-      return config[key].name;
-    }
-  }
-
-  return "UNKNOWN";
+  return getChain(nonce)?.name || "UNKNOWN";
 }
 
-console.log(chainNonceToName("15"));
-
 export const chainNonceToId = (nonce: string) => {
-  let chain = config.web3.find((chain) => chain.nonce === nonce);
-
-  return chain?.id || "unknown";
+  return getChain(nonce)?.id || "";
 };
 
+export const getChain = (nonce: string) => {
+  try {
+    Object.keys(config).forEach((key: string) => {
+      const item: ChainConfig | ChainConfig[] = config[key];
+
+      if (Array.isArray(item)) {
+        for (const c of item) {
+          if (c.nonce === nonce) throw c;
+        }
+      } else {
+        if (item.nonce && item.nonce === nonce) throw item;
+      }
+    });
+  } catch (chain) {
+    return chain as ChainConfig;
+  }
+};
+
+console.log(getChain("2"));
+
 export default config;
-//0x5B916EFb0e7bc0d8DdBf2d6A9A7850FdAb1984C4
