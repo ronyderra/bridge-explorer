@@ -78,6 +78,7 @@ interface Config {
   elrond: ChainConfig & { socket: string };
   tezos: ChainConfig & { socket: string; xpnft: string };
   algorand: ChainConfig & { indexerNode: string; apiKey: string };
+  tron: ChainConfig & { apiKey: string };
   [key: string]: any;
 }
 
@@ -212,6 +213,14 @@ const config: Config = {
     contract: getOrThrow("ALGORAND_APPLICATION"),
     nonce: getOrThrow("ALGORAND_NONCE"),
     id: "algorand",
+  },
+  tron: {
+    name: "TRON",
+    node: getOrThrow("TRON_RPC_URL"),
+    contract: getOrThrow("TRON_MINTER_ADDRESS"),
+    nonce: getOrThrow("TRON_NONCE"),
+    id: "tron",
+    apiKey: getOrThrow("TRON_API_KEY"),
   },
   db: getOrThrow("DB_URL"),
   indexer_db: getOrThrow("XP_INDEXER_DB"),

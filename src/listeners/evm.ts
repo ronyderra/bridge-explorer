@@ -5,12 +5,12 @@ import { clientAppSocket } from "../index";
 
 import { BigNumber } from "bignumber.js";
 import IndexUpdater from "../services/indexUpdater";
-import { eventHandler, executedEventHandler } from "./helpers/index";
+import { eventHandler, executedEventHandler } from "./handlers/index";
 import {
   handleBridgeEvent,
   handleNativeTransferEvent,
   handleNativeUnfreezeEvent,
-} from "./helpers/evm";
+} from "./handlers/evm";
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 
