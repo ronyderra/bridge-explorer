@@ -18,44 +18,77 @@ export interface IContractEventListener {
   listenBridge? : FunctionStringCallback
 }
 
-const socket = io(config.socketUrl);
+const TestNetRpcUri: any = {
+  ELROND: "https://devnet-api.elrond.com",
+  HECO: "https://http-testnet.hecochain.com",
+  BSC: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/bsc/testnet/archive",
+  ROPSTEN: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/eth/ropsten/archive",
+  AVALANCHE: "https://api.avax-test.network/ext/bc/C/rpc",
+  POLYGON: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/polygon/mumbai/archive",
+  FANTOM: "https://rpc.testnet.fantom.network/",
+  TRON: "https://api.shasta.trongrid.io/",
+  CELO: "https://alfajores-forno.celo-testnet.org",
+  HARMONY: "https://api.s0.b.hmny.io",
+  XDAI: "https://sokol.poa.network",
+  UNIQUE: "https://rpc-opal.unique.network/",
+  TEZOS: "https://hangzhounet.smartpy.io",
+  VELAS: "https://explorer.testnet.velas.com/rpc",
+  IOTEX: "https://babel-api.testnet.iotex.io",
+  AURORA: "https://testnet.aurora.dev/",
+  GODWOKEN: "https://godwoken-testnet-web3-v1-rpc.ckbapp.dev",
+  GATECHAIN: "https://meteora-evm.gatenode.cc",
+  VECHAIN: "https://sync-testnet.veblocks.net",
+}
 
-/*export function EventService(eventRepo: IEventRepo): IContractEventListener {
-  return {
-    listen: () => {
-      socket.on(
-        "tx_executed_event",
-        async (
-          toChain: number,
-          fromChain: number,
-          action_id: string,
-          hash: string
-        ) => {
-          // chain is targetChain
-          // action id is well, action id
-          // hash is the transaction hash
+const Chain: any = {
+  ELROND: 2,
+  HECO: 3,
+  BSC: 4,
+  ETHEREUM: 5,
+  AVALANCHE: 6,
+  POLYGON: 7,
+  FANTOM: 8,
+  TRON: 9,
+  CELO: 11, //11
+  HARMONY: 12, //12
+  ONT: 13, //13
+  XDAI: 14, //14
+  ALGORAND: 15, //15
+  FUSE: 16, // 16
+  UNIQUE: 17, // 17
+  TEZOS: 18, // 18
+  VELAS: 19, // 19
+  IOTEX: 20, // 20
+  AURORA: 21, // 21
+  GODWOKEN: 22, // 22
+  GATECHAIN: 23, // 23
+  VECHAIN: 25, // 25
+}
 
-          try {
-            console.log(action_id, "id");
-            console.log(fromChain, "toChain");
-            const updated = await eventRepo.updateEvent(
-              action_id,
-              fromChain.toString(),
-              toChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e: any) {
-            console.error(e);
+const contractAddresses: any = {
+  ELROND: "erd1qqqqqqqqqqqqqpgqnd6nmq4vh8e3xrxqrxgpwfldgp3sje83k4as3lusln",
+  // HECO: 3,
+  BSC: "0x3Dd26fFf61D2a79f5fB77100d6daDBF073F334E6",
+  // ETHEREUM: 5,
+  AVALANCHE: "0xDdF1f6B8Ae8cd26dBE7C4C3ed9ac8E6D8B3a4FdC",
+  POLYGON: "0x224f78681099D66ceEdf4E52ee62E5a98CCB4b9e",
+  FANTOM: "0x9a287810bA8F0564DaDd9F2Ea9B7B2459497416B",
+  TRON: "TY46GA3GGdMtu9GMaaSPPSQtqq9CZAv5sK",
+  // CELO: 11, //11
+  // HARMONY: 12, //12
+  // ONT: 13, //13
+  // XDAI: 14, //14
+  // ALGORAND: 15, //15
+  // FUSE: 16, // 16
+  // UNIQUE: 17, // 17
+  // TEZOS: 18, // 18
+  // VELAS: 19, // 19
+  // IOTEX: 20, // 20
+  // AURORA: 21, // 21
+  // GODWOKEN: 22, // 22
+  // GATECHAIN: 23, // 23
+  VECHAIN: "0x4096e08C5d6270c8cd873daDbEAB575670aad8Bc", // 25
           }
-        }
-      );
-    },
-  };
-}*/
 
 export function contractEventService(
   provider: providers.Provider,
