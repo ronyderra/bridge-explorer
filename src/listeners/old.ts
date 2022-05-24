@@ -103,29 +103,15 @@ export function contractEventService(
     listen: () => {
       const contract = Minter__factory.connect(minterAddress, provider);
 
-      const transferEvent = contract.filters.TransferErc721();
-      const unfreezeEvent = contract.filters.UnfreezeNft();
-      //const a = contract.filters.
+  //from chain data
+  const fromChainName = Object.keys(Chain).filter(e => Chain[e] === fromChain);
+  const fromRpc = Object.keys(TestNetRpcUri).filter(e => TestNetRpcUri[e] === fromChainName);
+  const fromContractAddress = Object.keys(contractAddresses).filter(e => contractAddresses[e] === fromChainName);
+  const fromLastBlockScraped = 1000;
+  const fromProvider = new ethers.providers.JsonRpcProvider(fromRpc[0]);
+  const fromCurrentBlock = await fromProvider.getBlockNumber()
       
-      contract.on(
-        transferEvent,
-        async (
-          actionId,
-          targetNonce,
-          txFees,
-          to,
-          tokenId,
-          contract,
-          tokenData,
-          mintWith,
-          event
-        ) => {
-          const NFTcontract = UserNftMinter__factory.connect(
-            contract,
-            provider
-          );
-          //const nftUri = await NFTcontract.tokenURI(tokenId);
-          //const senderAddress = (await event.getTransaction()).from;
+  const fromData = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress[0], fromProvider)
 
           let [nftUri, senderAddress, exchangeRate]:
             | PromiseSettledResult<string>[]
