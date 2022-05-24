@@ -239,74 +239,32 @@ export function contractEventService(
             })(),
           ]);
 
-          wrappedData =
-            wrappedData.status === "fulfilled" ? wrappedData.value : "";
-          senderAddress =
-            senderAddress.status === "fulfilled" ? senderAddress.value : "";
+async function getData(
+  LastBlockScraped: number,
+  currentBlock: number,
+  contractAddress: string,
+  provider: ethers.providers.JsonRpcProvider): Promise<[Data]> {
 
-          console.log(senderAddress, "senderAddress");
-          console.log(exchangeRate);
+  let transactions: [Data] = [{}]
 
-          const eventObj: IEvent = {
-            actionId: actionId.toString(),
-            chainName,
-            tokenId: wrappedData?.data?.wrapped.tokenId ?? "",
-            initialTokenId: tokenId.toString(),
-            fromChain: chainNonce,
-            toChain: wrappedData?.data?.wrapped?.origin ?? "N/A",
-            fromChainName: chainNonceToName(chainNonce),
-            toChainName: chainNonceToName(
-              wrappedData?.data?.wrapped?.origin ?? "N/A"
-            ),
-            txFees: txFees.toString(),
-            type: "Unfreeze",
-            status: "Pending",
-            fromHash: event.transactionHash,
-            toHash: undefined,
-            senderAddress: senderAddress,
-            targetAddress: value.toString(),
-            nftUri: wrappedData?.data?.wrapped?.original_uri,
-            dollarFees:
-              exchangeRate.status === "fulfilled"
-                ? new BigNumber(ethers.utils.formatEther(txFees.toString()))
-                    .multipliedBy(exchangeRate.value)
-                    .toString()
-                : "",
-          };
+  for (let i = LastBlockScraped; i <= currentBlock; i++) {
 
-          Promise.all([
-            (async () => {
-              return await eventRepo.createEvent(eventObj);
-            })(),
-            (async () => {
-              await saveWallet(
-                eventRepo,
-                eventObj.senderAddress,
-                eventObj.targetAddress
-              );
-            })(),
-          ])
-            .then(([doc]) => {
-              console.log(doc);
-              clientAppSocket.emit("incomingEvent", doc);
-              setTimeout(async () => {
-                const updated = await eventRepo.errorEvent(
-                  actionId.toString(),
-                  chainNonce
-                );
+    const blockData = await provider.getBlockWithTransactions(i);
+    const allTransaction = blockData.transactions;
 
-                if (updated) {
-                  clientAppSocket.emit("updateEvent", updated);
+    allTransaction.filter((item) => {
+      if (item.to === contractAddress[0]) {
+        transactions.push({
+          to: item.to,
+          from: item.from,
+          fromHash: item.hash,
+          gasPrice: item.gasPrice ? item.gasPrice.toString() : null,
+          chainId: item.chainId,
+          blockNumber: item.blockNumber,
+          lastBlock: currentBlock
+        })
                 }
-              }, 1000 * 60);
             })
-            .catch(() => {});
-
-          console.log("unfreeze", {
-            chainName,
-            actionId,
-            fromChain: chainNonce,
-          });
         }
       );
     },
