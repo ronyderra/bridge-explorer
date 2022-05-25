@@ -3,7 +3,7 @@ import { IEvent } from "../entities/IEvent";
 import { IEventRepo } from "../db/repo";
 import { saveWallet } from "../db/helpers";
 import { io as clientAppSocket } from "../index";
-import  { chainNonceToId } from "../config";
+import { chainNonceToId } from "../config";
 import axios from "axios";
 import { BigNumber } from "bignumber.js";
 
@@ -107,8 +107,10 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
     console.log(toData)
 
     //preparing data for push to mongo   
-    const chainId = chainNonceToId(fromChain?.toString());
-    let [exchangeRate]: any =await Promise.allSettled([
+
+    for (let t = 0; t < fromData.length; t++) {
+      const chainId = chainNonceToId(fromChain?.toString());
+      let [exchangeRate]: any = await Promise.allSettled([
         (async () => {
           const res = await axios(
             `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
@@ -116,56 +118,59 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
           return res.data[chainId].usd;
         })(),
       ]);
-    const event: IEvent = {    
-      chainName: fromChainName,
-      fromChain: fromChain.toString(),//number      
-      toChain: toChain.toString(),//number
-      fromChainName:fromChainName,
-      toChainName:toChainName,
-      txFees: fromData.gasPrice,
-      fromHash: fromData.hash && fromData.hash.toString(),
-      toHash: toData.hash && toData.hash.toString(),
-      targetAddress: toData.clientAddress,
-      senderAddress: fromData.clientAddress,
-      type: "Transfer",
-      actionId: actionId,
-      dollarFees: exchangeRate.status === "fulfilled" ? new BigNumber(
-        ethers.utils.formatEther(fromData.dollarFees?.toString() || ""))
-        .multipliedBy(exchangeRate.value)
-        .toString()
-        : "",
-      // nftUri: ,
-    };
-    console.log("_________event____________")
-    console.log(event)
 
-    Promise.all([
-      (async () => {
-        return await eventRepo.createEvent(event);
-      })(),
-      (async () => {
-        await saveWallet(
-          eventRepo,
-          event.senderAddress,
-          event.targetAddress
-        );           
-      })(),
-    ])
-      .then(([doc]) => {
-        clientAppSocket.emit("incomingEvent", doc);
+      const event: IEvent = {
+        chainName: fromChainName,
+        fromChain: fromChain.toString(),//number      
+        toChain: toChain.toString(),//number
+        fromChainName: fromChainName,
+        toChainName: toChainName,
+        txFees: fromData[t].gasPrice,
+        fromHash: fromData[t].hash && fromData[t].hash.toString(),
+        toHash: toData[t].hash && toData[t].hash.toString(),
+        targetAddress: toData[t].clientAddress,
+        senderAddress: fromData[t].clientAddress,
+        type: "Transfer",
+        actionId: actionId,
+        status: "Pending",
+        dollarFees: exchangeRate.status === "fulfilled" ? new BigNumber(
+          ethers.utils.formatEther(fromData[t].dollarFees?.toString() || ""))
+          .multipliedBy(exchangeRate.value)
+          .toString()
+          : "",
+      };
+      console.log("_________event____________")
+      console.log(event)
 
-        setTimeout(async () => {
-          const updated = await eventRepo.errorEvent(
-            actionId.toString(),
-            fromChain.toString()
+      Promise.all([
+        (async () => {
+          return await eventRepo.createEvent(event);
+        })(),
+        (async () => {
+          await saveWallet(
+            eventRepo,
+            event.senderAddress,
+            event.targetAddress
           );
+        })(),
+      ])
+        .then(([doc]) => {
+          clientAppSocket.emit("incomingEvent", doc);
 
-          if (updated) {
-            clientAppSocket.emit("updateEvent", updated);
-          }
-        }, 1000 * 60);
-      })
-      .catch(() => { });
+          setTimeout(async () => {
+            const updated = await eventRepo.errorEvent(
+              actionId.toString(),
+              fromChain.toString()
+            );
+
+            if (updated) {
+              clientAppSocket.emit("updateEvent", updated);
+            }
+          }, 1000 * 60);
+        })
+        .catch(() => { });
+    }
+
 
     return 'success'
   } catch (err: any) {
@@ -178,24 +183,27 @@ async function getContractData(
   currentBlock: number,
   contractAddress: string,
   provider: ethers.providers.JsonRpcProvider) {
-
-  for (let i = 19588860; i <= 19588870; i++) {
+     
+  for (let i = 19590325; i <= 19590335; i++) {
     console.log(i)
     const blockData = await provider.getBlockWithTransactions(i);
     const allTransaction = blockData.transactions;
 
     const relavantItem = allTransaction.filter((item) => { if (item.to === contractAddress || item.from === contractAddress) { return item } })
+    let relavantItemArray = []
+
     if (relavantItem.length > 0) {
-      let add = {
-        clientAddress: relavantItem[0].from === contractAddress ? relavantItem[0].to : relavantItem[0].from,
-        hash: relavantItem[0].hash,
-        gasPrice: relavantItem[0].value ? ethers.utils.formatEther(relavantItem[0].value) : null
+      for (let j = 0; j < relavantItem.length; j++) {
+        let add = {
+          clientAddress: relavantItem[j].from === contractAddress ? relavantItem[j].to : relavantItem[j].from,
+          hash: relavantItem[j].hash,
+          gasPrice: relavantItem[j].value ? ethers.utils.formatEther(relavantItem[j].value) : null,
+          dollarFees: relavantItem[j].value
+        }
+        relavantItemArray.push(add)
       }
-      return add;
+      return relavantItemArray;
     }
   }
 }
 
-async function pushToMongo() {
-
-}
