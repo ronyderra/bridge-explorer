@@ -117,7 +117,7 @@ export const scrap = async (
         
   
   
-        false && eventHandler(em.fork())({
+        eventHandler(em.fork())({
           actionId: String(args["actionId"]),
           from: chain,
           to: String(args["chainNonce"]),
