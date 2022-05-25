@@ -90,7 +90,7 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
     const fromLastBlockScraped = fromCurrentBlock - 30;
     const actionId = "4"
 
-    const fromData = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
+    const fromData = await getContractData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
     console.log("-----------------------fromData----------------------------")
     console.log(fromData)
 
@@ -102,7 +102,7 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
     const toCurrentBlock = await fromProvider.getBlockNumber()
     const toLastBlockScraped = toCurrentBlock - 30;
 
-    const toData = await getData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
+    const toData = await getContractData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
     console.log("------------------------toData---------------------------")
     console.log(toData)
 
@@ -173,7 +173,7 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
   }
 }
 
-async function getData(
+async function getContractData(
   LastBlockScraped: number,
   currentBlock: number,
   contractAddress: string,
