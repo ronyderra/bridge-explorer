@@ -51,6 +51,7 @@ export function EvmEventService(
           console.log(eventContract, 'eventContact');
           if (actionId && type && txFees && senderAddress) {
 
+          contractEventService(fromChain, eventRepo, toChain)
 
 
             const chainId = chainNonceToId(fromChain?.toString());
