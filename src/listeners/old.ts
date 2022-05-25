@@ -1,11 +1,8 @@
 import { ethers } from "ethers";
 import { IEvent } from "../entities/IEvent";
-
-interface Data {
-  hash?: string | undefined,
-  clientAddress?: string | undefined,
-  gasPrice?: string | null,
-}
+import { IEventRepo } from "../db/repo";
+import { saveWallet } from "../db/helpers";
+import { io as clientAppSocket } from "../index";
 
 const TestNetRpcUri: any = {
   ELROND: "https://devnet-api.elrond.com",
@@ -79,7 +76,7 @@ const contractAddresses: any = {
   VECHAIN: "0x4096e08C5d6270c8cd873daDbEAB575670aad8Bc", // 25
 }
 
-export async function contractEventService(fromChain: number, toChain?: number | undefined): Promise<any> {
+export async function contractEventService(fromChain: number, eventRepo: IEventRepo, toChain?: number | undefined): Promise<any> {
   try {
     //from chain data
     let fromChainName = Object.keys(Chain).filter(e => Chain[e] === fromChain)[0];
@@ -88,8 +85,9 @@ export async function contractEventService(fromChain: number, toChain?: number |
     const fromProvider = await new ethers.providers.JsonRpcProvider(fromRpc);
     const fromCurrentBlock = await fromProvider.getBlockNumber()
     const fromLastBlockScraped = fromCurrentBlock - 30;
+    const actionId = "4"
 
-    const fromData: Data = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
+    const fromData = await getData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
     console.log("-----------------------fromData----------------------------")
     console.log(fromData)
 
@@ -101,23 +99,28 @@ export async function contractEventService(fromChain: number, toChain?: number |
     const toCurrentBlock = await fromProvider.getBlockNumber()
     const toLastBlockScraped = toCurrentBlock - 30;
 
-    const toData: Data = await getData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
+    const toData = await getData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
     console.log("------------------------toData---------------------------")
     console.log(toData)
 
     //preparing data for push to mongo   
-    const event = {
+    const event: IEvent = {    
       chainName: fromChainName,
-      fromChain: fromChain.toString(),//number
-      toChain: toChainName,
+      fromChain: fromChain.toString(),//number      
+      toChain: toChain.toString(),//number
+      fromChainName:fromChainName,
+      toChainName:toChainName,
       txFees: fromData.gasPrice,
       fromHash: fromData.hash && fromData.hash.toString(),
       toHash: toData.hash && toData.hash.toString(),
       targetAddress: toData.clientAddress,
       senderAddress: fromData.clientAddress,
+      type: "Transfer",
+      actionId: actionId,
+      status: "Pending"
       // nftUri: ,
     };
-    console.log("event_____________________")
+    console.log("_________event____________")
     console.log(event)
 
     Promise.all([
@@ -158,9 +161,8 @@ async function getData(
   LastBlockScraped: number,
   currentBlock: number,
   contractAddress: string,
-  provider: ethers.providers.JsonRpcProvider): Promise<{}> {
+  provider: ethers.providers.JsonRpcProvider) {
 
-  let transactions: Data = {};
   for (let i = 19588860; i <= 19588870; i++) {
     console.log(i)
     const blockData = await provider.getBlockWithTransactions(i);
@@ -173,11 +175,9 @@ async function getData(
         hash: relavantItem[0].hash,
         gasPrice: relavantItem[0].value ? ethers.utils.formatEther(relavantItem[0].value) : null
       }
-      transactions = { ...transactions, ...add }
-      return transactions;
+      return add;
     }
   }
-  return transactions;
 }
 
 async function pushToMongo() {
