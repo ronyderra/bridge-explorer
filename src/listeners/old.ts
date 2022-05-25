@@ -120,6 +120,33 @@ export async function contractEventService(fromChain: number, toChain?: number |
     console.log("event_____________________")
     console.log(event)
 
+    Promise.all([
+      (async () => {
+        return await eventRepo.createEvent(event);
+      })(),
+      (async () => {
+        await saveWallet(
+          eventRepo,
+          event.senderAddress,
+          event.targetAddress
+        );           
+      })(),
+    ])
+      .then(([doc]) => {
+        clientAppSocket.emit("incomingEvent", doc);
+
+        setTimeout(async () => {
+          const updated = await eventRepo.errorEvent(
+            actionId.toString(),
+            fromChain.toString()
+          );
+
+          if (updated) {
+            clientAppSocket.emit("updateEvent", updated);
+          }
+        }, 1000 * 60);
+      })
+      .catch(() => { });
 
     return 'success'
   } catch (err: any) {
