@@ -3,6 +3,9 @@ import { IEvent } from "../entities/IEvent";
 import { IEventRepo } from "../db/repo";
 import { saveWallet } from "../db/helpers";
 import { io as clientAppSocket } from "../index";
+import  { chainNonceToId } from "../config";
+import axios from "axios";
+import { BigNumber } from "bignumber.js";
 
 const TestNetRpcUri: any = {
   ELROND: "https://devnet-api.elrond.com",
@@ -104,6 +107,15 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
     console.log(toData)
 
     //preparing data for push to mongo   
+    const chainId = chainNonceToId(fromChain?.toString());
+    let [exchangeRate]: any =await Promise.allSettled([
+        (async () => {
+          const res = await axios(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+          );
+          return res.data[chainId].usd;
+        })(),
+      ]);
     const event: IEvent = {    
       chainName: fromChainName,
       fromChain: fromChain.toString(),//number      
@@ -117,7 +129,11 @@ export async function contractEventService(fromChain: number, eventRepo: IEventR
       senderAddress: fromData.clientAddress,
       type: "Transfer",
       actionId: actionId,
-      status: "Pending"
+      dollarFees: exchangeRate.status === "fulfilled" ? new BigNumber(
+        ethers.utils.formatEther(fromData.dollarFees?.toString() || ""))
+        .multipliedBy(exchangeRate.value)
+        .toString()
+        : "",
       // nftUri: ,
     };
     console.log("_________event____________")
