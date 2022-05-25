@@ -3,6 +3,8 @@ import config, { ChainConfig } from "../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
 
+import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
+import createEventRepo from "../db/repo";
 import { BigNumber } from "bignumber.js";
 import IndexUpdater from "../services/indexUpdater";
 import { eventHandler, executedEventHandler } from "./handlers/index";
@@ -14,6 +16,8 @@ import {
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
 
+
+
 interface IContractEventListener {
   //listen(): void;
   listenBridge(): void;
@@ -23,7 +27,7 @@ interface IContractEventListener {
 const executedSocket = io(config.socketUrl);
 const web3socket = io(config.web3socketUrl);
 
-export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
+export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>): IContractEventListener {
   return {
     listenBridge: async () => {
       console.log("listen --NOTIFIER--");
@@ -56,9 +60,32 @@ export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
             eventContract,
           });
 
-          eventData && (await eventHandler(eventRepo)(eventData));
+          eventData && (await eventHandler(em.fork())(eventData));
         }
       );
+
+
+      executedSocket.on(
+        "tx_executed_event",
+        async (
+          fromChain: number,
+          toChain: number,
+          action_id: string,
+          hash: string
+        ) => {
+          if (!fromChain || !config.web3.map(c => c.nonce).includes(String(fromChain)))
+            return;
+
+            executedEventHandler(
+              em.fork(),
+              String(fromChain)
+            )({
+              fromChain,
+              toChain,
+              action_id,
+              hash,
+            });
+        })
     },
     listenNative: async (chain: ChainConfig) => {
       const provider = new JsonRpcProvider(chain.node);
@@ -66,6 +93,7 @@ export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
 
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
+      const a = contract.filters.TransferErc1155()
       console.log(`listen ${chain.name}`);
       contract.on(
         transferEvent,
@@ -106,7 +134,7 @@ export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
             event,
           });
 
-          eventData && (await eventHandler(eventRepo)(eventData));
+          //eventData && (await eventHandler(eventRepo)(eventData));
         }
       );
 
@@ -136,7 +164,7 @@ export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
             event,
           });
 
-          eventData && (await eventHandler(eventRepo)(eventData));
+          //eventData && (await eventHandler(eventRepo)(eventData));
         }
       );
 
@@ -149,7 +177,7 @@ export function EvmEventService(eventRepo: IEventRepo): IContractEventListener {
           hash: string
         ) => {
           executedEventHandler(
-            eventRepo,
+            em.fork(),
             chain.nonce
           )({
             fromChain,

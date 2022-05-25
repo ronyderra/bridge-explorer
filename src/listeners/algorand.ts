@@ -19,7 +19,8 @@ import {
   getAlgodIndexer,
   assetUrlFromId,
 } from "./helpers";
-
+import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
+import createEventRepo from "../db/repo";
 const util = require("util");
 
 const executedSocket = io(config.socketUrl);
@@ -27,7 +28,7 @@ const algoSocket = io(config.web3socketUrl);
 //const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
 
 export function AlgorandEventListener(
-  eventRepo: IEventRepo
+  em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   return {
     listen: async () => {
@@ -40,6 +41,7 @@ export function AlgorandEventListener(
         config.algorand.apiKey
       );
 
+      console.log('listening algorand');
       algoSocket.on("algorand:bridge_tx", async (hash) => {
         const txRes = await indexerClient.lookupTransactionByID(hash).do();
         const txnInfo = txRes["transaction"];
@@ -110,15 +112,10 @@ export function AlgorandEventListener(
 
           Promise.all([
             (async () => {
-              return await eventRepo.createEvent(event);
+              return await createEventRepo(em.fork()).createEvent(event);
             })(),
-            (async () => {
-              await saveWallet(
-                eventRepo,
-                event.senderAddress,
-                event.targetAddress
-              );
-            })(),
+            (async () => await createEventRepo(em.fork()).saveWallet(event.senderAddress,event.targetAddress!)
+            )(),
           ]).then(([doc]) => {
             console.log(doc, "doc");
             clientAppSocket.emit("incomingEvent", doc);
@@ -148,7 +145,7 @@ export function AlgorandEventListener(
           );
 
           try {
-            const updated = await eventRepo.updateEvent(
+            const updated = await createEventRepo(em.fork()).updateEvent(
               action_id,
               toChain.toString(),
               fromChain.toString(),

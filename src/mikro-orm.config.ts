@@ -4,10 +4,11 @@ import { BridgeEvent } from "./entities/IEvent";
 import { Wallet } from "./entities/IWallet";
 import { DailyData } from "./entities/IDailyData";
 import { EthNftDto } from "./entities/NftIndex";
+import { BlockRepo } from "./entities/IBlockRepo";
 
 export const explorerDB =  {
   clientUrl: config.db,
-  entities: [BridgeEvent, Wallet, DailyData],
+  entities: [BridgeEvent, Wallet, DailyData, BlockRepo],
   type: "mongo",
 } as Options;
 

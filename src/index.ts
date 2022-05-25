@@ -1,12 +1,12 @@
 import express from "express";
 import { providers } from "ethers";
-import { contractEventService } from "./listeners/old";
+//import { contractEventService } from "./listeners/old";
 import { EvmEventService } from "./listeners/evm";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
 import { TronEventListener } from "./listeners/tron";
-import config from "./config";
+import config, { getChain } from "./config";
 import { MikroORM, wrap } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
@@ -23,6 +23,7 @@ import moment, { Moment } from "moment";
 import { IEvent, BridgeEvent } from "./entities/IEvent";
 import { DailyData, IDailyData } from "./entities/IDailyData";
 import { Server } from "socket.io";
+import {scrap} from './scraper/index'
 
 const app = express();
 app.use(cors());
@@ -49,18 +50,20 @@ server.listen(config.port, async () => {
   const orm = await MikroORM.init(explorerDB);
 
   const indexerOrm = await MikroORM.init(indexerDb);
-  const txRoutes = txRouter(createEventRepo(orm));
+  const txRoutes = txRouter(orm.em);
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  listen && EvmEventService(createEventRepo(orm)).listenBridge(); //listen bridge notifier
+  scrap(orm.em.fork(), '5')
 
-  listen &&
+  listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
+
+  /*listen &&
     config.web3.map((chain) =>
       EvmEventService(createEventRepo(orm)).listenNative(chain)
-    ); // listen all evm chain native events
+    ); // listen all evm chain native events*/
 
-  listen && elrondEventListener(createEventRepo(orm)).listen();
+  listen && elrondEventListener(orm.em.fork()).listen();
 
   listen &&
     tezosEventListener(
@@ -69,14 +72,14 @@ server.listen(config.port, async () => {
       config.tezos.name,
       config.tezos.nonce,
       config.tezos.id,
-      createEventRepo(orm)
+      orm.em.fork()
     ).listen();
 
-  listen && AlgorandEventListener(createEventRepo(orm)).listen();
+  listen && AlgorandEventListener(orm.em.fork()).listen();
 
-  listen && TronEventListener(createEventRepo(orm)).listen();
+  listen && TronEventListener(orm.em.fork()).listen();
 
-  const repo = createEventRepo(orm);
+  const repo = createEventRepo(orm.em.fork());
   repo.saveDailyData();
   cron.schedule("*/30 * * * *", () => repo.saveDailyData());
 });

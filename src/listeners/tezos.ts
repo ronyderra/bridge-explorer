@@ -9,6 +9,8 @@ import { clientAppSocket } from "../index";
 import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
+import createEventRepo from "../db/repo";
+import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
 
 const util = require("util");
 
@@ -51,7 +53,7 @@ export function tezosEventListener(
   chainName: string,
   chainNonce: string,
   chainId: string,
-  eventRepo: IEventRepo
+  em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   const tezos = new TezosToolkit(rpc);
   const sub = tezos.stream.subscribeOperation({
@@ -164,15 +166,9 @@ export function tezosEventListener(
               console.log(eventObj);
               Promise.all([
                 (async () => {
-                  return await eventRepo.createEvent(eventObj);
+                  return await createEventRepo(em.fork()).createEvent(eventObj);
                 })(),
-                (async () => {
-                  await saveWallet(
-                    eventRepo,
-                    eventObj.senderAddress,
-                    eventObj.targetAddress
-                  );
-                })(),
+                (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
               ]).then(([doc]) => {
                 console.log("end");
                 clientAppSocket.emit("incomingEvent", doc);
@@ -242,15 +238,9 @@ export function tezosEventListener(
 
               Promise.all([
                 (async () => {
-                  return await eventRepo.createEvent(eventObj);
+                  return await createEventRepo(em.fork()).createEvent(eventObj);
                 })(),
-                (async () => {
-                  await saveWallet(
-                    eventRepo,
-                    eventObj.senderAddress,
-                    eventObj.targetAddress
-                  );
-                })(),
+                (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress,eventObj.targetAddress!))(),
               ]).then(([doc]) => {
                 clientAppSocket.emit("incomingEvent", doc);
               });
@@ -281,7 +271,7 @@ export function tezosEventListener(
           );
 
           try {
-            const updated = await eventRepo.updateEvent(
+            const updated = await createEventRepo(em.fork()).updateEvent(
               action_id,
               toChain.toString(),
               fromChain.toString(),

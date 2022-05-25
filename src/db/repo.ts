@@ -4,6 +4,7 @@ import {
   Connection,
   wrap,
   QueryOrderKeys,
+  EntityManager
 } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
@@ -12,6 +13,7 @@ import { chainNonceToName } from "../config";
 import moment from "moment";
 import axios from "axios";
 import config from "../config";
+import { saveWallet } from "./helpers";
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | undefined>;
@@ -56,11 +58,10 @@ export interface IEventRepo {
   } | null>;
   saveDailyData(): void;
   getDashboard(period: number | undefined): Promise<DailyData[]>;
+  saveWallet(senderAddress: string, to :string): Promise<void>
 }
 
-export default function createEventRepo({
-  em,
-}: MikroORM<IDatabaseDriver<Connection>>): IEventRepo {
+export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connection>>): IEventRepo {
   return {
     async getEventsForCSV(
       startDate = undefined,
@@ -436,6 +437,15 @@ export default function createEventRepo({
 
       return events;
     },
+    async saveWallet(senderAddress, to) {
+      return Promise.all([
+        senderAddress ? this.findWallet(senderAddress): undefined,
+        to? this.findWallet(to): undefined
+    ]).then(async ([walletFrom, walletTo]) => {
+        if (!walletFrom && senderAddress) await this.createWallet({address: senderAddress});
+        if (!walletTo && to && senderAddress !== to) await this.createWallet({address: to!});
+    }).catch((err) => console.log(err))
+    }
   };
 }
 

@@ -28,7 +28,8 @@ import {
   VariadicValue,
   BigIntType,
 } from "@elrondnetwork/erdjs";
-
+import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
+import createEventRepo from "../db/repo";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
 
@@ -43,7 +44,7 @@ const minterAddr = new Address(config.elrond.contract);
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
-  eventRepo: IEventRepo
+  em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   /*eventFromTxn('ffa8103ab5acd4bcc60582c1d1014c5d7277809fa4b008ee2ea6b0900c46a6a3', provider, providerRest).then((evs) => {
   evs?.evs!.forEach(async (e) => {
@@ -65,6 +66,8 @@ export function elrondEventListener(
   return {
     listen: async () => {
       elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
+        
+
         try {
           console.log(fromHash, "fromHash");
 
@@ -164,7 +167,7 @@ export function elrondEventListener(
 
               Promise.all([
                 (async () => {
-                  return await eventRepo.createEvent(eventObj);
+                  return await createEventRepo(em.fork()).createEvent(eventObj);
                 })(),
                 (async () => {})(),
               ]).then(([doc]) => {
@@ -198,7 +201,7 @@ export function elrondEventListener(
           );
 
           try {
-            const updated = await eventRepo.updateEvent(
+            const updated = await createEventRepo(em.fork()).updateEvent(
               action_id,
               toChain.toString(),
               fromChain.toString(),
@@ -287,10 +290,10 @@ const eventHandler = async (
         nftUri: wrappedData?.data?.wrapped?.original_uri,
       };
       console.log("unfreez event: ", eventObj);
-      const doc = await eventRepo.createEvent(eventObj);
+      const doc = await createEventRepo(em.fork()).createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
       setTimeout(async () => {
-        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        const updated = await createEventRepo(em.fork()).errorEvent(action_id.toString(),chainNonce);
         console.log(updated, 'in errored');
         if (updated) {
           clientAppSocket.emit("updateEvent", updated);
@@ -327,10 +330,10 @@ const eventHandler = async (
       };
 
       console.log("transfer event: ", eventObj);
-      const doc = await eventRepo.createEvent(eventObj);
+      const doc = await createEventRepo(em.fork()).createEvent(eventObj);
       clientAppSocket.emit("incomingEvent", doc);
       setTimeout(async () => {
-        const updated = await eventRepo.errorEvent(action_id.toString(),chainNonce);
+        const updated = await createEventRepo(em.fork()).errorEvent(action_id.toString(),chainNonce);
         console.log(updated, 'in errored');
         if (updated) {
           clientAppSocket.emit("updateEvent", updated);

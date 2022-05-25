@@ -10,6 +10,10 @@ import { IEventRepo } from "../../db/repo";
 import { saveWallet } from "../../db/helpers";
 import { clientAppSocket } from "../../index";
 
+import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
+
+import createEventRepo from "../../db/repo";
+
 export interface IEventhandler {
   actionId: string;
   from: string;
@@ -28,7 +32,7 @@ export interface IEventhandler {
 const evmNonces = config.web3.map((c) => c.nonce);
 
 export const executedEventHandler = (
-  eventRepo: IEventRepo,
+  em: EntityManager<IDatabaseDriver<Connection>>,
   chain: string
 ) => async ({
   fromChain,
@@ -51,7 +55,7 @@ export const executedEventHandler = (
     },
     "tx_executed_event"
   );
-
+  const eventRepo = createEventRepo(em)
   const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
   try {
@@ -87,7 +91,7 @@ export const executedEventHandler = (
   }
 };
 
-export const eventHandler = (eventRepo: IEventRepo) => async ({
+export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>  async ({
   actionId,
   from,
   to,
@@ -101,6 +105,9 @@ export const eventHandler = (eventRepo: IEventRepo) => async ({
   contract,
   dollarFees,
 }: IEventhandler) => {
+
+  const eventRepo = createEventRepo(em.fork())
+
   const event: IEvent = {
     chainName: chainNonceToName(from),
     fromChain: from,

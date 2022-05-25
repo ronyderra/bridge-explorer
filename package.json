@@ -25,6 +25,7 @@
     "@taquito/utils": "^12.0.0",
     "@types/cors": "^2.8.12",
     "@types/node-cron": "^3.0.1",
+    "@types/web3": "^1.2.2",
     "algosdk": "^1.15.0",
     "axios": "^0.26.0",
     "bignumber.js": "^9.0.2",
@@ -32,6 +33,7 @@
     "cors": "^2.8.5",
     "csv-stringify": "^6.0.5",
     "dotenv": "^14.3.2",
+    "elegant-pair": "^1.0.1",
     "ethers": "^5.5.3",
     "express": "^4.17.2",
     "google-spreadsheet": "^3.2.0",
@@ -44,6 +46,7 @@
     "tronweb": "^4.2.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5",
+    "web3": "^1.7.3",
     "ws": "^8.4.2",
     "xpnet-web3-contracts": "git+https://github.com/XP-NETWORK/XP.network-HECO-Migration.git#dist-erc1155"
   }

@@ -8,6 +8,7 @@ import { eventHandler } from "./handlers";
 import { executedEventHandler } from "./handlers";
 import Bottleneck from "bottleneck";
 import { IEventhandler } from "./handlers";
+import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
 
 const executedSocket = io(config.socketUrl);
 const notifier = io(config.web3socketUrl);
@@ -23,7 +24,7 @@ const rateLimit = new Bottleneck({
 });
 
 export function TronEventListener(
-  eventRepo: IEventRepo
+  em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   return {
     async listen() {
@@ -101,7 +102,7 @@ export function TronEventListener(
 
             console.log(evData, "evData");
 
-            eventHandler(eventRepo)(evData);
+            //eventHandler(createEventRepo(em.fork()))(evData);
           }
         }
       });
@@ -115,7 +116,7 @@ export function TronEventListener(
           hash: string
         ) => {
           executedEventHandler(
-            eventRepo,
+            em.fork(),
             config.tron.nonce
           )({
             fromChain,
@@ -163,7 +164,7 @@ export function TronEventListener(
             contract: String(res.result["burner"]),
           });
 
-          eventHandler(eventRepo)({
+          eventHandler(createEventRepo(em.fork()))({
             actionId: String(res.result["actionId"]),
             from: "9",
             to: String(res.result["chainNonce"]),
@@ -209,7 +210,7 @@ export function TronEventListener(
             contract: String(res.result["burner"]),
           });
 
-          eventHandler(eventRepo)({
+          eventHandler(createEventRepo(em.fork()))({
             actionId: String(res.result["actionId"]),
             from: "9",
             to: String(res.result["chainNonce"]),
