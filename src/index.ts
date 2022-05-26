@@ -54,8 +54,9 @@ server.listen(config.port, async () => {
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  scrap(orm.em.fork(), '5')
   scrap(orm.em.fork(), '4')
+  scrap(orm.em.fork(), '5')
+  scrap(orm.em.fork(), '7')
 
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 

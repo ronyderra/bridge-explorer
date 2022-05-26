@@ -44,11 +44,12 @@ export default class IndexUpdater {
           return [];
         }
       });
-
-      if (descs[0].name === "UnfreezeNft") {
+      console.log(descs);
+      if (descs[0].name.includes('Unfreeze')) {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
           contractAddr: descs[0].args["burner"].toString(),
+          
         };
       }
 

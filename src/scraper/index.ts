@@ -32,15 +32,14 @@ export const scrap = async (
 
   //console.log((await web3.eth.getTransactionReceipt('0x26b57142045d2c9dba65f495bee6c9091ccd885d0f242456703114e209a6fb9a')).logs.map(l => console.log(l.topics)));
 
-  
-
-
   const _contract = Minter__factory.connect(chainConfig.contract, provider);
 
 
   //const p = Minter__factory.connect('0x14cab7829b03d075c4ae1acf4f9156235ce99405', new JsonRpcProvider('https://polygon-rpc.com'))
 
-//console.log(await IndexUpdater.instance.getDestTrxData('0x65191f5648a5768f4a88fda7be892842b558196838c67d843bced3e787c706e0', 'ETHEREUM', provider));
+
+//console.log(await IndexUpdater.instance.getDepTrxData('0xe8a854ee23a09b869599c39bb18cd6dacaa143ed6b25fae4faf45c90a8a490eb', 'POLYGON'));  
+//console.log(await IndexUpdater.instance.getDestTrxData('0xfd369f2c6c15ced6c3feed54112923b8342d695628159946693b48a381bbd660', 'ETHEREUM', provider));
 
 /*let a = await new Web3(
   new Web3.providers.HttpProvider(getChain('4')?.node!, {
@@ -96,6 +95,9 @@ console.log(b);*/
       toBlock: 'latest',
       address: chainConfig.contract,
     });
+
+
+  // console.log(_contract.queryFilter(_contract.filters.UnfreezeNft(), 14834674, 14834674));
     
     console.log(`found ${logs.length} in ${chainConfig.name}::from block ${blocks.lastBlock}`);
   
@@ -107,18 +109,23 @@ console.log(b);*/
     })) 
   
   
+   
     for (const log of logs) {
-  
-  
+  //@ts-ignore
+   
       try {
         const parsed = _contract.interface.parseLog(log);
-        
+    
         const args = parsed.args;
   
         let nftUrl = ''
   
         if (parsed.name.includes("Unfreeze")) {
           nftUrl = String(args["baseURI"]).split("{")[0] + String(args["tokenId"]);
+
+          //console.log(await IndexUpdater.instance.getDepTrxData(log.transactionHash, getChain(chain)));
+          
+
         } else {
           if (args["tokenData"].includes('0x{id}')) {
               nftUrl = String(args["tokenData"]).replace('0x{id}', String(args["id"]));
@@ -150,7 +157,7 @@ console.log(b);*/
         
         console.log(eventData);
   
-        eventHandler(em.fork())(eventData)
+       eventHandler(em.fork())(eventData)
        
 
       } catch (_) {
