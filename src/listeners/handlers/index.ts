@@ -132,7 +132,8 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
       return await eventRepo.createEvent(event);
     })(),
     (async () => {
-      await saveWallet(eventRepo, event.senderAddress, event.targetAddress);
+      return await eventRepo.saveWallet(event.senderAddress, event.targetAddress!)
+  
     })(),
   ]);
 

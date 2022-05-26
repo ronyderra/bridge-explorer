@@ -65,7 +65,7 @@ let b = await new Web3(
 console.log(a);
 
 console.log(b);*/
-
+console.log('SCRAPING ', chainConfig.name);
 
   cron.schedule("*/7 * * * * *", async () => {
 
@@ -97,8 +97,12 @@ console.log(b);*/
     });
 
 
-  // console.log(_contract.queryFilter(_contract.filters.UnfreezeNft(), 14834674, 14834674));
-    
+ /* console.log(await _contract.queryFilter(_contract.filters.));
+  console.log(await _contract.queryFilter(_contract.filters["UnfreezeNft(uint256,uint256,uint256,string,address,uint256,string)"](), 
+  28789317, 
+  28789317));*/
+
+    if (logs.length > 0)
     console.log(`found ${logs.length} in ${chainConfig.name}::from block ${blocks.lastBlock}`);
   
      const trxs = await Promise.all(logs.map(async (log) =>  web3.eth.getTransaction(log.transactionHash)))
@@ -111,7 +115,6 @@ console.log(b);*/
   
    
     for (const log of logs) {
-  //@ts-ignore
    
       try {
         const parsed = _contract.interface.parseLog(log);
@@ -122,10 +125,7 @@ console.log(b);*/
   
         if (parsed.name.includes("Unfreeze")) {
           nftUrl = String(args["baseURI"]).split("{")[0] + String(args["tokenId"]);
-
-          //console.log(await IndexUpdater.instance.getDepTrxData(log.transactionHash, getChain(chain)));
           
-
         } else {
           if (args["tokenData"].includes('0x{id}')) {
               nftUrl = String(args["tokenData"]).replace('0x{id}', String(args["id"]));
@@ -170,7 +170,7 @@ console.log(b);*/
     if (!logs.length) {
         return
     }
-  
+
     blocks &&
       wrap(blocks).assign(
         {

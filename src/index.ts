@@ -54,16 +54,13 @@ server.listen(config.port, async () => {
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-  scrap(orm.em.fork(), '4')
-  scrap(orm.em.fork(), '5')
-  scrap(orm.em.fork(), '7')
 
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 
-  /*listen &&
+  listen &&
     config.web3.map((chain) =>
-      EvmEventService(createEventRepo(orm)).listenNative(chain)
-    ); // listen all evm chain native events*/
+    scrap(orm.em.fork(), chain.nonce)
+    ); 
 
   listen && elrondEventListener(orm.em.fork()).listen();
 
