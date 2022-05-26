@@ -55,11 +55,11 @@ export const executedEventHandler = (
     },
     "tx_executed_event"
   );
-  const eventRepo = createEventRepo(em)
+
   const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
   try {
-    const updated = await eventRepo.updateEvent(
+    const updated = await createEventRepo(em).updateEvent(
       String(Number(action_id) - actionIdOffset),
       toChain.toString(),
       fromChain.toString(),
@@ -106,7 +106,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   dollarFees,
 }: IEventhandler) => {
 
-  const eventRepo = createEventRepo(em.fork())
+
 
   const event: IEvent = {
     chainName: chainNonceToName(from),
@@ -129,10 +129,10 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
 
   const [doc] = await Promise.all([
     (async () => {
-      return await eventRepo.createEvent(event);
+      return await createEventRepo(em.fork()).createEvent(event);
     })(),
     (async () => {
-      return await eventRepo.saveWallet(event.senderAddress, event.targetAddress!)
+      return await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
   
     })(),
   ]);
@@ -142,7 +142,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     clientAppSocket.emit("incomingEvent", doc);
 
     setTimeout(async () => {
-      const updated = await eventRepo.errorEvent(actionId, from);
+      const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
 
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);

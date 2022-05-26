@@ -60,7 +60,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             eventContract,
           });
 
-          eventData && (await eventHandler(em.fork())(eventData));
+          eventData && eventHandler(em.fork())(eventData);
         }
       );
 

@@ -157,7 +157,7 @@ console.log('SCRAPING ', chainConfig.name);
         
         console.log(eventData);
   
-       eventHandler(em.fork())(eventData)
+        eventData && eventHandler(em.fork())(eventData)
        
 
       } catch (_) {
