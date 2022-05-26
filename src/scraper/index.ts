@@ -75,21 +75,24 @@ console.log(b);*/
     let blocks = await em.findOne(BlockRepo, {
       chain,
     });
+
+;
   
     //const currentBlock = await web3.eth.getBlockNumber()
   
     if (!blocks) {
       blocks = new BlockRepo({
         chain,
-        lastBlock: await web3.eth.getBlockNumber(),
+        lastBlock: await web3.eth.getBlockNumber() - 1,
         timestamp: Math.floor(+new Date() / 1000),
       });
       await em.persistAndFlush(blocks);
     }
   
+    const fromBlock = blocks.lastBlock + 1
   
     let logs = await web3.eth.getPastLogs({
-      fromBlock: blocks.lastBlock,
+      fromBlock,
       toBlock: 'latest',
       address: chainConfig.contract,
     });
@@ -164,7 +167,7 @@ console.log(b);*/
     blocks &&
       wrap(blocks).assign(
         {
-          lastBlock: logs[logs.length -1].blockNumber,
+          lastBlock: logs[logs.length - 1].blockNumber,
           timestamp: Math.floor(+new Date() / 1000),
         },
         { em}
