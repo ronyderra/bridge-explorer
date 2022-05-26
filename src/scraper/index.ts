@@ -17,9 +17,9 @@ export const scrap = async (
   chain: string,
 ) => {
 
-  const chainConfig = getChain(chain)
+  const chainConfig = getChain(chain)!
 
-  if (!chainConfig) return
+ // if (!chainConfig) return
 
   const provider = new JsonRpcProvider(chainConfig.node);
 
@@ -36,6 +36,36 @@ export const scrap = async (
 
 
   const _contract = Minter__factory.connect(chainConfig.contract, provider);
+
+
+  //const p = Minter__factory.connect('0x14cab7829b03d075c4ae1acf4f9156235ce99405', new JsonRpcProvider('https://polygon-rpc.com'))
+
+//console.log(await IndexUpdater.instance.getDestTrxData('0x65191f5648a5768f4a88fda7be892842b558196838c67d843bced3e787c706e0', 'ETHEREUM', provider));
+
+/*let a = await new Web3(
+  new Web3.providers.HttpProvider(getChain('4')?.node!, {
+    timeout: 5000,
+  })
+).eth.getPastLogs({
+  fromBlock: 18080582,
+  toBlock: 18080582,
+  address: '0x0b7ed039dff2b91eb4746830eadae6a0436fc4cb',
+});
+
+let b = await new Web3(
+  new Web3.providers.HttpProvider(getChain('7')?.node!, {
+    timeout: 5000,
+  })
+).eth.getPastLogs({
+  fromBlock: 28723906,
+  toBlock: 28723906,
+  address: '0x2d317eD6C2e3EB5C54CA7518Ef19deEe96C15c85'
+});
+
+
+console.log(a);
+
+console.log(b);*/
 
 
   cron.schedule("*/7 * * * * *", async () => {
@@ -96,7 +126,7 @@ export const scrap = async (
           
         }
   
-        console.log({
+        const eventData = {
           actionId: String(args["actionId"]),
           from: chain,
           to: String(args["chainNonce"]),
@@ -108,37 +138,18 @@ export const scrap = async (
           tokenId: parsed.name.includes("Unfreeze")
             ? String(args["tokenId"])
             : String(args["id"]),
-          type: parsed.name.includes("Unfreeze") ? "Unfreeze" : "Transfer",
+          type: parsed.name.includes("Unfreeze") ? "Unfreeze" : "Transfer" as "Unfreeze" | "Transfer",
           uri: nftUrl,
           contract: parsed.name.includes("Unfreeze")
             ? String(args["burner"])
             : String(args["mintWith"]),
-        });
+        };
         
+        console.log(eventData);
   
-  
-        eventHandler(em.fork())({
-          actionId: String(args["actionId"]),
-          from: chain,
-          to: String(args["chainNonce"]),
-          //@ts-ignore
-          sender: log.trx.from,
-          target: String(args["to"]),
-          hash: log.transactionHash,
-          txFees: String(args["txFees"]),
-          tokenId: parsed.name.includes("Unfreeze")
-            ? String(args["tokenId"])
-            : String(args["id"]),
-          type: parsed.name.includes("Unfreeze") ? "Unfreeze" : "Transfer",
-          uri: parsed.name.includes("Unfreeze")
-            ? String(args["baseURI"]).split("{")[0] +
-              String(args["tokenId"])
-            : String(args["tokenData"]),
-          contract: parsed.name.includes("Unfreeze")
-            ? String(args["burner"])
-            : String(args["mintWith"]),
-        })
-  
+        eventHandler(em.fork())(eventData)
+       
+
       } catch (_) {
         console.log(_);
         return [];

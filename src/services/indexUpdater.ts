@@ -64,14 +64,14 @@ export default class IndexUpdater {
     }
   }
 
-  public async getDestTrxData(trx: string, chainName: string) {
+  public async getDestTrxData(trx: string, chainName: string, provider:JsonRpcProvider) {
     const node = this.getNodeRpc(chainName);
     const minter = this.getMinterContract(chainName);
 
     if (!node && !minter) return null;
 
     try {
-      const provider = new JsonRpcProvider(node);
+
 
       const wait = await provider.waitForTransaction(trx);
       console.log(wait.transactionHash, "trxHash");
@@ -82,16 +82,16 @@ export default class IndexUpdater {
       const decoded = contract.interface.parseTransaction(res);
 
     
-
+      console.log(decoded);
       const tokenId =
-        decoded.name === "validateTransferNft"
+        decoded.name.includes('Transfer')
           ? decoded.args["nftId"].toString()
           : decoded.args["tokenId"].toString();
 
       const bridgeMinter = decoded.args["mintWith"]?.toString();
       const originalContractAddress = decoded.args["contractAddr"]?.toString();
 
-      return { tokenId, provider, bridgeMinter, originalContractAddress };
+      return { tokenId, provider, bridgeMinter, originalContractAddress, actionId:  decoded.args["actionId"]?.toString()};
     } catch (e) {
       console.log(e, "kistro");
       return null;
@@ -227,7 +227,8 @@ export default class IndexUpdater {
 
     const destTrxData = await this.getDestTrxData(
       updated.toHash,
-      updated.toChainName
+      updated.toChainName,
+      new JsonRpcProvider(this.getNodeRpc(updated.toChain!))
     );
 
     if (!destTrxData?.provider || !destTrxData?.tokenId) {

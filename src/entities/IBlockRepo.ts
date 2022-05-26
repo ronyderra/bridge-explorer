@@ -4,7 +4,8 @@ import { ObjectId } from "@mikro-orm/mongodb";
 export interface IBlockRepo {
     chain: string,
     lastBlock: number,
-    timestamp: number
+    timestamp: number,
+    addresses?: string[]
 
 }
 
@@ -22,12 +23,18 @@ export class BlockRepo {
   @Property()
   timestamp: number
 
+  @Property()
+  addresses?: string[]
+
 
 
   constructor(obj:IBlockRepo) {
      this.chain = obj.chain
      this.lastBlock = obj.lastBlock
      this.timestamp = obj.timestamp
+     if (obj.addresses){
+       this.addresses = obj.addresses
+     }
   }
 
 }

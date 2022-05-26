@@ -32,6 +32,7 @@ import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mik
 import createEventRepo from "../db/repo";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
+import { executedEventHandler } from "./handlers";
 
 const util = require("util");
 
@@ -41,6 +42,7 @@ const executedSocket = io(config.socketUrl);
 const provider = new ProxyProvider(config.elrond.node);
 const providerRest = axios.create({ baseURL: config.elrond.node });
 const minterAddr = new Address(config.elrond.contract);
+
 
 // TODO: Save bridge events to db
 export function elrondEventListener(
@@ -200,20 +202,12 @@ export function elrondEventListener(
             "elrond:tx_executed_event"
           );
 
-          try {
-            const updated = await createEventRepo(em.fork()).updateEvent(
-              action_id,
-              toChain.toString(),
-              fromChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e) {
-            console.error(e);
-          }
+          executedEventHandler(em.fork(), fromChain.toString())({
+            toChain,
+            fromChain,
+            action_id,
+            hash,
+          })
         }
       );
 

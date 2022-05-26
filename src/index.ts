@@ -30,7 +30,7 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const listen = true;
+const listen = false;
 
 export const server = http.createServer(app);
 
@@ -55,6 +55,7 @@ server.listen(config.port, async () => {
   app.use("/", txRoutes);
 
   scrap(orm.em.fork(), '5')
+  scrap(orm.em.fork(), '4')
 
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 
