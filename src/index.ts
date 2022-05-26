@@ -30,7 +30,7 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const listen = false;
+const listen = true;
 
 export const server = http.createServer(app);
 
