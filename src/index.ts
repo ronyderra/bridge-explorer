@@ -30,7 +30,7 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const listen = true;
+const listen = false;
 
 export const server = http.createServer(app);
 
@@ -57,9 +57,9 @@ server.listen(config.port, async () => {
 
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 
-  listen &&
+  true &&
     config.web3.map((chain, i) =>
-       setTimeout(() => scrap(orm.em.fork(), chain.nonce), 10000 + (i + 1) * .5 * 1000)
+    chain.nonce === '5' && setTimeout(() => scrap(orm.em.fork(), chain.nonce), 5000)//10000 + (i + 1) * .5 * 1000)
     ); 
 
   listen && elrondEventListener(orm.em.fork()).listen();

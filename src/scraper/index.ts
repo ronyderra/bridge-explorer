@@ -82,7 +82,7 @@ console.log('SCRAPING ', chainConfig.name);
     if (!blocks) {
       blocks = new BlockRepo({
         chain,
-        lastBlock: await web3.eth.getBlockNumber() - 1,
+        lastBlock: 14829790 -1 ,//await web3.eth.getBlockNumber() - 1,
         timestamp: Math.floor(+new Date() / 1000),
       });
       await em.persistAndFlush(blocks);
@@ -155,7 +155,7 @@ console.log('SCRAPING ', chainConfig.name);
             : String(args["mintWith"]),
         };
         
-        console.log(eventData);
+        //console.log(eventData);
   
         eventData && eventHandler(em.fork())(eventData)
        
@@ -170,7 +170,7 @@ console.log('SCRAPING ', chainConfig.name);
     if (!logs.length) {
         return
     }
-
+ 
     blocks &&
       wrap(blocks).assign(
         {

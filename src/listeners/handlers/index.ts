@@ -135,12 +135,13 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
       return await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
   
     })(),
+    
   ]);
 
   if (doc) {
     console.log(doc);
-    clientAppSocket.emit("incomingEvent", doc);
-
+    setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000 )
+    
     setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
 
