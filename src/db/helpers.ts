@@ -3,6 +3,9 @@ import { IEventRepo } from "./repo";
 import {Request, Response, NextFunction} from 'express'
 import axios from "axios";
 import config from "../config";
+import { BigNumber } from "@ethersproject/bignumber";
+import { isHexString, isBytes } from "@ethersproject/bytes";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 const saveWallet = async  function (eventRepo:IEventRepo, senderAddress:string | undefined, to:string | undefined) {
     Promise.all([
@@ -35,4 +38,18 @@ const captchaProtected = async (req:Request, res:Response, next:NextFunction) =>
         }
 }
 
-export {saveWallet, captchaProtected}
+
+function isBigNumberish(value: any): value is BigNumberish {
+    return (value != null) && (
+        BigNumber.isBigNumber(value) ||
+        (typeof(value) === "number" && (value % 1) === 0) ||
+        (typeof(value) === "string" && !!value.match(/^-?[0-9]+$/)) ||
+        isHexString(value) ||
+        (typeof(value) === "bigint") ||
+        isBytes(value)
+    );
+}
+
+export {saveWallet, captchaProtected, isBigNumberish}
+
+

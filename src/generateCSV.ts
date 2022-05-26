@@ -5,6 +5,8 @@ import { IEventRepo } from "./db/repo";
 import moment from "moment";
 import { ethers } from "ethers";
 import { currency, txExplorers, addressExplorers } from "./config";
+import { isBigNumberish } from "./db/helpers";
+
 
 
 export const generateCSV = async (
@@ -27,7 +29,8 @@ export const generateCSV = async (
       delete shallow.chainName;
       delete shallow.actionId;
 
-      shallow['txValue'] = event.txFees &&  ethers.utils.formatEther(event.txFees) + ' ' +currency[event.fromChain || 'unknown_chain'];
+      shallow['txValue'] = event.txFees  && isBigNumberish(event.txFees) &&  ethers.utils.formatEther(event.txFees) + ' ' +currency[event.fromChain || 'unknown_chain'];
+      shallow['txDollarValue'] = event.dollarFees  && event.dollarFees
       shallow['fromHash'] = event.fromChain? `${txExplorers[event.fromChain]}${shallow['fromHash']}` : shallow['fromHash'] || '';
       shallow['toHash'] = event.toChain? `${txExplorers[event.toChain]}${shallow['toHash']}` : shallow['toHash'] || '';
       shallow['targetAddress'] = event.fromChain? `${addressExplorers[event.fromChain]}${shallow['targetAddress']}` : shallow['targetAddress'] || '';
