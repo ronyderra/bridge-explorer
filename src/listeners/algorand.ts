@@ -1,5 +1,5 @@
 import { IEventRepo } from "../db/repo";
-import { IContractEventListener } from "./old";
+import { contractEventService } from "./old";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
@@ -28,7 +28,7 @@ const algoSocket = io(config.web3socketUrl);
 
 export function AlgorandEventListener(
   eventRepo: IEventRepo
-): IContractEventListener {
+): any {
   return {
     listen: async () => {
       const indexerClient = getAlgodIndexer(

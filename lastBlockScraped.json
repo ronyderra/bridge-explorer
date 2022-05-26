@@ -1,0 +1,113 @@
+[
+  {
+    "blockChainNumber": 2,
+    "blochChainSymbol": "ELROND",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 3,
+    "blochChainSymbol": "HECO",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 4,
+    "blochChainSymbol": "BSC",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 5,
+    "blochChainSymbol": "ETHEREUM",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 6,
+    "blochChainSymbol": "AVALANCHE",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 7,
+    "blochChainSymbol": "POLYGON",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 8,
+    "blochChainSymbol": "FANTOM",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 9,
+    "blochChainSymbol": "TRON",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 11,
+    "blochChainSymbol": "CELO",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 12,
+    "blochChainSymbol": "HARMONY",
+    "lastBlockScraped": 19590327
+  },  {
+    "blockChainNumber": 13,
+    "blochChainSymbol": "ONT",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 14,
+    "blochChainSymbol": "XDAI",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 15,
+    "blochChainSymbol": "ALGORAND",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 16,
+    "blochChainSymbol": "FUSE",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 17,
+    "blochChainSymbol": "UNIQUE",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 18,
+    "blochChainSymbol": "TEZOS",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 19,
+    "blochChainSymbol": "VELAS",
+    "lastBlockScraped": 19590327
+  },
+
+  {
+    "blockChainNumber": 20,
+    "blochChainSymbol": "IOTEX",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 21,
+    "blochChainSymbol": "AURORA",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber":22,
+    "blochChainSymbol": "GODWOKEN",
+    "lastBlockScraped": 19590327
+  },
+
+  {
+    "blockChainNumber": 23,
+    "blochChainSymbol": "GATECHAIN",
+    "lastBlockScraped": 19590327
+  },
+  {
+    "blockChainNumber": 25,
+    "blochChainSymbol": "VECHAIN",
+    "lastBlockScraped": 19590327
+  }
+]

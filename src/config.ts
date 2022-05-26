@@ -215,6 +215,7 @@ const config: Config = {
   },
   db: getOrThrow("DB_URL"),
   indexer_db: getOrThrow("XP_INDEXER_DB"),
+  lastBlockScraped_db:getOrThrow("DB_URL_LASTBLOCKSCRAPED"),
   port: getOrThrow("PORT"),
   socketUrl: getOrThrow("SOCKET_URL"),
   type: getOrThrow("type_sheets"),

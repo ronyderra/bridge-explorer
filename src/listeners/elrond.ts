@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { Base64 } from "js-base64";
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./old";
+import { contractEventService } from "./old";
 import { EvResp } from "../entities/EvResp";
 import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";
@@ -46,7 +46,7 @@ const minterAddr = new Address(config.elrond.contract);
 // TODO: Save bridge events to db
 export function elrondEventListener(
   eventRepo: IEventRepo
-): IContractEventListener {
+): any {
 
 
  /* ws.onopen = () => {

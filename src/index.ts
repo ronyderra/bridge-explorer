@@ -6,7 +6,7 @@ import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
 import config from "./config";
-import { MikroORM,wrap } from "@mikro-orm/core";
+import { MikroORM, wrap } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
@@ -18,8 +18,8 @@ import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater"
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-import moment, {Moment} from "moment";
-import { IEvent,BridgeEvent } from "./entities/IEvent";
+import moment, { Moment } from "moment";
+import { IEvent, BridgeEvent } from "./entities/IEvent";
 import { DailyData, IDailyData } from "./entities/IDailyData";
 
 const cron = require("node-cron");
@@ -28,8 +28,6 @@ export let io: Server;
 
 export default (async function main() {
 
-
-
   const app = express();
   app.use(cors());
   app.use(bodyParser.json({ limit: "10mb" }));
@@ -37,32 +35,30 @@ export default (async function main() {
 
   const orm = await MikroORM.init(explorerDB);
 
-  
   const indexerOrm = await MikroORM.init(indexerDb);
   const txRoutes = txRouter(createEventRepo(orm));
   new IndexUpdater(createNFTRepo(indexerOrm))
   app.use("/", txRoutes);
-
-  
- 
+     
+  contractEventService(4, createEventRepo(orm), 4)
 
   EvmEventService(createEventRepo(orm)).listen();
 
-  elrondEventListener(
-    createEventRepo(orm)
-  ).listen();
+  // elrondEventListener(
+  //   createEventRepo(orm)
+  // ).listen();
 
 
-  tezosEventListener(
-    config.tezos.socket,
-    config.tezos.contract,
-    config.tezos.name,
-    config.tezos.nonce,
-    config.tezos.id,
-    createEventRepo(orm)
-  ).listen();
+  // tezosEventListener(
+  //   config.tezos.socket,
+  //   config.tezos.contract,
+  //   config.tezos.name,
+  //   config.tezos.nonce,
+  //   config.tezos.id,
+  //   createEventRepo(orm)
+  // ).listen();
 
-  AlgorandEventListener(createEventRepo(orm)).listen();
+  // AlgorandEventListener(createEventRepo(orm)).listen();
 
 
 

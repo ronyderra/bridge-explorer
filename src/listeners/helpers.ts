@@ -5,7 +5,7 @@ import  { Algodv2, Indexer} from 'algosdk';
 import WebSocket from "ws";
 import { Base64 } from "js-base64";
 
-import { IContractEventListener } from "./old";
+import { contractEventService } from "./old";
 import { EvResp } from "../entities/EvResp";
 import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";

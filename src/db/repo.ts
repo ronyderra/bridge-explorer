@@ -7,6 +7,7 @@ import {
 } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
+import { ILastBlockScraped, LastBlockScraped } from "../entities/ILastBlockScraped";
 import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
 import moment from "moment";
@@ -24,6 +25,10 @@ export interface IEventRepo {
     fromChain: string,
     toHash: string
   ): Promise<BridgeEvent | undefined>;
+  // updateLastBlockScraped(
+  //   lastBlockScraped: number,
+  //   blockChainNumber: number
+  // ): Promise<LastBlockScraped | undefined>;
   updateElrond(
     actionId: string,
     fromChain: string,
@@ -49,6 +54,7 @@ export interface IEventRepo {
     pendingSearch?: string,
     offset?: number
   ): Promise<{ events: BridgeEvent[]; count: number } | null>;
+  getAllLastBlockScrapes(): any;
   getMetrics(): Promise<{
     totalTx: number;
     totalWallets: number;
@@ -282,6 +288,46 @@ export default function createEventRepo({
         console.log(e);
       }
     },
+    async getAllLastBlockScrapes() { 
+      let events = await em.find(LastBlockScraped,{},);
+      return events;
+    },
+    // async updateLastBlockScraped(lastBlockScraped: number,blockChainNumber: number){
+      // console.log("enter update", { lastBlockScraped, blockChainNumber });
+
+      // try {
+      //   const LastBlockScrapedIn = await new Promise<LastBlockScraped>(
+      //     async (resolve, reject) => {
+
+      //       let event = await em.findOne(LastBlockScraped, {});
+
+      //       const interval = setInterval(async () => {
+      //         console.log("waiting for event", { actionId, fromChain, toChain });
+      //         event = await em.findOne(LastBlockScraped, {});
+      //       }, 5000);
+
+      //       setTimeout(() => {
+      //         clearInterval(interval);
+      //         reject("no promise");
+      //       }, 1000 * 60 * 15);
+      //     }
+      //   );
+      //   if (waitEvent.status === "Completed" && waitEvent.toHash !== 'N/A') return undefined;
+      //   wrap(waitEvent).assign(
+      //     {
+      //       toHash,
+      //       status: "Completed",
+      //       toChain,
+      //       toChainName: chainNonceToName(toChain),
+      //     },
+      //     { em }
+      //   );
+      //   await em.flush();
+      //   return waitEvent;
+      // } catch (e) {
+      //   console.log(e);
+      // }
+    // },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
       console.log('update Elrond', {
         actionId, fromChain, fromHash, senderAddress, nftUri

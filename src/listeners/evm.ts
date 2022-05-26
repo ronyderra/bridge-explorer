@@ -1,5 +1,5 @@
 import { IEventRepo } from "../db/repo";
-import { IContractEventListener } from "./old";
+import { contractEventService } from "./old";
 import config, { chainNonceToId, chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { io as clientAppSocket } from "../index";
@@ -12,9 +12,6 @@ import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from '@ethersproject/providers';
 import IndexUpdater from "../services/indexUpdater";
 
-
-
-
 const executedSocket = io(config.socketUrl);
 const elrondSocket = io(config.elrond.socket);
 const web3socket = io(config.web3socketUrl);
@@ -24,13 +21,9 @@ const evmNonces = config.web3.map(c => c.nonce);
 
 export function EvmEventService(
   eventRepo: IEventRepo
-): IContractEventListener {
+): any {
   return {
     listen: async () => {
-
-
-
-
       web3socket.on(
         "web3:bridge_tx",
         async (

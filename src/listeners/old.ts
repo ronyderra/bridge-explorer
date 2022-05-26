@@ -1,209 +1,159 @@
 import { ethers } from "ethers";
 import { IEvent } from "../entities/IEvent";
 import { IEventRepo } from "../db/repo";
-import { saveWallet } from "../db/helpers";
+import { saveWallet, } from "../db/helpers";
 import { io as clientAppSocket } from "../index";
 import { chainNonceToId } from "../config";
 import axios from "axios";
 import { BigNumber } from "bignumber.js";
-
-const TestNetRpcUri: any = {
-  ELROND: "https://devnet-api.elrond.com",
-  HECO: "https://http-testnet.hecochain.com",
-  BSC: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/bsc/testnet/archive",
-  ROPSTEN: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/eth/ropsten/archive",
-  AVALANCHE: "https://api.avax-test.network/ext/bc/C/rpc",
-  POLYGON: "https://speedy-nodes-nyc.moralis.io/3749d19c2c6dbb6264f47871/polygon/mumbai/archive",
-  FANTOM: "https://rpc.testnet.fantom.network/",
-  TRON: "https://api.shasta.trongrid.io/",
-  CELO: "https://alfajores-forno.celo-testnet.org",
-  HARMONY: "https://api.s0.b.hmny.io",
-  XDAI: "https://sokol.poa.network",
-  UNIQUE: "https://rpc-opal.unique.network/",
-  TEZOS: "https://hangzhounet.smartpy.io",
-  VELAS: "https://explorer.testnet.velas.com/rpc",
-  IOTEX: "https://babel-api.testnet.iotex.io",
-  AURORA: "https://testnet.aurora.dev/",
-  GODWOKEN: "https://godwoken-testnet-web3-v1-rpc.ckbapp.dev",
-  GATECHAIN: "https://meteora-evm.gatenode.cc",
-  VECHAIN: "https://sync-testnet.veblocks.net",
-}
-
-const Chain: any = {
-  ELROND: 2,
-  HECO: 3,
-  BSC: 4,
-  ETHEREUM: 5,
-  AVALANCHE: 6,
-  POLYGON: 7,
-  FANTOM: 8,
-  TRON: 9,
-  CELO: 11, //11
-  HARMONY: 12, //12
-  ONT: 13, //13
-  XDAI: 14, //14
-  ALGORAND: 15, //15
-  FUSE: 16, // 16
-  UNIQUE: 17, // 17
-  TEZOS: 18, // 18
-  VELAS: 19, // 19
-  IOTEX: 20, // 20
-  AURORA: 21, // 21
-  GODWOKEN: 22, // 22
-  GATECHAIN: 23, // 23
-  VECHAIN: 25, // 25
-}
-
-const contractAddresses: any = {
-  ELROND: "erd1qqqqqqqqqqqqqpgqnd6nmq4vh8e3xrxqrxgpwfldgp3sje83k4as3lusln",
-  // HECO: 3,
-  BSC: "0x3Dd26fFf61D2a79f5fB77100d6daDBF073F334E6",
-  // ETHEREUM: 5,
-  AVALANCHE: "0xDdF1f6B8Ae8cd26dBE7C4C3ed9ac8E6D8B3a4FdC",
-  POLYGON: "0x224f78681099D66ceEdf4E52ee62E5a98CCB4b9e",
-  FANTOM: "0x9a287810bA8F0564DaDd9F2Ea9B7B2459497416B",
-  TRON: "TY46GA3GGdMtu9GMaaSPPSQtqq9CZAv5sK",
-  // CELO: 11, //11
-  // HARMONY: 12, //12
-  // ONT: 13, //13
-  // XDAI: 14, //14
-  // ALGORAND: 15, //15
-  // FUSE: 16, // 16
-  // UNIQUE: 17, // 17
-  // TEZOS: 18, // 18
-  // VELAS: 19, // 19
-  // IOTEX: 20, // 20
-  // AURORA: 21, // 21
-  // GODWOKEN: 22, // 22
-  // GATECHAIN: 23, // 23
-  VECHAIN: "0x4096e08C5d6270c8cd873daDbEAB575670aad8Bc", // 25
-}
+import { Minter__factory } from "xpnet-web3-contracts";
+import config from "../config";
 
 export async function contractEventService(fromChain: number, eventRepo: IEventRepo, toChain?: number | undefined): Promise<any> {
-  try {
-    //from chain data
-    let fromChainName = Object.keys(Chain).filter(e => Chain[e] === fromChain)[0];
-    const fromRpc = TestNetRpcUri[fromChainName];
-    const fromContractAddress = contractAddresses[fromChainName];
-    const fromProvider = await new ethers.providers.JsonRpcProvider(fromRpc);
-    const fromCurrentBlock = await fromProvider.getBlockNumber()
-    const fromLastBlockScraped = fromCurrentBlock - 30;
-    const actionId = "4"
+  const fromObj = config.web3.filter((i) => i.nonce === fromChain.toString())[0]
+  const toObj = toChain ? config.web3.filter((i) => i.nonce === toChain.toString())[0] : "theres no to chain"
+  console.log("got here")
+  const res = await eventRepo.getAllLastBlockScrapes();
+  console.log(res)
 
-    const fromData = await getContractData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
-    console.log("-----------------------fromData----------------------------")
-    console.log(fromData)
+  // try {
+    //from chain data
+    let fromChainName = fromObj.name;
+    const fromRpc = fromObj.node
+    const fromContractAddress = fromObj.contract;
+    const fromProvider = await new ethers.providers.JsonRpcProvider(fromRpc);
+    const fromCurrentBlock = await fromProvider.getBlockNumber();
+    const fromLastBlockScraped = fromCurrentBlock - 30;//get from mongo
+
+    // const fromData = await getContractData(fromLastBlockScraped, fromCurrentBlock, fromContractAddress, fromProvider)
+
+    // console.log("-----------------------fromData----------------------------")
+    // console.log(fromData)
 
     //to chain data
-    let toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain)[0];
-    const toRpc = TestNetRpcUri[toChainName];
-    const toContractAddress = contractAddresses[toChainName];
-    const toProvider = await new ethers.providers.JsonRpcProvider(toRpc);
-    const toCurrentBlock = await fromProvider.getBlockNumber()
-    const toLastBlockScraped = toCurrentBlock - 30;
+    // let toChainName = Object.keys(Chain).filter(e => Chain[e] === toChain)[0];
+    // const toRpc = TestNetRpcUri[toChainName];
+    // const toContractAddress = contractAddresses[toChainName];
+    // const toProvider = await new ethers.providers.JsonRpcProvider(toRpc);
+    // const toCurrentBlock = await fromProvider.getBlockNumber()
+    // const toLastBlockScraped = toCurrentBlock - 30;
 
-    const toData = await getContractData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
-    console.log("------------------------toData---------------------------")
-    console.log(toData)
+    // const toData = await getContractData(toLastBlockScraped, toCurrentBlock, toContractAddress, toProvider)
+    // console.log("------------------------toData---------------------------")
+    // console.log(toData)
 
     //preparing data for push to mongo   
 
-    for (let t = 0; t < fromData.length; t++) {
-      const chainId = chainNonceToId(fromChain?.toString());
-      let [exchangeRate]: any = await Promise.allSettled([
-        (async () => {
-          const res = await axios(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-          );
-          return res.data[chainId].usd;
-        })(),
-      ]);
+    // for (let t = 0; t < fromData.length; t++) {
+    //   const chainId = chainNonceToId(fromChain?.toString());
+    //   let [exchangeRate]: any = await Promise.allSettled([
+    //     (async () => {
+    //       const res = await axios(
+    //         `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+    //       );
+    //       return res.data[chainId].usd;
+    //     })(),
+    //   ]);
 
-      const event: IEvent = {
-        chainName: fromChainName,
-        fromChain: fromChain.toString(),//number      
-        toChain: toChain.toString(),//number
-        fromChainName: fromChainName,
-        toChainName: toChainName,
-        txFees: fromData[t].gasPrice,
-        fromHash: fromData[t].hash && fromData[t].hash.toString(),
-        toHash: toData[t].hash && toData[t].hash.toString(),
-        targetAddress: toData[t].clientAddress,
-        senderAddress: fromData[t].clientAddress,
-        type: "Transfer",
-        actionId: actionId,
-        status: "Pending",
-        dollarFees: exchangeRate.status === "fulfilled" ? new BigNumber(
-          ethers.utils.formatEther(fromData[t].dollarFees?.toString() || ""))
-          .multipliedBy(exchangeRate.value)
-          .toString()
-          : "",
-      };
-      console.log("_________event____________")
-      console.log(event)
+      // const event: IEvent = {
+      //   chainName: fromChainName,
+      //   fromChain: fromChain.toString(),//number      
+      //   toChain: toChain.toString(),//number
+      //   fromChainName: fromChainName,
+      //   toChainName: toChainName,
+      //   txFees: fromData[t].gasPrice,
+      //   fromHash: fromData[t].hash && fromData[t].hash.toString(),
+      //   toHash: toData[t].hash && toData[t].hash.toString(),
+      //   targetAddress: toData[t].clientAddress,
+      //   senderAddress: fromData[t].clientAddress,
+      //   type: "Transfer",
+      //   actionId: actionId,       
+      //   status: "Pending",
+      //   dollarFees: exchangeRate.status === "fulfilled" ? new BigNumber(
+      //     ethers.utils.formatEther(fromData[t].dollarFees?.toString() || ""))
+      //     .multipliedBy(exchangeRate.value)
+      //     .toString()
+      //     : "",
+      // };
+      // console.log("_________event____________")
+      // console.log(event)
 
-      Promise.all([
-        (async () => {
-          return await eventRepo.createEvent(event);
-        })(),
-        (async () => {
-          await saveWallet(
-            eventRepo,
-            event.senderAddress,
-            event.targetAddress
-          );
-        })(),
-      ])
-        .then(([doc]) => {
-          clientAppSocket.emit("incomingEvent", doc);
+      // Promise.all([
+      //   (async () => {
+      //     return await eventRepo.createEvent(event);
+      //   })(),
+      //   (async () => {
+      //     await saveWallet(
+      //       eventRepo,
+      //       event.senderAddress,
+      //       event.targetAddress
+      //     );
+      //   })(),
+      // ])
+      //   .then(([doc]) => {
+      //     clientAppSocket.emit("incomingEvent", doc);
 
-          setTimeout(async () => {
-            const updated = await eventRepo.errorEvent(
-              actionId.toString(),
-              fromChain.toString()
-            );
+      //     setTimeout(async () => {
+      //       const updated = await eventRepo.errorEvent(
+      //         actionId.toString(),
+      //         fromChain.toString()
+      //       );
 
-            if (updated) {
-              clientAppSocket.emit("updateEvent", updated);
-            }
-          }, 1000 * 60);
-        })
-        .catch(() => { });
-    }
+      //       if (updated) {
+      //         clientAppSocket.emit("updateEvent", updated);
+      //       }
+      //     }, 1000 * 60);
+      //   })
+      //   .catch(() => { });
+    // }
 
 
-    return 'success'
-  } catch (err: any) {
-    console.log(err.message)
-  }
+  //   return 'success'
+  // } catch (err: any) {
+  //   console.log(err.message)
+  // }
 }
 
-async function getContractData(
-  LastBlockScraped: number,
-  currentBlock: number,
-  contractAddress: string,
-  provider: ethers.providers.JsonRpcProvider) {
-     
-  for (let i = 19590325; i <= 19590335; i++) {
-    console.log(i)
-    const blockData = await provider.getBlockWithTransactions(i);
-    const allTransaction = blockData.transactions;
+async function getContractData(LastBlockScraped: number, currentBlock: number, contractAddress: string, provider: ethers.providers.JsonRpcProvider) {
 
-    const relavantItem = allTransaction.filter((item) => { if (item.to === contractAddress || item.from === contractAddress) { return item } })
-    let relavantItemArray = []
+  const contract = Minter__factory.connect(contractAddress, provider);
 
-    if (relavantItem.length > 0) {
-      for (let j = 0; j < relavantItem.length; j++) {
-        let add = {
-          clientAddress: relavantItem[j].from === contractAddress ? relavantItem[j].to : relavantItem[j].from,
-          hash: relavantItem[j].hash,
-          gasPrice: relavantItem[j].value ? ethers.utils.formatEther(relavantItem[j].value) : null,
-          dollarFees: relavantItem[j].value
+  try {
+    for (let i = 19590325; i <= 19590335; i++) {
+      const blockData = await provider.getBlockWithTransactions(i);
+
+      const allTransaction = blockData.transactions;
+      const relavantTransactions = allTransaction.filter((item) => { if (item.to === contractAddress || item.from === contractAddress) { return item } })
+      let relavantItemArray = []
+
+      if (relavantTransactions.length > 0) {
+        for (let j = 0; j < relavantTransactions.length; j++) {
+          console.log("gethere")
+
+          const data = await relavantTransactions[j].wait()
+          let logs = data.logs
+          logs.map((l) => {
+            try {
+              const parsed = contract.interface.parseLog(l);
+              console.log(parsed)
+            } catch (err) {
+              console.log(err.message)
+            }
+          })
+
+          let add = {
+            clientAddress: relavantTransactions[j].from === contractAddress ? relavantTransactions[j].to : relavantTransactions[j].from,
+            hash: relavantTransactions[j].hash,
+            gasPrice: relavantTransactions[j].value ? ethers.utils.formatEther(relavantTransactions[j].value) : null,
+            dollarFees: relavantTransactions[j].value
+          }
+          relavantItemArray.push(add)
         }
-        relavantItemArray.push(add)
+        return relavantItemArray;
       }
-      return relavantItemArray;
     }
+  } catch (err) {
+    console.log(err.message)
   }
 }
 

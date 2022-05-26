@@ -1,7 +1,7 @@
 
 
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./old";
+import { contractEventService } from "./old";
 import { bytes2Char, char2Bytes } from "@taquito/utils";
 import { saveWallet } from "../db/helpers";
 import { IEventRepo } from "../db/repo";
@@ -54,7 +54,7 @@ export function tezosEventListener(
   chainNonce: string,
   chainId: string,
   eventRepo: IEventRepo
-): IContractEventListener {
+): any {
   const tezos = new TezosToolkit(rpc);
   const sub = tezos.stream.subscribeOperation({
     destination: contract,
