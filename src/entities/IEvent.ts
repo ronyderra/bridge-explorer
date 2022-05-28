@@ -11,14 +11,15 @@ export interface IEvent {
   txFees: string;
   dollarFees?: string;
   tokenId?: string;
-  initialTokenId?:string;
+  initialTokenId?: string;
   status: "Pending" | "Completed";
   fromHash: string;
   toHash?: string;
   senderAddress: string;
   targetAddress?: string;
   nftUri?: string;
-  contract?:string;
+  contract?: string;
+  createdAt?: Date
 }
 
 @Entity()
@@ -81,7 +82,7 @@ export class BridgeEvent {
   contract?: string;
 
   @Property()
-  createdAt: Date = new Date();
+  createdAt?: Date = new Date();
 
   constructor({
     actionId,
@@ -101,7 +102,8 @@ export class BridgeEvent {
     fromChainName,
     toChainName,
     initialTokenId,
-    contract
+    contract,
+    createdAt
   }: IEvent) {
     this.actionId = actionId;
     this.chainName = chainName;
@@ -121,5 +123,6 @@ export class BridgeEvent {
     this.dollarFees = dollarFees
     this.initialTokenId = initialTokenId
     this.contract = contract
+    this.createdAt = createdAt
   }
 }

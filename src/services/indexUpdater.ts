@@ -1,10 +1,15 @@
 import { IndexerRepo } from "../db/indexerRepo";
 import { EthNftDto } from "../entities/NftIndex";
-import config from "../config";
+import config, { ChainConfig } from "../config";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { MikroORM } from "@mikro-orm/core";
+import { explorerDB } from "../mikro-orm.config";
 import { BridgeEvent } from "../entities/IEvent";
+import Web3 from "web3";
+import moment from "moment";
+import { eventHandler } from "../listeners/handlers";
+
 
 export default class IndexUpdater {
   public static instance: IndexUpdater;
@@ -18,6 +23,89 @@ export default class IndexUpdater {
 
     this.repo = repo;
     IndexUpdater.instance = this;
+  }
+
+  public async saveEvents(fromBlock: number, toBlock: number | string, chain: ChainConfig) {
+    const orm = await MikroORM.init(explorerDB);
+
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider(chain.node, {
+        timeout: 5000,
+      })
+    );
+
+    let logs = await web3.eth.getPastLogs({
+      fromBlock,
+      toBlock,
+      address: chain.contract,
+    });
+
+
+    if (logs.length > 0)
+      console.log(`found ${logs.length} in ${chain.name}::from block ${fromBlock}`);
+
+    const trxs = await Promise.all(logs.map(async (log) => web3.eth.getTransaction(log.transactionHash)))
+
+    logs = logs.map((log, i) => ({
+      ...log,
+      trx: trxs[i]
+    }))
+
+    const provider = new JsonRpcProvider(chain.node);
+    const _contract = Minter__factory.connect(chain.contract, provider);
+
+    for (const log of logs) {
+      const block = await web3.eth.getBlock(log.blockHash)
+      const date = +block.timestamp * 1000;
+
+      const createdAt = new Date(date);
+
+      console.log(createdAt);
+      const parsed = _contract.interface.parseLog(log);
+
+      const args = parsed.args;
+
+      let nftUrl = ''
+
+      if (parsed.name.includes("Unfreeze")) {
+        nftUrl = String(args["baseURI"]).split("{")[0] + String(args["tokenId"]);
+
+      } else {
+        if (args["tokenData"].includes('0x{id}')) {
+          nftUrl = String(args["tokenData"]).replace('0x{id}', String(args["id"]));
+
+        } else {
+          nftUrl = String(args["tokenData"]).includes('{id}') ? String(args["tokenData"]).split("{")[0] + String(args["id"]) : String(args["tokenData"])
+        }
+
+      }
+
+
+
+      eventHandler(orm.em)({
+        actionId: String(args["actionId"]),
+        from: chain.nonce,
+        to: String(args["chainNonce"]),
+        //@ts-ignore
+        sender: log.trx.from,
+        target: String(args["to"]),
+        hash: log.transactionHash,
+        txFees: String(args["txFees"]),
+        tokenId: parsed.name.includes("Unfreeze")
+          ? String(args["tokenId"])
+          : String(args["id"]),
+        type: parsed.name.includes("Unfreeze") ? "Unfreeze" : "Transfer" as "Unfreeze" | "Transfer",
+        uri: nftUrl,
+        contract: parsed.name.includes("Unfreeze")
+          ? String(args["burner"])
+          : String(args["mintWith"]),
+        createdAt
+      })
+
+
+    }
+
+
   }
 
   public async getDepTrxData(trx: string, chainName: string) {
@@ -49,7 +137,7 @@ export default class IndexUpdater {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
           contractAddr: descs[0].args["burner"].toString(),
-          
+
         };
       }
 
@@ -65,7 +153,7 @@ export default class IndexUpdater {
     }
   }
 
-  public async getDestTrxData(trx: string, chainName: string, provider:JsonRpcProvider) {
+  public async getDestTrxData(trx: string, chainName: string, provider: JsonRpcProvider) {
     const node = this.getNodeRpc(chainName);
     const minter = this.getMinterContract(chainName);
 
@@ -77,12 +165,12 @@ export default class IndexUpdater {
       const wait = await provider.waitForTransaction(trx);
       console.log(wait.transactionHash, "trxHash");
       const res = await provider.getTransaction(trx);
-     
+
 
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
 
-    
+
       console.log(decoded);
       const tokenId =
         decoded.name.includes('Transfer')
@@ -92,7 +180,7 @@ export default class IndexUpdater {
       const bridgeMinter = decoded.args["mintWith"]?.toString();
       const originalContractAddress = decoded.args["contractAddr"]?.toString();
 
-      return { tokenId, provider, bridgeMinter, originalContractAddress, actionId:  decoded.args["actionId"]?.toString()};
+      return { tokenId, provider, bridgeMinter, originalContractAddress, actionId: decoded.args["actionId"]?.toString() };
     } catch (e) {
       console.log(e, "kistro");
       return null;

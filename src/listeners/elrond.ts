@@ -40,6 +40,7 @@ const elrondSocket = io(config.elrond.socket);
 const executedSocket = io(config.socketUrl);
 
 const provider = new ProxyProvider(config.elrond.node);
+
 const providerRest = axios.create({ baseURL: config.elrond.node });
 const minterAddr = new Address(config.elrond.contract);
 
@@ -68,7 +69,7 @@ export function elrondEventListener(
   return {
     listen: async () => {
       elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
-        
+
 
         try {
           console.log(fromHash, "fromHash");
@@ -171,7 +172,7 @@ export function elrondEventListener(
                 (async () => {
                   return await createEventRepo(em.fork()).createEvent(eventObj);
                 })(),
-                (async () => {})(),
+                (async () => { })(),
               ]).then(([doc]) => {
                 console.log(doc, "doc");
                 clientAppSocket.emit("incomingEvent", doc);

@@ -1,13 +1,11 @@
 import express from "express";
-import { providers } from "ethers";
-//import { contractEventService } from "./listeners/old";
 import { EvmEventService } from "./listeners/evm";
 import { elrondEventListener } from "./listeners/elrond";
 import { tezosEventListener } from "./listeners/tezos";
 import { AlgorandEventListener } from "./listeners/algorand";
 import { TronEventListener } from "./listeners/tron";
-import config, { getChain } from "./config";
-import { MikroORM, wrap } from "@mikro-orm/core";
+import config from "./config";
+import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./db/repo";
 import { txRouter } from "./routes/tx";
@@ -17,20 +15,15 @@ import bodyParser from "body-parser";
 import cron from "node-cron";
 import createNFTRepo from "./db/indexerRepo";
 import IndexUpdater from "./services/indexUpdater";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-import moment, { Moment } from "moment";
-import { IEvent, BridgeEvent } from "./entities/IEvent";
-import { DailyData, IDailyData } from "./entities/IDailyData";
 import { Server } from "socket.io";
-import {scrap} from './scraper/index'
+import { scrap } from './scraper/index'
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const listen = false;
+const listen = true;
 
 export const server = http.createServer(app);
 
@@ -57,10 +50,9 @@ server.listen(config.port, async () => {
 
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 
-  true &&
+  listen &&
     config.web3.map((chain, i) =>
-    chain.nonce === '5' && setTimeout(() => scrap(orm.em.fork(), chain.nonce), 5000)//10000 + (i + 1) * .5 * 1000)
-    ); 
+      setTimeout(() => scrap(orm.em.fork(), chain.nonce), 10000 + (i + 1) * .5 * 1000));
 
   listen && elrondEventListener(orm.em.fork()).listen();
 

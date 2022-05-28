@@ -5,19 +5,21 @@ dotenv.config();
 export const currency: any = {
   "4": "BNB",
   "19": "VLX",
-  "14": "xDAI",
+  "14": "XDAI",
   "2": "EGLD",
   "20": "IOTX",
-  "16": "Fuse",
+  "16": "FUSE",
   "6": "AVAX",
   "21": "AETH",
   "7": "MATIC",
   "5": "ETH",
   "8": "FTM",
   "12": "ONE",
-  "18": "TEZ",
+  "18": "XTZ",
   "23": "GT",
   "25": "VET",
+  "9": "TRX",
+  "15": "ALGO"
 };
 
 export const txExplorers: any = {

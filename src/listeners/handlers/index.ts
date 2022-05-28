@@ -5,11 +5,10 @@ import IndexUpdater from "../../services/indexUpdater";
 import BigNumber from "bignumber.js";
 
 import { IEvent } from "../../entities/IEvent";
-import { chainNonceToName, chainNonceToId } from "../../config";
-import { IEventRepo } from "../../db/repo";
-import { saveWallet } from "../../db/helpers";
+import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
-
+import cron from 'node-cron'
+import { currency } from "../../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 
 import createEventRepo from "../../db/repo";
@@ -27,9 +26,31 @@ export interface IEventhandler {
   uri: string;
   contract: string;
   dollarFees?: string;
+  createdAt?: Date
 }
 
 const evmNonces = config.web3.map((c) => c.nonce);
+
+const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
+
+export const calcDollarFees = (txFees: any, exchangeRate: number) => {
+  console.log(exchangeRate.toFixed(2));
+  return new BigNumber(ethers.utils.formatEther(txFees?.toString() || ""))
+    .multipliedBy(exchangeRate.toFixed(2))
+    .toString();
+};
+
+//getting exchange rate api every 3 mins
+let exchangeRates: any = {};
+
+
+(async () => {
+  exchangeRates = (await getExchageRate())
+})()
+cron.schedule('*/3 * * * *', async () => {
+  exchangeRates = (await getExchageRate())
+})
+
 
 export const executedEventHandler = (
   em: EntityManager<IDatabaseDriver<Connection>>,
@@ -45,53 +66,53 @@ export const executedEventHandler = (
   action_id: string;
   hash: string;
 }) => {
-  if (!fromChain || chain !== String(fromChain)) return;
-  console.log(
-    {
-      fromChain,
-      toChain,
-      action_id,
-      hash,
-    },
-    "tx_executed_event"
-  );
-
-  const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
-
-  try {
-    const updated = await createEventRepo(em).updateEvent(
-      String(Number(action_id) - actionIdOffset),
-      toChain.toString(),
-      fromChain.toString(),
-      hash
+    if (!fromChain || chain !== String(fromChain)) return;
+    console.log(
+      {
+        fromChain,
+        toChain,
+        action_id,
+        hash,
+      },
+      "tx_executed_event"
     );
-    if (!updated) return;
-    console.log(updated, "updated");
 
-    if (
-      updated.status === "Completed" &&
-      updated.toChain &&
-      evmNonces.includes(updated.toChain)
-    ) {
-      IndexUpdater.instance.update(updated).catch((e) => console.log(e));
-    }
+    const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
-    if (updated.toChain === config.algorand.nonce) {
-      console.log("algo update");
-      console.log(updated.toHash?.split("-"));
-      if (updated.toHash?.split("-").length! > 2) {
-        clientAppSocket.emit("updateEvent", updated);
+    try {
+      const updated = await createEventRepo(em).updateEvent(
+        String(Number(action_id) - actionIdOffset),
+        toChain.toString(),
+        fromChain.toString(),
+        hash
+      );
+      if (!updated) return;
+      console.log(updated, "updated");
+
+      if (
+        updated.status === "Completed" &&
+        updated.toChain &&
+        evmNonces.includes(updated.toChain)
+      ) {
+        IndexUpdater.instance.update(updated).catch((e) => console.log(e));
       }
-      return;
+
+      if (updated.toChain === config.algorand.nonce) {
+        console.log("algo update");
+        console.log(updated.toHash?.split("-"));
+        if (updated.toHash?.split("-").length! > 2) {
+          clientAppSocket.emit("updateEvent", updated);
+        }
+        return;
+      }
+
+      clientAppSocket.emit("updateEvent", updated);
+    } catch (e) {
+      console.error(e);
     }
+  };
 
-    clientAppSocket.emit("updateEvent", updated);
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>  async ({
+export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) => async ({
   actionId,
   from,
   to,
@@ -103,7 +124,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   txFees,
   uri,
   contract,
-  dollarFees,
+  createdAt
 }: IEventhandler) => {
 
 
@@ -123,9 +144,11 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     senderAddress: sender,
     targetAddress: target,
     nftUri: uri,
-    dollarFees,
     contract,
+    dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]]) : '',
+    createdAt
   };
+
 
   const [doc] = await Promise.all([
     (async () => {
@@ -133,15 +156,15 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     })(),
     (async () => {
       return await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
-  
+
     })(),
-    
+
   ]);
 
   if (doc) {
     console.log(doc);
-    setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000 )
-    
+    setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
+
     setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
 
@@ -152,18 +175,4 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   }
 };
 
-export const getExchageRate = async (chain: string) => {
-  const id = chainNonceToId(chain);
 
-  const res = await axios(
-    `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`
-  );
-
-  return res.data[id].usd;
-};
-
-export const calcDollarFees = (txFees: any, exchangeRate: number) => {
-  return new BigNumber(ethers.utils.formatEther(txFees?.toString() || ""))
-    .multipliedBy(exchangeRate)
-    .toString();
-};
