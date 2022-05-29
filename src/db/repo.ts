@@ -147,7 +147,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         events = await em.find(
           BridgeEvent,
           {
-            status: "Pending",
+            status: "Failed",
           },
           {
             cache: true,

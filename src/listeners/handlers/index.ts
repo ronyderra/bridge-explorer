@@ -33,8 +33,15 @@ const evmNonces = config.web3.map((c) => c.nonce);
 
 const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
 
-export const calcDollarFees = (txFees: any, exchangeRate: number) => {
-  console.log(exchangeRate.toFixed(2));
+export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain:string) => {
+  if (fromChain === config.algorand.nonce) {
+      return String(+txFees * exchangeRate)
+  }
+
+  if (fromChain === config.tron.nonce) {
+      return new BigNumber(txFees).shiftedBy(-6).multipliedBy(exchangeRate.toFixed(2)).toString()
+  }
+
   return new BigNumber(ethers.utils.formatEther(txFees?.toString() || ""))
     .multipliedBy(exchangeRate.toFixed(2))
     .toString();
@@ -145,7 +152,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     targetAddress: target,
     nftUri: uri,
     contract,
-    dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]]) : '',
+    dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]], from) : '',
     createdAt
   };
 

@@ -8,7 +8,7 @@ import { eventHandler } from "./handlers";
 import { executedEventHandler } from "./handlers";
 import Bottleneck from "bottleneck";
 import { IEventhandler } from "./handlers";
-import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
+import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 
 const executedSocket = io(config.socketUrl);
 const notifier = io(config.web3socketUrl);
@@ -102,7 +102,7 @@ export function TronEventListener(
 
             console.log(evData, "evData");
 
-            //eventHandler(createEventRepo(em.fork()))(evData);
+            eventHandler(em.fork())(evData);
           }
         }
       });

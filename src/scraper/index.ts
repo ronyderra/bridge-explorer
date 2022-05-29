@@ -22,7 +22,7 @@ export const scrap = async (
 
   const chainConfig = getChain(chain)!
 
-  // if (!chainConfig) return
+  if (!chainConfig) return
 
   const provider = new JsonRpcProvider(chainConfig.node);
 
@@ -35,15 +35,9 @@ export const scrap = async (
 
   //const a = (await em.find(BridgeEvent, {})).at(0)
 
-
   //const date = moment(a?.createdAt).utcOffset(0).add(1, 'hour').toDate();
 
-
-
   //console.log((await web3.eth.getTransactionReceipt('0x26b57142045d2c9dba65f495bee6c9091ccd885d0f242456703114e209a6fb9a')).logs.map(l => console.log(l.topics)));
-
-  const _contract = Minter__factory.connect(chainConfig.contract, provider);
-
 
   //const p = Minter__factory.connect('0x14cab7829b03d075c4ae1acf4f9156235ce99405', new JsonRpcProvider('https://polygon-rpc.com'))
 
@@ -77,8 +71,10 @@ export const scrap = async (
   console.log(a);
   
   console.log(b);*/
-  console.log('SCRAPING ', chainConfig.name);
 
+  const _contract = Minter__factory.connect(chainConfig.contract, provider);
+
+  console.log('SCRAPING ', chainConfig.name);
 
   cron.schedule("*/7 * * * * *", async () => {
 
@@ -95,7 +91,7 @@ export const scrap = async (
     if (!blocks) {
       blocks = new BlockRepo({
         chain,
-        lastBlock: 14829790 - 1,//await web3.eth.getBlockNumber() - 1,
+        lastBlock: await web3.eth.getBlockNumber() - 1,
         timestamp: Math.floor(+new Date() / 1000),
       });
       await em.persistAndFlush(blocks);
@@ -104,10 +100,8 @@ export const scrap = async (
     const fromBlock = blocks.lastBlock + 1
 
     let logs = await web3.eth.getPastLogs({
-      fromBlock:
-        14840626,
-      toBlock:
-        14840626,
+      fromBlock,
+      toBlock : 'latest',
       address: chainConfig.contract,
     });
 
@@ -127,11 +121,8 @@ export const scrap = async (
       trx: trxs[i]
     }))
 
-
-
     for (const log of logs) {
-      //@ts-ignore
-      console.log(log.trx);
+  
 
       try {
         const parsed = _contract.interface.parseLog(log);
