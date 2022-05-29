@@ -170,6 +170,11 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
 
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
+
+        const telegram_api = `https://api.telegram.org/bot${config.telegramBotToken}
+        /sendMessage?chat_id=${config.telChatId}&text=${doc}`;
+        const res = await axios.post(`${telegram_api}`)
+        console.log(res)
       }
     }, 1000 * 60 * 30);
   }
