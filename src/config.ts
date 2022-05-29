@@ -241,6 +241,8 @@ const config: Config = {
   mail_key: getOrThrow("SENDING_BLUE"),
   captcha_secret: getOrThrow("SECRET_CAPTCHA"),
   web3socketUrl: getOrThrow("WEB3_SOCKET_URL"),
+  telegramBotToken:getOrThrow("Telegram_Bot_Token"),
+  telChatId:getOrThrow("Chat_Id")
 };
 
 export function chainNonceToName(nonce: string) {
