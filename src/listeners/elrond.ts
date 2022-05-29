@@ -7,7 +7,7 @@ import { IEventRepo } from "../db/repo";
 import config, { chainNonceToName } from "../config";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";
-import { IEvent } from "../entities/IEvent";
+import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
 import { TransactionDecoder, TransactionMetadata } from "@elrondnetwork/transaction-decoder";
@@ -76,25 +76,9 @@ export  function elrondEventListener(
     listen: async () => {
 
 
-      //const a = (await providerRest.get('/transactions?function=validateSendNft&withLogs=true&receiver=' + config.elrond.contract)).data[0];
-      //console.log(await (await providerRest.get('/transactions/' + a.txHash)).data.logs.events);
-      /*let transactionOnNetwork = await provider.getTransaction(new TransactionHash('933405eb7cc99c8923e2aa00c7b646d0d8d2d4177dfffc01c071baa5b7edc6ba'));
-
-      let metadata = new TransactionDecoder().getTransactionMetadata({
-        sender: transactionOnNetwork.sender.toString(),
-        receiver: transactionOnNetwork.receiver.toString(),
-        data:  btoa(transactionOnNetwork.data.toString()),
-        value: '0',
-        type: transactionOnNetwork.type.toString()
-
-    });
-
-    
+      
    
-  const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
-
-  console.log(xy);*/
-
+  
       elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
 
 

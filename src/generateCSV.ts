@@ -35,7 +35,7 @@ export const generateCSV = async (
       shallow['toHash'] = event.toChain? `${txExplorers[event.toChain]}${shallow['toHash']}` : shallow['toHash'] || '';
       shallow['targetAddress'] = event.fromChain? `${addressExplorers[event.fromChain]}${shallow['targetAddress']}` : shallow['targetAddress'] || '';
       shallow['senderAddress'] = event.toChain? `${addressExplorers[event.toChain]}${shallow['senderAddress']}` : shallow['senderAddress'] || '';
-      shallow['createdAt'] = moment(+shallow['createdAt']).format('MMMM Do YYYY, h:mm:ss a')
+      shallow['createdAt'] = String(moment(+shallow['createdAt']).format('MMMM Do YYYY, h:mm:ss a'))
 
       
       delete shallow.txFees;

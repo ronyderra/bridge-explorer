@@ -50,9 +50,7 @@ export default async function (body: {
             "Tx Hash": txHash,
             "Departure Chain": depChain,
             "Destination Chain": destChain,
-            "Submitted At": moment()
-              .add(2, "hour")
-              .format("DD/MM/YYYY HH:mm:ss"),
+            "Submitted At": String(moment().add(2, "hours").format("DD/MM/YYYY HH:mm:ss")),
           });
         } catch (err) {
           console.log(err);

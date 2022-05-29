@@ -145,4 +145,50 @@ export function bigIntFromBeElrd(buf: Uint8Array): BigNumber {
   return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16);
 }
 
+
+/*const trxs = (await providerRest.get('/transactions?function=validateSendNft&from=24&receiver=' + config.elrond.contract)).data;
+
+        //provider.f
+      for (const trx of trxs) {
+        let transactionOnNetwork = await provider.getTransaction(new TransactionHash(trx.txHash))
+
+        let metadata = new TransactionDecoder().getTransactionMetadata({
+          sender: transactionOnNetwork.sender.toString(),
+          receiver: transactionOnNetwork.receiver.toString(),
+          data:  btoa(transactionOnNetwork.data.toString()),
+          value: '0',
+          type: transactionOnNetwork.type.toString()
+  
+      });
+
+      const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
+
+      const doc = await em.findOne(BridgeEvent, {
+        actionId: String(xy[0]),
+        fromChain: String(xy[1])
+      })
+
+      if (doc && !doc.toHash) {
+       
+
+        wrap(doc).assign({
+          toHash: trx.txHash
+        }, {em})
+
+
+        await em.flush()
+
+        console.log(trx.txHash);
+      }
+
+        
+      }
+*/
+    
+
+
+
+
+
+
 /// TRON

@@ -72,5 +72,5 @@ server.listen(config.port, async () => {
 
   const repo = createEventRepo(orm.em.fork());
   repo.saveDailyData();
-  cron.schedule("*/30 * * * *", () => repo.saveDailyData());
+  cron.schedule("*/4 * * * *", () => repo.saveDailyData());
 });
