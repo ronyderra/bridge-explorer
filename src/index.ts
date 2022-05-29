@@ -54,7 +54,7 @@ server.listen(config.port, async () => {
     config.web3.map((chain, i) =>
       setTimeout(() => scrap(orm.em.fork(), chain.nonce), 10000 + (i + 1) * .5 * 1000));
 
-  listen && elrondEventListener(orm.em.fork()).listen();
+      listen && elrondEventListener(orm.em.fork()).listen();
 
   listen &&
     tezosEventListener(

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@elrondnetwork/erdjs": "9.2.4",
+    "@elrondnetwork/transaction-decoder": "^0.1.0",
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/mongodb": "^4.5.10",
     "@taquito/rpc": "^12.0.0",

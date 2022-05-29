@@ -12,6 +12,7 @@ import { currency } from "../../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 
 import createEventRepo from "../../db/repo";
+import moment from "moment";
 
 export interface IEventhandler {
   actionId: string;
@@ -153,7 +154,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     nftUri: uri,
     contract,
     dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]], from) : '',
-    createdAt
+    createdAt: createdAt? createdAt : moment().utcOffset(0).toDate()
   };
 
 

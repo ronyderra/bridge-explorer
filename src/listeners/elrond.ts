@@ -10,6 +10,8 @@ import { IERC721WrappedMeta } from "../entities/ERCMeta";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
+import { TransactionDecoder, TransactionMetadata } from "@elrondnetwork/transaction-decoder";
+import Web3 from "web3";
 import {
   Account,
   Address,
@@ -23,6 +25,7 @@ import {
   Transaction,
   TransactionHash,
   ProxyProvider,
+  SmartContract,
   TransactionPayload,
   U64Value,
   VariadicValue,
@@ -33,7 +36,8 @@ import createEventRepo from "../db/repo";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
 import { executedEventHandler } from "./handlers";
-
+import { Minter__factory } from "xpnet-web3-contracts";
+const elegantPair = require('elegant-pair');
 const util = require("util");
 
 const elrondSocket = io(config.elrond.socket);
@@ -41,12 +45,12 @@ const executedSocket = io(config.socketUrl);
 
 const provider = new ProxyProvider(config.elrond.node);
 
-const providerRest = axios.create({ baseURL: config.elrond.node });
+const providerRest = axios.create({ baseURL: config.elrond.api });
 const minterAddr = new Address(config.elrond.contract);
 
 
 // TODO: Save bridge events to db
-export function elrondEventListener(
+export  function elrondEventListener(
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   /*eventFromTxn('ffa8103ab5acd4bcc60582c1d1014c5d7277809fa4b008ee2ea6b0900c46a6a3', provider, providerRest).then((evs) => {
@@ -66,8 +70,31 @@ export function elrondEventListener(
   })
 });*/
 
+
+
   return {
     listen: async () => {
+
+
+      //const a = (await providerRest.get('/transactions?function=validateSendNft&withLogs=true&receiver=' + config.elrond.contract)).data[0];
+      //console.log(await (await providerRest.get('/transactions/' + a.txHash)).data.logs.events);
+      /*let transactionOnNetwork = await provider.getTransaction(new TransactionHash('933405eb7cc99c8923e2aa00c7b646d0d8d2d4177dfffc01c071baa5b7edc6ba'));
+
+      let metadata = new TransactionDecoder().getTransactionMetadata({
+        sender: transactionOnNetwork.sender.toString(),
+        receiver: transactionOnNetwork.receiver.toString(),
+        data:  btoa(transactionOnNetwork.data.toString()),
+        value: '0',
+        type: transactionOnNetwork.type.toString()
+
+    });
+
+    
+   
+  const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
+
+  console.log(xy);*/
+
       elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
 
 

@@ -77,7 +77,7 @@ export interface ChainConfig {
 
 interface Config {
   web3: ChainConfig[];
-  elrond: ChainConfig & { socket: string };
+  elrond: ChainConfig & { socket: string; api:string };
   tezos: ChainConfig & { socket: string; xpnft: string };
   algorand: ChainConfig & { indexerNode: string; apiKey: string };
   tron: ChainConfig & { apiKey: string };
@@ -192,6 +192,7 @@ const config: Config = {
     name: "ELROND",
     node: getOrThrow("ELROND_RPC_URL"),
     contract: getOrThrow("ELROND_MINTER_ADDRESS"),
+    api: getOrThrow("ELROND_API"),
     nonce: getOrThrow("ELROND_NONCE"),
     socket: getOrThrow("ELROND_SOCKET_URL"),
     id: "elrond-erd-2",
