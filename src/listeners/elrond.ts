@@ -75,8 +75,64 @@ export  function elrondEventListener(
   return {
     listen: async () => {
 
+    /*  let num = 0
+      while (3> 2) {
 
-      
+        //freezeSendNft
+        //validateSendNft
+        //WithdrawNft
+      const trxs = (await providerRest.get(`/transactions?function=WithdrawNft&from=${String(num)}&receiver=` + config.elrond.contract)).data;
+ 
+      //provider.f
+    for (const trx of trxs) {
+      let transactionOnNetwork = await provider.getTransaction(new TransactionHash(trx.txHash))
+
+      let metadata = new TransactionDecoder().getTransactionMetadata({
+        sender: transactionOnNetwork.sender.toString(),
+        receiver: transactionOnNetwork.receiver.toString(),
+        data:  btoa(transactionOnNetwork.data.toString()),
+        value: '0',
+        type: transactionOnNetwork.type.toString()
+
+    });
+
+    const ai = new BigNumber(metadata.functionArgs[0], 16).toString(10);
+
+    const doc = await em.findOne(BridgeEvent, {
+      actionId: ai,
+      fromChain: '2'
+    })
+
+    if (doc) {
+      console.log(doc);
+    }
+
+
+   /* const doc = await em.findOne(BridgeEvent, {
+      actionId: String(xy[0]),
+      fromChain: String(xy[1])
+    })
+    
+    if (doc && !doc.toHash) {
+     
+  
+      wrap(doc).assign({
+        toHash: trx.txHash
+      }, {em})
+
+
+     false && await em.flush()
+
+      console.log(trx.txHash);
+    }
+
+  }
+
+    num +=24
+
+      }
+
+*/
    
   
       elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
@@ -175,6 +231,7 @@ export  function elrondEventListener(
                 senderAddress: event.sender,
                 targetAddress: to,
                 nftUri: uri || "",
+                createdAt:  new Date()
               };
 
               console.log("transfer event: ", eventObj);

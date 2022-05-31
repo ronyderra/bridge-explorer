@@ -146,43 +146,52 @@ export function bigIntFromBeElrd(buf: Uint8Array): BigNumber {
 }
 
 
-/*const trxs = (await providerRest.get('/transactions?function=validateSendNft&from=24&receiver=' + config.elrond.contract)).data;
+/* let num = 0
+      while (3> 2) {
 
-        //provider.f
-      for (const trx of trxs) {
-        let transactionOnNetwork = await provider.getTransaction(new TransactionHash(trx.txHash))
 
-        let metadata = new TransactionDecoder().getTransactionMetadata({
-          sender: transactionOnNetwork.sender.toString(),
-          receiver: transactionOnNetwork.receiver.toString(),
-          data:  btoa(transactionOnNetwork.data.toString()),
-          value: '0',
-          type: transactionOnNetwork.type.toString()
+      const trxs = (await providerRest.get(`/transactions?function=validateSendNft&from=${String(num)}&receiver=` + config.elrond.contract)).data;
+
+      //provider.f
+    for (const trx of trxs) {
+      let transactionOnNetwork = await provider.getTransaction(new TransactionHash(trx.txHash))
+
+      let metadata = new TransactionDecoder().getTransactionMetadata({
+        sender: transactionOnNetwork.sender.toString(),
+        receiver: transactionOnNetwork.receiver.toString(),
+        data:  btoa(transactionOnNetwork.data.toString()),
+        value: '0',
+        type: transactionOnNetwork.type.toString()
+
+    });
+
+    const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
+
+    const doc = await em.findOne(BridgeEvent, {
+      actionId: String(xy[0]),
+      fromChain: String(xy[1])
+    })
+    
+    if (doc && !doc.toHash) {
+     
   
-      });
-
-      const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
-
-      const doc = await em.findOne(BridgeEvent, {
-        actionId: String(xy[0]),
-        fromChain: String(xy[1])
-      })
-
-      if (doc && !doc.toHash) {
-       
-
-        wrap(doc).assign({
-          toHash: trx.txHash
-        }, {em})
+      wrap(doc).assign({
+        toHash: trx.txHash
+      }, {em})
 
 
-        await em.flush()
+     await em.flush()
 
-        console.log(trx.txHash);
+      console.log(trx.txHash);
+    }
+
+    console.log('none');
+    }
+
+    num +=24
+
       }
 
-        
-      }
 */
     
 

@@ -1,5 +1,5 @@
 import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
-
+import { IEventhandler } from "../listeners/handlers";
 import IndexUpdater from "../services/indexUpdater";
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
@@ -13,7 +13,7 @@ import { getChain } from "../config";
 import { BridgeEvent } from "../entities/IEvent";
 import moment from "moment";
 import e from "express";
-
+import { IDailyData, DailyData } from "../entities/IDailyData";
 
 export const scrap = async (
   em: EntityManager<IDatabaseDriver<Connection>>,
@@ -26,6 +26,7 @@ export const scrap = async (
 
   const provider = new JsonRpcProvider(chainConfig.node);
 
+  console.log(chainConfig);
 
   const web3 = new Web3(
     new Web3.providers.HttpProvider(chainConfig.node, {
@@ -38,6 +39,115 @@ export const scrap = async (
   const _contract = Minter__factory.connect(chainConfig.contract, provider);
 
   console.log('SCRAPING ', chainConfig.name);
+
+
+/*let lb = 28850572//await provider.getBlockNumber()
+if (lb) {
+  
+  while (lb >= 25726111	) {
+    console.log(lb);
+    try {
+
+      let logs = await web3.eth.getPastLogs({
+        fromBlock: lb - 4999,
+        toBlock : lb,
+        address: chainConfig.contract,
+      });
+      //await new Promise((resplve) => setTimeout(() =>resplve(''),500 ))
+      console.log(logs.length);
+      
+      const trxs = await Promise.all(logs.map(async (log) => web3.eth.getTransaction(log.transactionHash)))
+
+
+    logs = logs.map((log, i) => ({
+      ...log,
+      trx: trxs[i]
+    }))
+
+
+    for (const log of logs) {
+  
+
+      try {
+        const parsed = _contract.interface.parseLog(log);
+
+        const doc  = await em.findOne(BridgeEvent, {
+          fromChain: chainConfig.nonce,
+          fromHash: log.transactionHash
+        })
+
+        if (!doc) {
+          const block = await web3.eth.getBlock(log.blockHash)
+          const date = +block.timestamp * 1000;
+
+          const createdAt = new Date(date);
+
+        const args = parsed.args;
+
+        let nftUrl = ''
+
+        if (parsed.name.includes("Unfreeze")) {
+          nftUrl = String(args["baseURI"]).split("{")[0] + String(args["tokenId"]);
+
+        } else {
+          if (args["tokenData"].includes('0x{id}')) {
+            nftUrl = String(args["tokenData"]).replace('0x{id}', String(args["id"]));
+
+          } else {
+            nftUrl = String(args["tokenData"]).includes('{id}') ? String(args["tokenData"]).split("{")[0] + String(args["id"]) : String(args["tokenData"])
+          }
+
+        }//17670567 - last bsc
+
+        const eventData:IEventhandler = {
+          
+          actionId: String(args["actionId"]),
+          from: chain,
+          to: String(args["chainNonce"]),
+          //@ts-ignore
+          sender: log.trx.from,
+          target: String(args["to"]),
+          hash: log.transactionHash,
+          txFees: String(args["txFees"]),
+          tokenId: parsed.name.includes("Unfreeze")
+            ? String(args["tokenId"])
+            : String(args["id"]),
+          type: parsed.name.includes("Unfreeze") ? "Unfreeze" : "Transfer" as "Unfreeze" | "Transfer",
+          uri: nftUrl,
+          contract: parsed.name.includes("Unfreeze")
+            ? String(args["burner"])
+            : String(args["mintWith"]),
+            
+            createdAt
+        };
+
+        console.log(eventData);
+
+        eventData && eventHandler(em.fork())(eventData, {notLive: true})
+
+        }
+ 
+
+
+      } catch (_) {
+        console.log(_);
+        return [];
+      }
+    }
+
+    } catch (e) {
+
+    }
+    
+    lb = lb - 4999
+  }
+
+
+
+}
+  */
+
+
 
   cron.schedule("*/7 * * * * *", async () => {
 

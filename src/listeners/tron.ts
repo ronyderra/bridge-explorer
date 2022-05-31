@@ -1,6 +1,6 @@
 import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./old";
-import config from "../config";
+import config, {getChain} from "../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
@@ -8,7 +8,8 @@ import { eventHandler } from "./handlers";
 import { executedEventHandler } from "./handlers";
 import Bottleneck from "bottleneck";
 import { IEventhandler } from "./handlers";
-import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
+import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
+import { BridgeEvent } from "../entities/IEvent";
 
 const executedSocket = io(config.socketUrl);
 const notifier = io(config.web3socketUrl);
@@ -26,10 +27,14 @@ const rateLimit = new Bottleneck({
 export function TronEventListener(
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
+
+
+
+
+
   return {
     async listen() {
-      console.log("listentin to tron");
-
+     
       const provider = new TronWeb({
         fullHost: config.tron.node,
         privateKey: "111",
@@ -37,6 +42,25 @@ export function TronEventListener(
           "TRON-PRO-API-KEY": config.tron.apiKey,
         },
       });
+
+      //const block =( await  provider.trx.getBlock(41095532))//block_header.raw_data.timestamp
+
+     
+
+     /* console.log(await provider.getEventResult('TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb', {
+        sinceTimestamp: 1653841089000,
+        eventName: 'Transfer'
+      }));
+     /* console.log((await provider.trx.getBlock(41088395)).transactions.filter((trx:any) => {
+       return  trx.raw_data.contract[0].parameter.value['owner_address'] === 'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb' || 
+       trx.raw_data.contract[0].parameter.value['to_address'] ===  'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb'
+      }));*/
+
+     //let res = await provider.contract().at("TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb");
+
+     // const owner = await res.ownerOf(1).call();
+
+      //console.log(provider.address.fromHex(owner));
 
       async function getRawEventFromTxn(
         hash: string,
@@ -80,6 +104,7 @@ export function TronEventListener(
               trx["raw_data"]?.contract[0]?.parameter?.value["owner_address"];
 
             const evData: IEventhandler = {
+      
               actionId: String(ev.result["actionId"]),
               from: config.tron.nonce,
               to: String(ev.result["chainNonce"]),

@@ -259,10 +259,10 @@ export const getChain = (nonce: string) => {
 
       if (Array.isArray(item)) {
         for (const c of item) {
-          if (c.nonce === nonce) throw c;
+          if (c.nonce === nonce || c.name.toUpperCase() === nonce.toUpperCase()) throw c;
         }
       } else {
-        if (item.nonce && item.nonce === nonce) throw item;
+        if (item.nonce && item.nonce === nonce || item.name && item.name.toUpperCase() === nonce.toUpperCase()) throw item;
       }
     });
   } catch (chain) {
@@ -270,6 +270,6 @@ export const getChain = (nonce: string) => {
   }
 };
 
-console.log(getChain("2"));
+console.log(getChain("BSC"));
 
 export default config;

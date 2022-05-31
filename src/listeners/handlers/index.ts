@@ -30,6 +30,11 @@ export interface IEventhandler {
   createdAt?: Date
 }
 
+
+interface HanderOptions {
+  notLive?: boolean
+}
+
 const evmNonces = config.web3.map((c) => c.nonce);
 
 const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
@@ -133,7 +138,8 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   uri,
   contract,
   createdAt
-}: IEventhandler) => {
+}: IEventhandler, 
+options?: HanderOptions ) => {
 
 
 
@@ -169,17 +175,18 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
 
   ]);
 
-  if (doc) {
+  if (doc && !options?.notLive) {
     console.log(doc);
+
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 
-    setTimeout(async () => {
+    !setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
 
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
       }
-    }, 1000 * 60 * 30);
+    }, 1000 * 60 * 20);
   }
 };
 

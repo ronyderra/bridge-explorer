@@ -108,6 +108,7 @@ export function AlgorandEventListener(
             senderAddress: txnInfo["sender"],
             nftUri: assetUrl,
             contract: mintWith,
+            createdAt: new Date()
           };
 
           Promise.all([

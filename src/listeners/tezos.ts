@@ -11,6 +11,7 @@ import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../db/repo";
 import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
+import { RpcClient } from '@taquito/rpc';
 
 const util = require("util");
 
@@ -80,6 +81,10 @@ export function tezosEventListener(
     listen: async () => {
       console.log("listen tezos");
 
+      /*const client = new RpcClient(config.tezos.node, 'NetXjD3HPJJjmcd');
+      const block = await client.getBlock();
+      console.log('-- Head block:', block); */
+
       //const a = await getUriFa2('KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton', '517745');
       //console.log(a);
 
@@ -136,6 +141,7 @@ export function tezosEventListener(
                 senderAddress: data.source,
                 targetAddress: to.string,
                 nftUri: "",
+                createdAt: new Date()
               };
 
               try {
@@ -210,6 +216,7 @@ export function tezosEventListener(
                 //@ts-ignore
                 targetAddress: params?.args[1]?.args[0]?.string,
                 nftUri: "",
+                createdAt: new Date()
               };
 
               try {
