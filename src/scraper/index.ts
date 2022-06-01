@@ -38,7 +38,7 @@ export const scrap = async (
 
   const _contract = Minter__factory.connect(chainConfig.contract, provider);
 
-  console.log('SCRAPING ', chainConfig.name);
+  // console.log('SCRAPING ', chainConfig.name);
 
 
 /*let lb = 28850572//await provider.getBlockNumber()
