@@ -8,7 +8,7 @@ import { IEvent } from "../../entities/IEvent";
 import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
-import { currency } from "../../config";
+import { currency , txExplorers } from "../../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 
 import createEventRepo from "../../db/repo";
@@ -185,11 +185,21 @@ options?: HanderOptions ) => {
 
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
-
-        const telegram_api = `https://api.telegram.org/bot${config.telegramBotToken}
-        /sendMessage?chat_id=${config.telChatId}&text=${doc}`;
-        const res = await axios.post(`${telegram_api}`)
-        console.log(res)
+        const getTelegramTemplate = () => {
+          return `
+          <strong>Txn - <a href="${doc.fromChain && txExplorers[doc.fromChain]}">${doc.fromHash}</a></strong>
+          <strong>From - ${doc.fromChainName}</strong>
+          <strong>TO - ${doc.toChainName}</strong>
+          <strong>IN PROCESSING</strong>
+          `;
+        };
+        try {
+          axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
+            /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate()}&parse_mode=HTML`
+          );
+        } catch (err) {
+          console.log(err)
+        }
       }
     }, 1000 * 60 * 20);
   }
