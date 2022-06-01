@@ -79,7 +79,7 @@ export function tezosEventListener(
 
   return {
     listen: async () => {
-      console.log("listen tezos");
+      // console.log("listen tezos");
 
       /*const client = new RpcClient(config.tezos.node, 'NetXjD3HPJJjmcd');
       const block = await client.getBlock();
@@ -114,13 +114,13 @@ export function tezosEventListener(
 
               const tchainNonce = param1.args![0] as MichelsonV1ExpressionBase;
               const fa2Address = param1.args![1] as MichelsonV1ExpressionBase;
-              console.log(fa2Address);
+              // console.log(fa2Address);
               const to = param2.args![0] as MichelsonV1ExpressionBase;
               const tokenId = param2.args![1] as MichelsonV1ExpressionBase;
               const actionId = getActionId(data.metadata.operation_result);
               //@ts-ignore
-              console.log(tokenId?.args[1].int!);
-              console.log(tchainNonce);
+              // console.log(tokenId?.args[1].int!);
+              // console.log(tchainNonce);
 
               const eventObj: IEvent = {
                 actionId: actionId.toString(),
@@ -169,23 +169,23 @@ export function tezosEventListener(
               } catch (e) {
                 console.log(e);
               }
-              console.log(eventObj);
+              // console.log(eventObj);
               Promise.all([
                 (async () => {
                   return await createEventRepo(em.fork()).createEvent(eventObj);
                 })(),
                 (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
               ]).then(([doc]) => {
-                console.log("end");
+                // console.log("end");
                 clientAppSocket.emit("incomingEvent", doc);
               });
               break;
             }
 
             case "withdraw_nft": {
-              console.log(
-                util.inspect(data, false, null, true /* enable colors */)
-              );
+              // console.log(
+              //   util.inspect(data, false, null, true /* enable colors */)
+              // );
               const params = data.parameters
                 .value as MichelsonV1ExpressionExtended;
               const to = params.args![0] as MichelsonV1ExpressionBase;
@@ -267,15 +267,15 @@ export function tezosEventListener(
           hash: string
         ) => {
           if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "tezos:tx_executed_event"
-          );
+          // console.log(
+          //   {
+          //     toChain,
+          //     fromChain,
+          //     action_id,
+          //     hash,
+          //   },
+          //   "tezos:tx_executed_event"
+          // );
 
           try {
             const updated = await createEventRepo(em.fork()).updateEvent(
@@ -285,7 +285,7 @@ export function tezosEventListener(
               hash
             );
             if (!updated) return;
-            console.log(updated, "updated");
+            // console.log(updated, "updated");
 
             if (updated.toChain === config.algorand.nonce) {
               if (updated.toHash?.split("-").length! > 2) {

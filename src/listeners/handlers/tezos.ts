@@ -1,7 +1,14 @@
 import signalR from "@microsoft/signalr";
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("https://api.tzkt.io/v1/events")
+//main net
+// const connection = new signalR.HubConnectionBuilder()
+//     .withUrl("https://api.tzkt.io/v1/events")
+//     .build();
+
+
+//testnet
+    const connection = new signalR.HubConnectionBuilder()
+    .withUrl("https://hangzhounet.smartpy.io")
     .build();
 
 async function init() {
@@ -10,7 +17,7 @@ async function init() {
    
     // subscribe to account transactions
     await connection.invoke("SubscribeToOperations", {
-        address: 'KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu',
+        address: 'KT195omxiopL2ZDqM3g8hRj2sSCG2pTqjNEj',
         types: 'transaction'
     });
 };
