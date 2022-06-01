@@ -1,10 +1,10 @@
 import axios from "axios";
-import config, { getChain } from "../../config";
+import config, { getChain, getTelegramTemplate } from "../../config";
 import { ethers } from "ethers";
 import IndexUpdater from "../../services/indexUpdater";
 import BigNumber from "bignumber.js";
 
-import { IEvent } from "../../entities/IEvent";
+import { BridgeEvent, IEvent } from "../../entities/IEvent";
 import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
@@ -185,17 +185,10 @@ options?: HanderOptions ) => {
 
       if (updated) {
         clientAppSocket.emit("updateEvent", updated);
-        const getTelegramTemplate = () => {
-          return `
-          <strong>Txn - <a href="${doc.fromChain && txExplorers[doc.fromChain]}">${doc.fromHash}</a></strong>
-          <strong>From - ${doc.fromChainName}</strong>
-          <strong>TO - ${doc.toChainName}</strong>
-          <strong>IN PROCESSING</strong>
-          `;
-        };
+
         try {
           axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
-            /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate()}&parse_mode=HTML`
+            /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate(doc)}&parse_mode=HTML`
           );
         } catch (err) {
           console.log(err)

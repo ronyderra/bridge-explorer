@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-
+import {BridgeEvent} from './entities/IEvent'
 dotenv.config();
 
 export const currency: any = {
@@ -242,8 +242,8 @@ const config: Config = {
   mail_key: getOrThrow("SENDING_BLUE"),
   captcha_secret: getOrThrow("SECRET_CAPTCHA"),
   web3socketUrl: getOrThrow("WEB3_SOCKET_URL"),
-  telegramBotToken:getOrThrow("Telegram_Bot_Token"),
-  telChatId:getOrThrow("Chat_Id")
+  telegramBotToken:getOrThrow("TELEGRAM_BOT"),
+  telChatId:getOrThrow("TELEGRAM_CHAT")
 };
 
 export function chainNonceToName(nonce: string) {
@@ -272,6 +272,16 @@ export const getChain = (nonce: string) => {
   }
 };
 
-console.log(getChain("BSC"));
+
+
+export const getTelegramTemplate = (doc:BridgeEvent) => {
+  return `
+  <strong>Txn - <a href="${doc.fromChain && txExplorers[doc.fromChain]}">${doc.fromHash}</a></strong>
+  <strong>From - ${doc.fromChainName}</strong>
+  <strong>TO - ${doc.toChainName}</strong>
+  <strong>IN PROCESSING</strong>
+  `;
+};
+
 
 export default config;

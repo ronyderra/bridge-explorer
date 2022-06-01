@@ -10,7 +10,7 @@ import { TransactionHash, ProxyProvider } from "@elrondnetwork/erdjs";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
 import { Erc721Attrs } from "./elrond";
 
-import Bottleneck from "bottleneck";
+
 
 /// ALGORAND
 
