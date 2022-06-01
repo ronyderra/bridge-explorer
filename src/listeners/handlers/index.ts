@@ -107,7 +107,7 @@ export const executedEventHandler = (
         updated.toChain &&
         evmNonces.includes(updated.toChain)
       ) {
-        IndexUpdater.instance.update(updated).catch((e) => console.log(e));
+        //IndexUpdater.instance.update(updated).catch((e) => console.log(e));
       }
 
       if (updated.toChain === config.algorand.nonce) {
