@@ -150,16 +150,16 @@ export const handleNativeUnfreezeEvent =
             baseUri: string
             event: any
         }) => {
-            console.log({
-                actionId,
-                _,
-                txFees,
-                target,
-                burner,
-                tokenId,
-                baseUri,
-                event
-            })
+            // console.log({
+            //     actionId,
+            //     _,
+            //     txFees,
+            //     target,
+            //     burner,
+            //     tokenId,
+            //     baseUri,
+            //     event
+            // })
 
             let [wrappedData, senderAddress, trxData]: any = await Promise.allSettled([
                 (async () =>

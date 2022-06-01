@@ -137,7 +137,7 @@ export function contractEventService(
                     .toString()
                 : "",
           };
-          console.log(eventObj);
+          // console.log(eventObj);
 
           Promise.all([
             (async () => {
@@ -211,8 +211,8 @@ export function contractEventService(
           senderAddress =
             senderAddress.status === "fulfilled" ? senderAddress.value : "";
 
-          console.log(senderAddress, "senderAddress");
-          console.log(exchangeRate);
+          // console.log(senderAddress, "senderAddress");
+          // console.log(exchangeRate);
 
           const eventObj: IEvent = {
             actionId: actionId.toString(),
@@ -254,7 +254,7 @@ export function contractEventService(
             })(),
           ])
             .then(([doc]) => {
-              console.log(doc);
+              // console.log(doc);
               clientAppSocket.emit("incomingEvent", doc);
               setTimeout(async () => {
                 const updated = await eventRepo.errorEvent(
@@ -269,11 +269,11 @@ export function contractEventService(
             })
             .catch(() => {});
 
-          console.log("unfreeze", {
-            chainName,
-            actionId,
-            fromChain: chainNonce,
-          });
+          // console.log("unfreeze", {
+          //   chainName,
+          //   actionId,
+          //   fromChain: chainNonce,
+          // });
         }
       );
     },

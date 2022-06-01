@@ -41,7 +41,7 @@ export function AlgorandEventListener(
         config.algorand.apiKey
       );
 
-      console.log('listening algorand');
+      // console.log('listening algorand');
       algoSocket.on("algorand:bridge_tx", async (hash) => {
         const txRes = await indexerClient.lookupTransactionByID(hash).do();
         const txnInfo = txRes["transaction"];
@@ -118,7 +118,7 @@ export function AlgorandEventListener(
             (async () => await createEventRepo(em.fork()).saveWallet(event.senderAddress,event.targetAddress!)
             )(),
           ]).then(([doc]) => {
-            console.log(doc, "doc");
+            // console.log(doc, "doc");
             clientAppSocket.emit("incomingEvent", doc);
           });
         }
@@ -135,15 +135,15 @@ export function AlgorandEventListener(
           if (!fromChain || fromChain.toString() !== config.algorand.nonce)
             return;
 
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "algo:tx_executed_event"
-          );
+          // console.log(
+          //   {
+          //     toChain,
+          //     fromChain,
+          //     action_id,
+          //     hash,
+          //   },
+          //   "algo:tx_executed_event"
+          // );
 
           try {
             const updated = await createEventRepo(em.fork()).updateEvent(
@@ -153,7 +153,7 @@ export function AlgorandEventListener(
               hash
             );
             if (!updated) return;
-            console.log(updated, "updated");
+            // console.log(updated, "updated");
 
             clientAppSocket.emit("updateEvent", updated);
           } catch (e) {

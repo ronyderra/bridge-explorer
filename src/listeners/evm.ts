@@ -94,7 +94,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
       const a = contract.filters.TransferErc1155()
-      console.log(`listen ${chain.name}`);
+      // console.log(`listen ${chain.name}`);
       contract.on(
         transferEvent,
         async (
@@ -108,16 +108,16 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           mintWith,
           event
         ) => {
-          console.log({
-            actionId,
-            targetNonce,
-            txFees,
-            to,
-            tokenId,
-            contract,
-            tokenData,
-            mintWith,
-          });
+          // console.log({
+          //   actionId,
+          //   targetNonce,
+          //   txFees,
+          //   to,
+          //   tokenId,
+          //   contract,
+          //   tokenData,
+          //   mintWith,
+          // });
 
           const eventData = await handleNativeTransferEvent(
             chain.nonce,

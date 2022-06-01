@@ -139,7 +139,7 @@ export  function elrondEventListener(
 
 
         try {
-          console.log(fromHash, "fromHash");
+          // console.log(fromHash, "fromHash");
 
           const event = await eventFromTxn(fromHash, provider, providerRest);
 
@@ -161,12 +161,12 @@ export  function elrondEventListener(
                 Base64.toUint8Array(e.topics[e.topics.length - 1])
               );
 
-              console.log({
-                action_id: action_id.toString(),
-                tx_fees: tx_fees.toString(),
-              });
+              // console.log({
+              //   action_id: action_id.toString(),
+              //   tx_fees: tx_fees.toString(),
+              // });
 
-              console.log(e.topics);
+              // console.log(e.topics);
 
               const to = Base64.atob(e.topics[3]); //
               const nftMinterContact = Base64.decode(e.topics[4]); //
@@ -177,11 +177,11 @@ export  function elrondEventListener(
               )[0]; //
               const nonce = bigIntFromBeElrd(Base64.toUint8Array(e.topics[6]));
 
-              console.log({
-                chain_nonce,
-                nftMinterContact,
-                nonce,
-              });
+              // console.log({
+              //   chain_nonce,
+              //   nftMinterContact,
+              //   nonce,
+              // });
 
               let type = "Unfreeze";
 
@@ -206,11 +206,11 @@ export  function elrondEventListener(
                     nonce
                   );
 
-                  console.log({
-                    name,
-                    metadataUrl,
-                    attrs,
-                  });
+                  // console.log({
+                  //   name,
+                  //   metadataUrl,
+                  //   attrs,
+                  // });
                   break;
                 }
               }
@@ -234,7 +234,7 @@ export  function elrondEventListener(
                 createdAt:  new Date()
               };
 
-              console.log("transfer event: ", eventObj);
+              // console.log("transfer event: ", eventObj);
 
               Promise.all([
                 (async () => {
@@ -242,7 +242,7 @@ export  function elrondEventListener(
                 })(),
                 (async () => { })(),
               ]).then(([doc]) => {
-                console.log(doc, "doc");
+                // console.log(doc, "doc");
                 clientAppSocket.emit("incomingEvent", doc);
               });
             });
@@ -261,15 +261,15 @@ export  function elrondEventListener(
         ) => {
           if (!fromChain || fromChain.toString() !== config.elrond.nonce)
             return;
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "elrond:tx_executed_event"
-          );
+          // console.log(
+          //   {
+          //     toChain,
+          //     fromChain,
+          //     action_id,
+          //     hash,
+          //   },
+          //   "elrond:tx_executed_event"
+          // );
 
           executedEventHandler(em.fork(), fromChain.toString())({
             toChain,
@@ -280,10 +280,10 @@ export  function elrondEventListener(
         }
       );
 
-      setTimeout(
-        () => console.log(elrondSocket.connected && "Listening to Elrond"),
-        1000
-      );
+      // setTimeout(
+      //   () => console.log(elrondSocket.connected && "Listening to Elrond"),
+      //   1000
+      // );
     },
   };
 }

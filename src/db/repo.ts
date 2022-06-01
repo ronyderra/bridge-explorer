@@ -143,7 +143,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       } else if (fromHash) {
         events = await em.find(BridgeEvent, { fromHash });
       } else if (pendingSearch) {
-        console.log("d");
+        // console.log("d");
         events = await em.find(
           BridgeEvent,
           {
@@ -194,7 +194,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
       }
-      console.log(count);
+      // console.log(count);
 
       return { events, count };
     },
@@ -228,7 +228,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash) {
-      console.log("enter update", { actionId, fromChain, toChain });
+      // console.log("enter update", { actionId, fromChain, toChain });
       if (toHash === "N/A") return undefined;
 
       try {
@@ -247,11 +247,11 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
                 resolve(event);
                 return;
               }
-              console.log("waiting for event", {
-                actionId,
-                fromChain,
-                toChain,
-              });
+              // console.log("waiting for event", {
+              //   actionId,
+              //   fromChain,
+              //   toChain,
+              // });
               event = await em.findOne(BridgeEvent, {
                 $and: [
                   { actionId: actionId.toString() },
@@ -341,7 +341,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       });
 
       if (event && event.status === "Pending") {
-        console.log('timeout', event);
+        // console.log('timeout', event);
         wrap(event).assign({ status: "Failed" }, { em });
         await em.flush();
         return event;
@@ -408,7 +408,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
           now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate(),
       });
 
-      console.log(dailyData);
+      // console.log(dailyData);
 
       const data = await em.findOne(DailyData, {
         date: dailyData.date,

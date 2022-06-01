@@ -41,8 +41,8 @@ export default class IndexUpdater {
     });
 
 
-    if (logs.length > 0)
-      console.log(`found ${logs.length} in ${chain.name}::from block ${fromBlock}`);
+    // if (logs.length > 0)
+    //   console.log(`found ${logs.length} in ${chain.name}::from block ${fromBlock}`);
 
     const trxs = await Promise.all(logs.map(async (log) => web3.eth.getTransaction(log.transactionHash)))
 
@@ -60,7 +60,7 @@ export default class IndexUpdater {
 
       const createdAt = new Date(date);
 
-      console.log(createdAt);
+      // console.log(createdAt);
       const parsed = _contract.interface.parseLog(log);
 
       const args = parsed.args;
@@ -132,7 +132,7 @@ export default class IndexUpdater {
           return [];
         }
       });
-      console.log(descs);
+      // console.log(descs);
       if (descs[0].name.includes('Unfreeze')) {
         return {
           tokenId: descs[0].args["tokenId"].toString(),
@@ -163,7 +163,7 @@ export default class IndexUpdater {
 
 
       const wait = await provider.waitForTransaction(trx);
-      console.log(wait.transactionHash, "trxHash");
+      // console.log(wait.transactionHash, "trxHash");
       const res = await provider.getTransaction(trx);
 
 
@@ -171,7 +171,7 @@ export default class IndexUpdater {
       const decoded = contract.interface.parseTransaction(res);
 
 
-      console.log(decoded);
+      // console.log(decoded);
       const tokenId =
         decoded.name.includes('Transfer')
           ? decoded.args["nftId"].toString()
@@ -233,10 +233,10 @@ export default class IndexUpdater {
     } = updated;
 
     if (!this.repo) throw new Error("no initilized");
-    console.log(fromChain);
-    console.log(senderAddress);
-    console.log(tokenId);
-    console.log(contractAddress);
+    // console.log(fromChain);
+    // console.log(senderAddress);
+    // console.log(tokenId);
+    // console.log(contractAddress);
     if (
       !fromChain ||
       !senderAddress ||
@@ -246,16 +246,16 @@ export default class IndexUpdater {
       !updated.toHash ||
       !updated.toChainName
     ) {
-      console.log(
-        "missing paramg",
-        fromChain,
-        senderAddress,
-        tokenId,
-        contractAddress,
-        updated.fromChainName,
-        updated.toHash,
-        updated.toChainName
-      );
+      // console.log(
+      //   "missing paramg",
+      //   fromChain,
+      //   senderAddress,
+      //   tokenId,
+      //   contractAddress,
+      //   updated.fromChainName,
+      //   updated.toHash,
+      //   updated.toChainName
+      // );
       return;
     }
 
@@ -289,7 +289,7 @@ export default class IndexUpdater {
     const minterContract = this.getMinterContract(updated.fromChainName);
 
     if (!minterContract) {
-      console.log("cant find minterContract");
+      // console.log("cant find minterContract");
       return;
     }
 
@@ -308,11 +308,11 @@ export default class IndexUpdater {
       ents: [ownedByBridge],
     });
 
-    console.log("finish updating deparureNFTs");
-    console.log(ownedByBridge);
+    // console.log("finish updating deparureNFTs");
+    // console.log(ownedByBridge);
 
-    console.log(updated.toHash, "toHash");
-    console.log(updated.toChainName, "toChainName");
+    // console.log(updated.toHash, "toHash");
+    // console.log(updated.toChainName, "toChainName");
 
     const destTrxData = await this.getDestTrxData(
       updated.toHash,
@@ -321,19 +321,19 @@ export default class IndexUpdater {
     );
 
     if (!destTrxData?.provider || !destTrxData?.tokenId) {
-      console.log(
-        "missing some data of destination trx",
-        destTrxData?.originalContractAddress,
-        destTrxData?.provider,
-        destTrxData?.tokenId,
-        destTrxData?.bridgeMinter
-      );
+      // console.log(
+      //   "missing some data of destination trx",
+      //   destTrxData?.originalContractAddress,
+      //   destTrxData?.provider,
+      //   destTrxData?.tokenId,
+      //   destTrxData?.bridgeMinter
+      // );
       return;
     }
 
     const desMinterContract = this.getMinterContract(updated.toChainName);
 
-    console.log(desMinterContract, "desMinterContract");
+    // console.log(desMinterContract, "desMinterContract");
 
     if (
       desMinterContract &&
@@ -341,7 +341,7 @@ export default class IndexUpdater {
       updated?.targetAddress &&
       updated.toChain
     ) {
-      console.log(updated.toChain, "updated.toChain");
+      // console.log(updated.toChain, "updated.toChain");
       let destNfts = await this.getNfts(updated.toChain, desMinterContract);
 
       destNfts = destNfts?.filter((nft) => {
@@ -361,13 +361,13 @@ export default class IndexUpdater {
       });
 
       if (destNfts?.length > 500) {
-        console.log("more than 500 in target chain");
+        // console.log("more than 500 in target chain");
         return;
       }
 
       if (destNfts.length === 0) {
         //await delay(1000);
-        console.log('no leftovers');
+        // console.log('no leftovers');
         const erc7 = UserNftMinter__factory.connect(
           destTrxData.bridgeMinter
             ? destTrxData.bridgeMinter
@@ -386,7 +386,7 @@ export default class IndexUpdater {
           name.status === "fulfilled" &&
           symbol.status === "fulfilled"
         ) {
-          console.log(uri.value, name.value, symbol.value);
+          // console.log(uri.value, name.value, symbol.value);
 
           const alreadyExist = await (
             await this.getNfts(
@@ -397,7 +397,7 @@ export default class IndexUpdater {
           ).filter((nft) => nft.contract === contractAddress);
 
           if (alreadyExist.length > 0) {
-            console.log("already exist", alreadyExist[0].tokenId);
+            // console.log("already exist", alreadyExist[0].tokenId);
             return;
           }
 
@@ -415,13 +415,13 @@ export default class IndexUpdater {
           await this.repo.createNFT({
             ents: [createdTagetNft],
           });
-          console.log(createdTagetNft, "finish creating destinationNFTs");
+          // console.log(createdTagetNft, "finish creating destinationNFTs");
         }
 
         return;
       }
 
-      console.log('removing leftovers');
+      // console.log('removing leftovers');
       await this.repo.removeNFT({
         ents: destNfts,
       });
@@ -436,7 +436,7 @@ export default class IndexUpdater {
           nft.name &&
           nft.uri
       );
-      console.log(targetNft, "targetNft");
+      // console.log(targetNft, "targetNft");
       if (!targetNft) return;
 
       const newTagetNft = new EthNftDto(
@@ -454,10 +454,10 @@ export default class IndexUpdater {
         ents: [newTagetNft],
       });
 
-      console.log(newTagetNft, "finish updating destinationNFTs");
+      // console.log(newTagetNft, "finish updating destinationNFTs");
     } else {
-      console.log("no bridgeContract or originalTokenId");
-      console.log(updated.targetAddress);
+      // console.log("no bridgeContract or originalTokenId");
+      // console.log(updated.targetAddress);
     }
   }
 }

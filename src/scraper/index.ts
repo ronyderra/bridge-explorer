@@ -26,7 +26,7 @@ export const scrap = async (
 
   const provider = new JsonRpcProvider(chainConfig.node);
 
-  console.log(chainConfig);
+  // console.log(chainConfig);
 
   const web3 = new Web3(
     new Web3.providers.HttpProvider(chainConfig.node, {
@@ -184,8 +184,8 @@ if (lb) {
      28789317, 
      28789317));*/
 
-    if (logs.length > 0)
-      console.log(`found ${logs.length} in ${chainConfig.name}::from block ${blocks.lastBlock}`);
+    // if (logs.length > 0)
+    //   console.log(`found ${logs.length} in ${chainConfig.name}::from block ${blocks.lastBlock}`);
 
     const trxs = await Promise.all(logs.map(async (log) => web3.eth.getTransaction(log.transactionHash)))
 
@@ -200,7 +200,7 @@ if (lb) {
       try {
         const parsed = _contract.interface.parseLog(log);
 
-        console.log(parsed);
+        // console.log(parsed);
 
         const args = parsed.args;
 

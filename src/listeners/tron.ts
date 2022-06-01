@@ -93,7 +93,7 @@ export function TronEventListener(
       }
 
       notifier.on("tron:bridge_tx", async (hash: string) => {
-        console.log(hash, "tron hash");
+        // console.log(hash, "tron hash");
         const evs = await txToEvent(hash);
 
         if (evs.length) {
@@ -125,7 +125,7 @@ export function TronEventListener(
                 : String(ev.result["mintWith"]),
             };
 
-            console.log(evData, "evData");
+            // console.log(evData, "evData");
 
             eventHandler(em.fork())(evData);
           }

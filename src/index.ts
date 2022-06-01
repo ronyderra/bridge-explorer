@@ -34,11 +34,11 @@ export const clientAppSocket = new Server(server, {
 });
 
 clientAppSocket.on("connection", (socket) => {
-  console.log("a user connected ", socket.id);
+  // console.log("a user connected ", socket.id);
 });
 
 server.listen(config.port, async () => {
-  console.log(`Listening on port ${process.env.PORT}`);
+  // console.log(`Listening on port ${process.env.PORT}`);
 
   const orm = await MikroORM.init(explorerDB);
 
