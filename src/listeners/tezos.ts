@@ -122,11 +122,23 @@ export function tezosEventListener(
               // console.log(tokenId?.args[1].int!);
               // console.log(tchainNonce);
 
+              if (!tokenId.args[1].int) {
+                try {
+                  const res = await axios.get('https://staging.api.tzkt.io/v1/operations/transactions', { params: { sender: "KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu" } });
+                  const mappedHash = res.data.filter((i: any) => i.hash === data.hash);
+                  const array = mappedHash[0].parameter.value[0].list ? mappedHash[0].parameter.value[0].list : mappedHash[0].parameter.value[0].txs
+                  const tokenId = array[0].token_id;
+
+                } catch (err: any) {
+                  console.log(err.message)
+                }
+              }
+              
               const eventObj: IEvent = {
                 actionId: actionId.toString(),
                 chainName,
                 //@ts-ignore
-                tokenId: tokenId.args[1].int.toString(),
+                tokenId: tokenId.args[1].int.toString() || tokenId,
                 fromChain: chainNonce,
                 toChain: tchainNonce.int,
                 fromChainName: chainNonceToName(chainNonce),
