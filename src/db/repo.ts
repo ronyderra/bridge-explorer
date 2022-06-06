@@ -229,6 +229,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash ,statusFlag) {
+      const statusString = (statusFlag == true) ? "Completed" : "Failed";
       console.log("enter update", { actionId, fromChain, toChain });
       if (toHash === "N/A") return undefined;
 
@@ -277,7 +278,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         wrap(waitEvent).assign(
           {
             toHash: waitEvent.toHash ? waitEvent.toHash + "-" + toHash : toHash,
-            status: "Completed",
+            status: statusString,
             toChain,
             toChainName: chainNonceToName(toChain),
           },
