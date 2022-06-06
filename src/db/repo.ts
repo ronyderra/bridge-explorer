@@ -23,7 +23,8 @@ export interface IEventRepo {
     actionId: string,
     toChain: string,
     fromChain: string,
-    toHash: string
+    toHash: string,
+    statusFlag:boolean
   ): Promise<BridgeEvent | undefined>;
   updateElrond(
     actionId: string,
@@ -227,7 +228,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
     async findWallet(address) {
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
-    async updateEvent(actionId, toChain, fromChain, toHash) {
+    async updateEvent(actionId, toChain, fromChain, toHash ,statusFlag) {
       // console.log("enter update", { actionId, fromChain, toChain });
       if (toHash === "N/A") return undefined;
 

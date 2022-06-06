@@ -1,6 +1,6 @@
 import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./old";
-import config, {getChain} from "../config";
+import config, { getChain } from "../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
@@ -10,6 +10,7 @@ import Bottleneck from "bottleneck";
 import { IEventhandler } from "./handlers";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
 import { BridgeEvent } from "../entities/IEvent";
+import axios from "axios";
 
 const executedSocket = io(config.socketUrl);
 const notifier = io(config.web3socketUrl);
@@ -28,13 +29,9 @@ export function TronEventListener(
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
 
-
-
-
-
   return {
     async listen() {
-     
+
       const provider = new TronWeb({
         fullHost: config.tron.node,
         privateKey: "111",
@@ -45,20 +42,20 @@ export function TronEventListener(
 
       //const block =( await  provider.trx.getBlock(41095532))//block_header.raw_data.timestamp
 
-     
 
-     /* console.log(await provider.getEventResult('TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb', {
-        sinceTimestamp: 1653841089000,
-        eventName: 'Transfer'
-      }));
-     /* console.log((await provider.trx.getBlock(41088395)).transactions.filter((trx:any) => {
-       return  trx.raw_data.contract[0].parameter.value['owner_address'] === 'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb' || 
-       trx.raw_data.contract[0].parameter.value['to_address'] ===  'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb'
-      }));*/
 
-     //let res = await provider.contract().at("TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb");
+      /* console.log(await provider.getEventResult('TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb', {
+         sinceTimestamp: 1653841089000,
+         eventName: 'Transfer'
+       }));
+      /* console.log((await provider.trx.getBlock(41088395)).transactions.filter((trx:any) => {
+        return  trx.raw_data.contract[0].parameter.value['owner_address'] === 'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb' || 
+        trx.raw_data.contract[0].parameter.value['to_address'] ===  'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb'
+       }));*/
 
-     // const owner = await res.ownerOf(1).call();
+      //let res = await provider.contract().at("TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb");
+
+      // const owner = await res.ownerOf(1).call();
 
       //console.log(provider.address.fromHex(owner));
 
@@ -92,6 +89,17 @@ export function TronEventListener(
         return evs.filter((ev) => ev.contract === config.tron.contract);
       }
 
+      async function dollarFees(txFees: number): Promise<string | undefined> {
+        try {
+          const exchangeRate = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd`);
+          const feeInDollars = exchangeRate ? txFees * exchangeRate.data.tron.usd : "no exchange rate";
+          const toString = feeInDollars.toString() ||  "no exchange rate"
+          return toString;
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
       notifier.on("tron:bridge_tx", async (hash: string) => {
         // console.log(hash, "tron hash");
         const evs = await txToEvent(hash);
@@ -103,8 +111,10 @@ export function TronEventListener(
             const owner =
               trx["raw_data"]?.contract[0]?.parameter?.value["owner_address"];
 
+
+
             const evData: IEventhandler = {
-      
+
               actionId: String(ev.result["actionId"]),
               from: config.tron.nonce,
               to: String(ev.result["chainNonce"]),
@@ -118,8 +128,9 @@ export function TronEventListener(
               type: ev.name.includes("Unfreeze") ? "Unfreeze" : "Transfer",
               uri: ev.name.includes("Unfreeze")
                 ? String(ev.result["baseURI"]).split("{")[0] +
-                  String(ev.result["tokenId"])
+                String(ev.result["tokenId"])
                 : String(ev.result["tokenData"]),
+              dollarFees: dollarFees(ev.result["txFees"]),
               contract: ev.name.includes("Unfreeze")
                 ? String(ev.result["burner"])
                 : String(ev.result["mintWith"]),

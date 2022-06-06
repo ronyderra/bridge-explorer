@@ -122,23 +122,26 @@ export function tezosEventListener(
               // console.log(tokenId?.args[1].int!);
               // console.log(tchainNonce);
 
-              if (!tokenId.args[1].int) {
-                try {
-                  const res = await axios.get('https://staging.api.tzkt.io/v1/operations/transactions', { params: { sender: "KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu" } });
-                  const mappedHash = res.data.filter((i: any) => i.hash === data.hash);
-                  const array = mappedHash[0].parameter.value[0].list ? mappedHash[0].parameter.value[0].list : mappedHash[0].parameter.value[0].txs
-                  const tokenId = array[0].token_id;
-
-                } catch (err: any) {
-                  console.log(err.message)
-                }
+              try {
+                const ScrapedTokenId: Promise<string> = (async () => {
+                  const res = await axios.get(
+                    'https://staging.api.tzkt.io/v1/operations/transactions',
+                    { params: { sender: "KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu" } }
+                  );
+                  const mappedHash = res.data.filter((i: any) => i.hash && i.hash === data.hash);
+                  const array = mappedHash[0].parameter.value[0].list ?
+                    mappedHash[0].parameter.value[0].list : mappedHash[0].parameter.value[0].txs;
+                  return array[0].token_id;
+                })()
+              } catch (err) {
+                console.log(err)
               }
-              
+
               const eventObj: IEvent = {
                 actionId: actionId.toString(),
                 chainName,
                 //@ts-ignore
-                tokenId: tokenId.args[1].int.toString() || tokenId,
+                tokenId: tokenId.args[1].int.toString() || tokenId || ScrapedTokenId,
                 fromChain: chainNonce,
                 toChain: tchainNonce.int,
                 fromChainName: chainNonceToName(chainNonce),
@@ -160,23 +163,23 @@ export function tezosEventListener(
                 let [url, exchangeRate]:
                   | PromiseSettledResult<string>[]
                   | string[] = await Promise.allSettled([
-                  (async () =>
-                    fa2Address?.string &&
-                    eventObj.tokenId &&
-                    (await getUriFa2(fa2Address.string, eventObj.tokenId)))(),
-                  (async () => {
-                    const res = await axios(
-                      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-                    );
-                    return res.data[chainId].usd;
-                  })(),
-                ]);
+                    (async () =>
+                      fa2Address?.string &&
+                      eventObj.tokenId &&
+                      (await getUriFa2(fa2Address.string, eventObj.tokenId)))(),
+                    (async () => {
+                      const res = await axios(
+                        `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                      );
+                      return res.data[chainId].usd;
+                    })(),
+                  ]);
                 eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
                 eventObj.dollarFees =
                   exchangeRate.status === "fulfilled"
                     ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
-                        .multipliedBy(exchangeRate.value)
-                        .toString()
+                      .multipliedBy(exchangeRate.value)
+                      .toString()
                     : "";
               } catch (e) {
                 console.log(e);
@@ -235,21 +238,21 @@ export function tezosEventListener(
                 let [url, exchangeRate]:
                   | PromiseSettledResult<string>[]
                   | string[] = await Promise.allSettled([
-                  (async () =>
-                    await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
-                  (async () => {
-                    const res = await axios(
-                      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-                    );
-                    return res.data[chainId].usd;
-                  })(),
-                ]);
+                    (async () =>
+                      await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
+                    (async () => {
+                      const res = await axios(
+                        `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                      );
+                      return res.data[chainId].usd;
+                    })(),
+                  ]);
                 eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
                 eventObj.dollarFees =
                   exchangeRate.status === "fulfilled"
                     ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
-                        .multipliedBy(exchangeRate.value)
-                        .toString()
+                      .multipliedBy(exchangeRate.value)
+                      .toString()
                     : "";
               } catch (e) {
                 console.log(e);

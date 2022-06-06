@@ -13,16 +13,17 @@ import { explorerDB, indexerDb } from "./mikro-orm.config";
 import http from "http";
 import bodyParser from "body-parser";
 import cron from "node-cron";
-import createNFTRepo from "./db/indexerRepo";
+import createNFTRepo from "./db/indexerRepo";     
 import IndexUpdater from "./services/indexUpdater";
 import { Server } from "socket.io";
 import { scrap } from './scraper/index'
-
+import {init} from './listeners/handlers/tezos'
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+init()
 const listen = true;
 
 export const server = http.createServer(app);

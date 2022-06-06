@@ -1,32 +1,21 @@
 import signalR from "@microsoft/signalr";
+import axios from "axios";
 
-//main net
-// const connection = new signalR.HubConnectionBuilder()
-//     .withUrl("https://api.tzkt.io/v1/events")
-//     .build();
+export async function init() {
+    try {
+        // const res = await axios.get('https://staging.api.tzkt.io/v1/operations/transactions', { params: { sender: "KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu" } });
+        // const mappedHash = res.data.filter((i: any) => i.hash === "ooWPQua2ZMPUcWNgeUq2eiWitbV9ipw8bQNRcQPXgFyx824w8cM")
+        // const array = mappedHash[0].parameter.value[0].list ? mappedHash[0].parameter.value[0].list : mappedHash[0].parameter.value[0].txs
+        // const tokenId = array[0].token_id;
+        // console.log(tokenId)
 
 
-//testnet
-    const connection = new signalR.HubConnectionBuilder()
-    .withUrl("https://hangzhounet.smartpy.io")
-    .build();
 
-async function init() {
-    // open connection
-    await connection.start();
-   
-    // subscribe to account transactions
-    await connection.invoke("SubscribeToOperations", {
-        address: 'KT195omxiopL2ZDqM3g8hRj2sSCG2pTqjNEj',
-        types: 'transaction'
-    });
+        const exchangeRate = await axios(`https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd`);
+console.log(exchangeRate.data.tron.usd)
+    } catch (err: any) {
+        console.log(err.message)
+    }
+
+
 };
-
-// auto-reconnect
-connection.onclose(init);
-
-connection.on("operations", (msg) => {
-    // console.log(msg);            
-});
-
-init();

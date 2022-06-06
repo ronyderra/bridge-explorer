@@ -26,7 +26,7 @@ export interface IEventhandler {
   txFees: string;
   uri: string;
   contract: string;
-  dollarFees?: string;
+  dollarFees?: string | Promise<string>;
   createdAt?: Date
 }
 
@@ -63,7 +63,7 @@ let exchangeRates: any = {};
 cron.schedule('*/3 * * * *', async () => {
   exchangeRates = (await getExchageRate())
 })
-
+//whereTowork
 export const executedEventHandler = (
   em: EntityManager<IDatabaseDriver<Connection>>,
   chain: string
@@ -88,6 +88,10 @@ export const executedEventHandler = (
     //   },
     //   "tx_executed_event"
     // );
+    const rpc = getChain(String(toChain))
+    const provider = new ethers.providers.JsonRpcProvider(rpc?.node);
+    const txReceipt = await provider?.getTransactionReceipt(hash);
+    const statusFlag = txReceipt && txReceipt.blockNumber ? true : false;
 
     const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
@@ -96,7 +100,8 @@ export const executedEventHandler = (
         String(Number(action_id) - actionIdOffset),
         toChain.toString(),
         fromChain.toString(),
-        hash
+        hash,
+        statusFlag
       );
       if (!updated) return;
       // console.log(updated, "updated");
