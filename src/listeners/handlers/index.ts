@@ -92,7 +92,7 @@ export const executedEventHandler = (
     const rpc = getChain(String(toChain))
     const provider = new ethers.providers.JsonRpcProvider(rpc?.node);
     const txReceipt = await provider?.getTransactionReceipt(hash);
-    const statusFlag = txReceipt && txReceipt.blockNumber ? true : false;
+    const statusFlag = (txReceipt && txReceipt.blockNumber) ? true : false;
 
     const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
