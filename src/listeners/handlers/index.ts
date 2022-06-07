@@ -89,13 +89,20 @@ export const executedEventHandler = (
       },
       "tx_executed_event"
     );
-    const rpc = getChain(String(toChain))
-    const provider = new ethers.providers.JsonRpcProvider(rpc?.node);
-    const txReceipt = await provider?.waitForTransaction(hash);
-    console.log("txReceipt:" , txReceipt)
-    const statusFlag = (txReceipt) ? true : false;
-    console.log("status flag:", statusFlag)
-    const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
+    const checkSuccess =async () =>{
+      if (evmNonces.includes(String(toChain))) {
+        const rpc = getChain(String(toChain))
+        const provider = new ethers.providers.JsonRpcProvider(rpc?.node);
+        const txReceipt = await provider?.waitForTransaction(hash);
+        console.log("txReceipt:", txReceipt)
+        const bool = (txReceipt) ? true : false;
+        console.log("status flag:", bool)
+        return bool;
+      }else{
+        return true;
+      }
+    }
+      const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
     try {
       const updated = await createEventRepo(em).updateEvent(
@@ -103,7 +110,7 @@ export const executedEventHandler = (
         toChain.toString(),
         fromChain.toString(),
         hash,
-        statusFlag
+        checkSuccess() 
       );
       if (!updated) return;
       console.log(updated, "updated");
