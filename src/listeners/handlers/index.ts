@@ -200,6 +200,7 @@ options?: HanderOptions ) => {
         clientAppSocket.emit("updateEvent", updated);
 
         try {
+          console.log("before telegram operation")
           axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
             /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate(doc)}&parse_mode=HTML`
           );
