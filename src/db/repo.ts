@@ -18,6 +18,7 @@ export interface IEventRepo {
   createWallet(e: IWallet): Promise<Wallet | null>;
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   findEventByHash(fromHash: string): Promise<BridgeEvent | null>;
+  findEventByToHash(toHash: string): Promise<BridgeEvent | null>;
   findWallet(address: string): Promise<Wallet | null>;
   updateEvent(
     actionId: string,
@@ -223,6 +224,11 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
     async findEventByHash(fromHash) {
       return await em.findOne(BridgeEvent, {
         fromHash,
+      });
+    },
+    async findEventByToHash(toHash) {
+      return await em.findOne(BridgeEvent, {
+        toHash,
       });
     },
     async findWallet(address) {
