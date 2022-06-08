@@ -36,9 +36,10 @@ export const txRouter = (em: EntityManager<IDatabaseDriver<Connection>>): Router
     try {
       const docs = await createEventRepo(res.locals.em).getAllEvents(
         req.query.sort?.toString(),
-        req.query.from?.toString(),
+        req.query.fromChain?.toString(),
         req.query.status?.toString(),
         req.query.fromHash?.toString(),
+        req.query.toHash?.toString(),
         req.query.chainName?.toString(),
         req.query.pendingSearch?.toString(),
         Number(req.query.offset)
