@@ -48,6 +48,7 @@ export interface IEventRepo {
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
+    toHash?:string,
     chainName?: string,
     pendingSearch?: string,
     offset?: number
@@ -110,6 +111,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       fromChain = undefined,
       status = undefined,
       fromHash = undefined,
+      toHash = undefined,
       chainName = undefined,
       pendingSearch = undefined,
       offset = 0
@@ -143,7 +145,10 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
       } else if (fromHash) {
-        events = await em.find(BridgeEvent, { fromHash });
+        events = await em.find
+        (BridgeEvent, { fromHash });
+      } else if (toHash) {
+        events = await em.find(BridgeEvent, { toHash });
       } else if (pendingSearch) {
         console.log("d");
         events = await em.find(
