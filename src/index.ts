@@ -47,26 +47,22 @@ server.listen(config.port, async () => {
   new IndexUpdater(createNFTRepo(indexerOrm));
   app.use("/", txRoutes);
 
-
   listen && EvmEventService(orm.em.fork()).listenBridge(); //listen bridge notifier
 
-  listen &&
-    config.web3.map((chain, i) => setTimeout(() => scrap(orm.em.fork(), chain.nonce), 10000 + (i + 1) * .5 * 1000)); //10000 + (i + 1) * .5 * 1000));
+  listen && config.web3.map((chain, i) => setTimeout(() => scrap(orm.em.fork(), chain.nonce), 10000 + (i + 1) * .5 * 1000));
 
-       listen && elrondEventListener(orm.em.fork()).listen();
+  listen && elrondEventListener(orm.em.fork()).listen();
 
-       listen &&
-    tezosEventListener(
-      config.tezos.socket,
-      config.tezos.contract,
-      config.tezos.name,
-      config.tezos.nonce,
-      config.tezos.id,
-      orm.em.fork()
-    ).listen();
+  listen && tezosEventListener(
+          config.tezos.socket,
+          config.tezos.contract,
+          config.tezos.name,
+          config.tezos.nonce,
+          config.tezos.id,
+          orm.em.fork()
+          ).listen();
 
   listen && AlgorandEventListener(orm.em.fork()).listen();
-
   listen && TronEventListener(orm.em.fork()).listen();
 
   const repo = createEventRepo(orm.em.fork());
