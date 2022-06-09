@@ -7,13 +7,13 @@ import { TronEventListener } from "./listeners/tron";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
-import createEventRepo from "./db/repo";
-import { txRouter } from "./routes/tx";
+import createEventRepo from "./business-logic/repo";
+import { txRouter } from "./controller/tx";
 import { explorerDB, indexerDb } from "./mikro-orm.config";
 import http from "http";
 import bodyParser from "body-parser";
 import cron from "node-cron";
-import createNFTRepo from "./db/indexerRepo";
+import createNFTRepo from "./business-logic/indexerRepo";
 import IndexUpdater from "./services/indexUpdater";
 import { Server } from "socket.io";
 import { scrap } from './scraper/index'

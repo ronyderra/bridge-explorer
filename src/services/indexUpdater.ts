@@ -1,4 +1,4 @@
-import { IndexerRepo } from "../db/indexerRepo";
+import { IndexerRepo } from "../business-logic/indexerRepo";
 import { EthNftDto } from "../entities/NftIndex";
 import config, { ChainConfig } from "../config";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";

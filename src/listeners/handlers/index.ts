@@ -8,7 +8,7 @@ import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
 import { currency } from "../../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../../db/repo";
+import createEventRepo from "../../business-logic/repo";
 import moment from "moment";
 
 export interface IEventhandler {

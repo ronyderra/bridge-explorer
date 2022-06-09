@@ -7,7 +7,7 @@ import { clientAppSocket } from "../index";
 import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
-import createEventRepo from "../db/repo";
+import createEventRepo from "../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 
 const util = require("util");

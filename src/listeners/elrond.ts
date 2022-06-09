@@ -8,7 +8,7 @@ import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
 import {Address,ProxyProvider,} from "@elrondnetwork/erdjs";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../db/repo";
+import createEventRepo from "../business-logic/repo";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
 import { executedEventHandler } from "./handlers";
 

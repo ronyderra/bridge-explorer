@@ -5,7 +5,7 @@ import { clientAppSocket } from "../index";
 import { IEvent } from "../entities/IEvent";
 import {b64Decode,bigIntFromBe,getAlgodClient,getAlgodIndexer,assetUrlFromId,} from "./helpers";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../db/repo";
+import createEventRepo from "../business-logic/repo";
 
 const util = require("util");
 
