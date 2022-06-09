@@ -276,7 +276,7 @@ export function tezosEventListener(
             console.log(updated, "updated");
 
             if (updated.toChain === config.algorand.nonce) {
-              if (updated.toHash?.split("-").length! > 2) {
+              if (updated.toHash?.split("-").length! >= 2) {
                 clientAppSocket.emit("updateEvent", updated);
               }
               return;

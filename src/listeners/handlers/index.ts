@@ -120,7 +120,7 @@ export const executedEventHandler = (
       if (updated.toChain === config.algorand.nonce) {
         console.log("algo update");
         console.log(updated.toHash?.split("-"));
-        if (updated.toHash?.split("-").length! > 2) {
+        if (updated.toHash?.split("-").length! >= 2) {
           clientAppSocket.emit("updateEvent", updated);
         }
         return;
