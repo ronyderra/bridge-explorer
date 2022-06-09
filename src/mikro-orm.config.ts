@@ -12,7 +12,6 @@ export const explorerDB =  {
   type: "mongo",
 } as Options;
 
-
 export const indexerDb = {
   clientUrl: config.indexer_db,
   entities: [EthNftDto],

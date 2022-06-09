@@ -1,13 +1,10 @@
 import fs from "fs";
-import axios from "axios";
 import { stringify } from "csv-stringify/sync";
 import { IEventRepo } from "./db/repo";
 import moment from "moment";
 import { ethers } from "ethers";
 import { currency, txExplorers, addressExplorers } from "./config";
 import { isBigNumberish } from "./db/helpers";
-
-
 
 export const generateCSV = async (
   eventRepo: IEventRepo,
@@ -36,7 +33,6 @@ export const generateCSV = async (
       shallow['targetAddress'] = event.fromChain? `${addressExplorers[event.fromChain]}${shallow['targetAddress']}` : shallow['targetAddress'] || '';
       shallow['senderAddress'] = event.toChain? `${addressExplorers[event.toChain]}${shallow['senderAddress']}` : shallow['senderAddress'] || '';
       shallow['createdAt'] = String(moment(+shallow['createdAt']).format('MMMM Do YYYY, h:mm:ss a'))
-
       
       delete shallow.txFees;
 

@@ -38,7 +38,6 @@ const captchaProtected = async (req:Request, res:Response, next:NextFunction) =>
         }
 }
 
-
 function isBigNumberish(value: any): value is BigNumberish {
     return (value != null) && (
         BigNumber.isBigNumber(value) ||

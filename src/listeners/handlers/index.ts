@@ -1,16 +1,13 @@
 import axios from "axios";
 import config, { getChain, getTelegramTemplate } from "../../config";
 import { ethers } from "ethers";
-import IndexUpdater from "../../services/indexUpdater";
 import BigNumber from "bignumber.js";
-
-import { BridgeEvent, IEvent } from "../../entities/IEvent";
+import {  IEvent } from "../../entities/IEvent";
 import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
-import { currency , txExplorers } from "../../config";
+import { currency } from "../../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-
 import createEventRepo from "../../db/repo";
 import moment from "moment";
 
@@ -43,7 +40,6 @@ export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain:stri
   if (fromChain === config.algorand.nonce) {
       return String(+txFees * exchangeRate)
   }
-
   if (fromChain === config.tron.nonce) {
       return new BigNumber(txFees).shiftedBy(-6).multipliedBy(exchangeRate.toFixed(2)).toString()
   }
@@ -55,7 +51,6 @@ export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain:stri
 
 //getting exchange rate api every 3 mins
 let exchangeRates: any = {};
-
 
 (async () => {
   exchangeRates = (await getExchageRate())
@@ -120,7 +115,6 @@ export const executedEventHandler = (
         updated.toChain &&
         evmNonces.includes(updated.toChain)
       ) {
-        //IndexUpdater.instance.update(updated).catch((e) => console.log(e));
       }
 
       if (updated.toChain === config.algorand.nonce) {

@@ -63,6 +63,7 @@ server.listen(config.port, async () => {
           ).listen();
 
   listen && AlgorandEventListener(orm.em.fork()).listen();
+  
   listen && TronEventListener(orm.em.fork()).listen();
 
   const repo = createEventRepo(orm.em.fork());

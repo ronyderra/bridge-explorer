@@ -163,7 +163,6 @@ const config: Config = {
       nonce: getOrThrow("GNOSIS_NONCE"),
       id: "gnosis",
     },
-
     {
       name: "FUSE",
       node: getOrThrow("FUSE_RPC_URL"),
@@ -171,7 +170,6 @@ const config: Config = {
       nonce: getOrThrow("FUSE_NONCE"),
       id: "fuse-network-token",
     },
-
     {
       name: "GATECHAIN",
       node: getOrThrow("GATECHAIN_RPC_URL"),
@@ -179,7 +177,6 @@ const config: Config = {
       nonce: getOrThrow("GATECHAIN_NONCE"),
       id: "gatechain-wormhole",
     },
-
     {
       name: "VECHAIN",
       node: getOrThrow("VECHAIN_RPC_URL"),
@@ -272,8 +269,6 @@ export const getChain = (nonce: string) => {
   }
 };
 
-
-
 export const getTelegramTemplate = (doc:BridgeEvent) => {
   return `
   <strong>Txn - <a href="${doc.fromChain && txExplorers[doc.fromChain]}">${doc.fromHash}</a></strong>
@@ -282,6 +277,5 @@ export const getTelegramTemplate = (doc:BridgeEvent) => {
   <strong>IN PROCESSING</strong>
   `;
 };
-
 
 export default config;

@@ -1,19 +1,12 @@
 import BigNumber from "bignumber.js";
 import { Algodv2, Indexer } from "algosdk";
-
 import { EvResp } from "../entities/EvResp";
-
 import { AxiosError, AxiosInstance } from "axios";
-
 import { TransactionHash, ProxyProvider } from "@elrondnetwork/erdjs";
-
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
 import { Erc721Attrs } from "./elrond";
 
-
-
 /// ALGORAND
-
 export async function assetUrlFromId(
   algodClient: any,
   assetId: number
@@ -144,60 +137,3 @@ export function bigIntFromBeElrd(buf: Uint8Array): BigNumber {
   // TODO: something better than this hack
   return new BigNumber(`0x${Buffer.from(buf).toString("hex")}`, 16);
 }
-
-
-/* let num = 0
-      while (3> 2) {
-
-
-      const trxs = (await providerRest.get(`/transactions?function=validateSendNft&from=${String(num)}&receiver=` + config.elrond.contract)).data;
-
-      //provider.f
-    for (const trx of trxs) {
-      let transactionOnNetwork = await provider.getTransaction(new TransactionHash(trx.txHash))
-
-      let metadata = new TransactionDecoder().getTransactionMetadata({
-        sender: transactionOnNetwork.sender.toString(),
-        receiver: transactionOnNetwork.receiver.toString(),
-        data:  btoa(transactionOnNetwork.data.toString()),
-        value: '0',
-        type: transactionOnNetwork.type.toString()
-
-    });
-
-    const xy = elegantPair.unpair(new BigNumber(metadata.functionArgs[0], 16).toString(10))
-
-    const doc = await em.findOne(BridgeEvent, {
-      actionId: String(xy[0]),
-      fromChain: String(xy[1])
-    })
-    
-    if (doc && !doc.toHash) {
-     
-  
-      wrap(doc).assign({
-        toHash: trx.txHash
-      }, {em})
-
-
-     await em.flush()
-
-      console.log(trx.txHash);
-    }
-
-    console.log('none');
-    }
-
-    num +=24
-
-      }
-
-*/
-    
-
-
-
-
-
-
-/// TRON
