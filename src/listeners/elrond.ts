@@ -251,32 +251,13 @@ export  function elrondEventListener(
         }
       });
 
-      executedSocket.on(
-        "tx_executed_event",
-        async (
-          fromChain: number,
-          toChain: number,
-          action_id: string,
-          hash: string
-        ) => {
+      executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
           if (!fromChain || fromChain.toString() !== config.elrond.nonce)
             return;
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "elrond:tx_executed_event"
-          );
 
-          executedEventHandler(em.fork(), fromChain.toString())({
-            toChain,
-            fromChain,
-            action_id,
-            hash,
-          })
+          console.log({toChain,fromChain,action_id,hash,},"elrond:tx_executed_event");
+
+          executedEventHandler(em.fork(), fromChain.toString())({toChain,fromChain,action_id,hash,})
         }
       );
 
