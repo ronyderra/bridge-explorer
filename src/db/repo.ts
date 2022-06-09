@@ -240,7 +240,9 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
     async updateEvent(actionId, toChain, fromChain, toHash ,statusFlag = true) {
+      console.log("before update - statusFlag:", statusFlag)
       const statusString = (statusFlag == true) ? "Completed" : "Failed";
+      console.log("statusString:", statusString)
       console.log("enter update", { actionId, fromChain, toChain });
       if (toHash === "N/A") return undefined;
 
