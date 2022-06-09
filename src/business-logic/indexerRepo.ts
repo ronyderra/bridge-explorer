@@ -15,7 +15,7 @@ export interface IndexerRepo {
   }): Promise<void>
 }
 
-export default function createNFTRepo({em,}: MikroORM<IDatabaseDriver<Connection>>): IndexerRepo {
+export default function createNFTRepo({em}: MikroORM<IDatabaseDriver<Connection>>): IndexerRepo {
   return {
     async findNFT({ chainId, address, tokenId }) {
       if (tokenId) {
