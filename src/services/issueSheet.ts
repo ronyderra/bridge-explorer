@@ -43,7 +43,6 @@ export default async function (body: {
       await doc.useServiceAccountAuth(creds);
       try {
         await doc.loadInfo();
-
         const sheet = doc.sheetsByTitle["TX Explorer"];
         try {
           sheet.addRow({

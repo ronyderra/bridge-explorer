@@ -1,17 +1,10 @@
-import {
-  IDatabaseDriver,
-  Connection,
-  wrap,
-  EntityManager
-} from "@mikro-orm/core";
+import {IDatabaseDriver,Connection,wrap,EntityManager} from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
 import { chainNonceToName } from "../config";
 import moment from "moment";
-
 import config from "../config";
-
 
 export interface IEventRepo {
   createEvent(e: IEvent): Promise<BridgeEvent | undefined>;
@@ -64,15 +57,9 @@ export interface IEventRepo {
 
 export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connection>>): IEventRepo {
   return {
-    async getEventsForCSV(
-      startDate = undefined,
-      endDate = undefined,
-      searchQuery = undefined
-    ) {
-      // get events between startDate and endDate
-      let events = await em.find(BridgeEvent, {});
 
-      // filter by startDate and endDate
+    async getEventsForCSV(startDate = undefined,endDate = undefined,searchQuery = undefined) {
+      let events = await em.find(BridgeEvent, {});
 
       if (startDate && endDate) {
         events = events.filter((e) => {
@@ -103,17 +90,9 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
             e?.toChainName?.includes(searchQuery)
         );
       }
-
       return events;
     },
-    async getAllEvents(
-      sort = "DESC",
-      fromChain = undefined,
-      status = undefined,
-      fromHash = undefined,
-      toHash = undefined,
-      chainName = undefined,
-      pendingSearch = undefined,
+    async getAllEvents( sort = "DESC",fromChain = undefined,status = undefined,fromHash = undefined,toHash = undefined,chainName = undefined,pendingSearch = undefined,
       offset = 0
     ) {
       let [events, count] = await em.findAndCount(
@@ -304,13 +283,9 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       }
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
-      console.log("update Elrond", {
-        actionId,
-        fromChain,
-        fromHash,
-        senderAddress,
-        nftUri,
-      });
+
+      console.log("update Elrond", { actionId,fromChain,fromHash,senderAddress,nftUri});
+
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
           let event = await em.findOne(BridgeEvent, {
@@ -403,21 +378,8 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
           users.push(reciver);
         }
       }
-
-      /*const rates = await axios(
-        `https://api.coingecko.com/api/v3/simple/price?ids=${chains.map(c => c.id).join(
-          ","
-        )}&vs_currencies=usd`
-      );*/
-
       const dailyData = new DailyData({
         txNumber: count,
-        //exchangeRates: Object.keys(rates.data).reduce((acc:{[x: string]:string}, coin:string) => {
-        // return {
-        // ...acc,
-        // [coin]: rates.data[coin].usd
-        // }
-        // }, {}),
         walletsNumber: users.length,
         date:
           now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate(),
@@ -463,84 +425,3 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
   };
 }
 
-/**
-const events = await em.find(
-  BridgeEvent, {})
-
-  //@ts-ignore
-  Date.prototype.addDays = function(days) {
-    var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
-}
-
-  function getDates(startDate:Date, stopDate:Date) {
-    var dateArray = new Array();
-    //@ts-ignore
-    var currentDate = startDate
-          //@ts-ignore
-    while (currentDate <= stopDate) {
-        dateArray.push(currentDate);
-          //@ts-ignore
-        currentDate = currentDate.addDays(1);
-    }
-    return dateArray;
-}
-
-  let dailis = getDates(new Date('2022/2/14'), new Date('2022/3/2') )
-
-  console.log(dailis);
-
-
-   dailis.map(d=>({date:d})).forEach((d) => {
-      
-     
-      const date = moment(d.date,  "YYYY/M/D")
-  
-     
-     
-      const start = date.startOf('day').add(3, 'hours').toDate()
-      const end = date.endOf('day').add(3, 'hours').toDate();
-
-
-
-      const ofTheDay = events.filter(e => e.createdAt! < end && e.createdAt! > start);
-
-      let uniqueWallets: string[] = [];
-
-      ofTheDay.forEach((e) => {
-        if (e.targetAddress && !uniqueWallets.includes(e.targetAddress)) {
-          uniqueWallets.push(e.targetAddress)
-        }
-
-        if (e.senderAddress && !uniqueWallets.includes(e.senderAddress)) {
-          uniqueWallets.push(e.senderAddress)
-        }
-
-      })
-
-      const daily:IDailyData = {
-        txNumber: ofTheDay.length,
-        date: moment(d.date).format("YYYY/M/D").toString(),
-        walletsNumber: uniqueWallets.length
-      }
-
-      console.log(daily);
-
-       const a = em.persist(new DailyData(daily));
-       a.flush();
-     console.log('d');
-      
-
-
-    })
-
-
-
-
-
-
-  
-   
-   
- */

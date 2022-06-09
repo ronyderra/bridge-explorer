@@ -8,7 +8,6 @@ export interface IDailyData {
     //},
     walletsNumber: number,
     date: string
-
 }
 
 @Entity()

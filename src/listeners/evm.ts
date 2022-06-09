@@ -1,25 +1,13 @@
-import { IEventRepo } from "../db/repo";
 import config, { ChainConfig } from "../config";
 import { io } from "socket.io-client";
-import { clientAppSocket } from "../index";
-
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
-import createEventRepo from "../db/repo";
 import { BigNumber } from "bignumber.js";
-import IndexUpdater from "../services/indexUpdater";
 import { eventHandler, executedEventHandler } from "./handlers/index";
-import {
-  handleBridgeEvent,
-  handleNativeTransferEvent,
-  handleNativeUnfreezeEvent,
-} from "./handlers/evm";
+import { handleBridgeEvent, handleNativeTransferEvent, handleNativeUnfreezeEvent } from "./handlers/evm";
 import { Minter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-
-
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 interface IContractEventListener {
-  //listen(): void;
   listenBridge(): void;
   listenNative(chain: ChainConfig): void;
 }
@@ -64,7 +52,6 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
         }
       );
 
-
       executedSocket.on(
         "tx_executed_event",
         async (
@@ -76,21 +63,21 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           if (!fromChain || !config.web3.map(c => c.nonce).includes(String(fromChain)))
             return;
 
-            executedEventHandler(
-              em.fork(),
-              String(fromChain)
-            )({
-              fromChain,
-              toChain,
-              action_id,
-              hash,
-            });
+          executedEventHandler(
+            em.fork(),
+            String(fromChain)
+          )({
+            fromChain,
+            toChain,
+            action_id,
+            hash,
+          });
         })
     },
+
     listenNative: async (chain: ChainConfig) => {
       const provider = new JsonRpcProvider(chain.node);
       const contract = Minter__factory.connect(chain.contract, provider);
-
       const transferEvent = contract.filters.TransferErc721();
       const unfreezeEvent = contract.filters.UnfreezeNft();
       const a = contract.filters.TransferErc1155()
@@ -163,7 +150,6 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             baseUri,
             event,
           });
-
           //eventData && (await eventHandler(eventRepo)(eventData));
         }
       );

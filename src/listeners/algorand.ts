@@ -1,47 +1,28 @@
-import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./old";
-import config, { chainNonceToId, chainNonceToName } from "../config";
+import config, { chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
 import { IEvent } from "../entities/IEvent";
-import { ethers } from "ethers";
-import axios from "axios";
-import { BigNumber } from "bignumber.js";
-import { saveWallet } from "../db/helpers";
-import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
-import { JsonRpcProvider, WebSocketProvider } from "@ethersproject/providers";
-import IndexUpdater from "../services/indexUpdater";
-import { Algodv2, Indexer } from "algosdk";
-import {
-  b64Decode,
-  bigIntFromBe,
-  getAlgodClient,
-  getAlgodIndexer,
-  assetUrlFromId,
-} from "./helpers";
-import { MikroORM, IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../db/repo";
+import {b64Decode,bigIntFromBe,getAlgodClient,getAlgodIndexer,assetUrlFromId,} from "./helpers";
+import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
+import createEventRepo from "../business-logic/repo";
+
 const util = require("util");
 
 const executedSocket = io(config.socketUrl);
 const algoSocket = io(config.web3socketUrl);
 //const executedSocket = io("https://testnet-tx-socket.herokuapp.com");
 
-export function AlgorandEventListener(
-  em: EntityManager<IDatabaseDriver<Connection>>,
-): IContractEventListener {
+export function AlgorandEventListener(em: EntityManager<IDatabaseDriver<Connection>>,): IContractEventListener {
   return {
-    listen: async () => {
-      const indexerClient = getAlgodIndexer(
-        config.algorand.indexerNode,
-        config.algorand.apiKey
-      );
+    listen: async () => {const indexerClient = getAlgodIndexer(config.algorand.indexerNode,config.algorand.apiKey);
       const algodClient = getAlgodClient(
         config.algorand.node,
         config.algorand.apiKey
       );
 
       console.log('listening algorand');
+
       algoSocket.on("algorand:bridge_tx", async (hash) => {
         const txRes = await indexerClient.lookupTransactionByID(hash).do();
         const txnInfo = txRes["transaction"];
@@ -52,7 +33,7 @@ export function AlgorandEventListener(
         if (
           txnInfo["tx-type"] == "appl" &&
           txnInfo["application-transaction"]["application-id"] ==
-            config.algorand.contract
+          config.algorand.contract
         ) {
           const actionType = b64Decode(txnInfo.logs[0]).toString("utf-8");
           // Base64 to big number
@@ -115,7 +96,7 @@ export function AlgorandEventListener(
             (async () => {
               return await createEventRepo(em.fork()).createEvent(event);
             })(),
-            (async () => await createEventRepo(em.fork()).saveWallet(event.senderAddress,event.targetAddress!)
+            (async () => await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
             )(),
           ]).then(([doc]) => {
             console.log(doc, "doc");
@@ -124,14 +105,7 @@ export function AlgorandEventListener(
         }
       });
 
-      executedSocket.on(
-        "tx_executed_event",
-        async (
-          fromChain: number,
-          toChain: number,
-          action_id: string,
-          hash: string
-        ) => {
+      executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
           if (!fromChain || fromChain.toString() !== config.algorand.nonce)
             return;
 

@@ -1,4 +1,3 @@
-import { IEventRepo } from "../db/repo";
 import { IContractEventListener } from "./old";
 import config, {getChain} from "../config";
 import { io } from "socket.io-client";
@@ -9,7 +8,6 @@ import { executedEventHandler } from "./handlers";
 import Bottleneck from "bottleneck";
 import { IEventhandler } from "./handlers";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
-import { BridgeEvent } from "../entities/IEvent";
 
 const executedSocket = io(config.socketUrl);
 const notifier = io(config.web3socketUrl);
@@ -28,10 +26,6 @@ export function TronEventListener(
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
 
-
-
-
-
   return {
     async listen() {
      
@@ -43,31 +37,10 @@ export function TronEventListener(
         },
       });
 
-      //const block =( await  provider.trx.getBlock(41095532))//block_header.raw_data.timestamp
-
-     
-
-     /* console.log(await provider.getEventResult('TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb', {
-        sinceTimestamp: 1653841089000,
-        eventName: 'Transfer'
-      }));
-     /* console.log((await provider.trx.getBlock(41088395)).transactions.filter((trx:any) => {
-       return  trx.raw_data.contract[0].parameter.value['owner_address'] === 'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb' || 
-       trx.raw_data.contract[0].parameter.value['to_address'] ===  'TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb'
-      }));*/
-
-     //let res = await provider.contract().at("TWS2dqBEscxGnNKC2jqv9zef38PH4Ea1nb");
-
-     // const owner = await res.ownerOf(1).call();
-
-      //console.log(provider.address.fromHex(owner));
-
       async function getRawEventFromTxn(
         hash: string,
         retries = 0
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ): Promise<any[] | undefined> {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const res: any[] = await rateLimit.schedule(() =>
           provider.getEventByTransactionID(hash)
         );
@@ -154,99 +127,3 @@ export function TronEventListener(
     },
   };
 }
-
-/*const minter = await provider.contract(
-        Minter__factory.abi,
-        config.tron.contract
-      );*/
-
-/*minter.TransferErc721().watch(
-        async (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          err: any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          res: any
-        ) => {
-          console.log(err, "err");
-          console.log("transfer");
-          console.log(util.inspect(res, false, null, true));
-
-          const tokenId = res.result["id"].toString();
-
-          const trx = await res.result["event"]?.getTransaction();
-
-          console.log({
-            actionId: String(res.result["actionId"]),
-            from: "9",
-            to: String(res.result["chainNonce"]),
-            sender: trx.from,
-            target: String(res.result["to"]),
-            hash: trx.hash,
-            txFees: String(res.result["txFees"]),
-            tokenId: tokenId,
-            type: "Transfer",
-            uri: res.result["tokenData"],
-            contract: String(res.result["burner"]),
-          });
-
-          eventHandler(createEventRepo(em.fork()))({
-            actionId: String(res.result["actionId"]),
-            from: "9",
-            to: String(res.result["chainNonce"]),
-            sender: trx.from,
-            target: String(res.result["to"]),
-            hash: "",
-            txFees: String(res.result["txFees"]),
-            tokenId: tokenId,
-            type: "Transfer",
-            uri: String(res.result["tokenData"]),
-            contract: String(res.result["burner"]),
-          });
-        }
-      );
-
-      minter.UnfreezeNft().watch(
-        async (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          err: any,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          res: any
-        ) => {
-          if (err) {
-            console.log(err, "err");
-            return;
-          }
-          console.log("unfreeze");
-          console.log(util.inspect(res, false, null, true));
-
-          const trx = await res.result["event"]?.getTransaction();
-
-          console.log({
-            actionId: String(res.result["actionId"]),
-            from: "9",
-            to: String(res.result["chainNonce"]),
-            sender: "",
-            target: String(res.result["to"]),
-            hash: trx.hash,
-            txFees: String(res.result["txFees"]),
-            tokenId: String(res.result["tokenId"]),
-            type: "Unfreeze",
-            uri: String(res.result["baseURI"]),
-            contract: String(res.result["burner"]),
-          });
-
-          eventHandler(createEventRepo(em.fork()))({
-            actionId: String(res.result["actionId"]),
-            from: "9",
-            to: String(res.result["chainNonce"]),
-            sender: trx.from,
-            target: String(res.result["to"]),
-            hash: trx.hash,
-            txFees: String(res.result["txFees"]),
-            tokenId: String(res.result["tokenId"]),
-            type: "Unfreeze",
-            uri: String(res.result["baseURI"]),
-            contract: String(res.result["burner"]),
-          });
-        }
-      );*/

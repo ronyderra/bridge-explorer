@@ -6,7 +6,6 @@ export interface IBlockRepo {
     lastBlock: number,
     timestamp: number,
     addresses?: string[]
-
 }
 
 @Entity()
@@ -25,8 +24,6 @@ export class BlockRepo {
 
   @Property()
   addresses?: string[]
-
-
 
   constructor(obj:IBlockRepo) {
      this.chain = obj.chain

@@ -1,15 +1,14 @@
 import config from "../config";
 const SibApiV3Sdk = require("sib-api-v3-sdk");
 const moment = require("moment");
+
 export class Mailer {
   sendFormFill = (body: any, title: string) => {
     return new Promise((res, rej) => {
       var defaultClient = SibApiV3Sdk.ApiClient.instance;
-
       var apiKey = defaultClient.authentications["api-key"];
       apiKey.apiKey = config.mail_key;
       var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
       var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
       sendSmtpEmail = {
@@ -39,7 +38,6 @@ export class Mailer {
           .add("H", 3)
           .format("DD/MM/YYYY HH:mm:ss")}`,
         htmlContent: `<html lang="HE">
-        
                 <head>
                 </head>
                 <style>
@@ -47,13 +45,11 @@ export class Mailer {
                         direction: rtl;
                     }
                 </style>
-                
                 <body>
                     ${Object.keys(body)
                       .map((n) => `<p>${n}: ${body[n]}</p>`)
                       .join("\n")}
                 </body>
-                
                 </html>`,
       };
 
@@ -114,7 +110,6 @@ export class Mailer {
                         direction: rtl;
                     }
                 </style>
-                
                 <body>
                 ${body}
                 </body>

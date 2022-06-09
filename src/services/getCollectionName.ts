@@ -59,14 +59,11 @@ const getAddressAndName = async (collectionData: any, collection: any) => {
                 //     }
 
                 // }
-
             }
         } catch (err: any) {
             console.log(err.message)
         }
     });
-
-
 }
 
 const abi = [

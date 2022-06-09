@@ -1,4 +1,4 @@
-import { IndexerRepo } from "../db/indexerRepo";
+import { IndexerRepo } from "../business-logic/indexerRepo";
 import { EthNftDto } from "../entities/NftIndex";
 import config, { ChainConfig } from "../config";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
@@ -7,9 +7,7 @@ import { MikroORM } from "@mikro-orm/core";
 import { explorerDB } from "../mikro-orm.config";
 import { BridgeEvent } from "../entities/IEvent";
 import Web3 from "web3";
-import moment from "moment";
 import { eventHandler } from "../listeners/handlers";
-
 
 export default class IndexUpdater {
   public static instance: IndexUpdater;
@@ -43,9 +41,7 @@ export default class IndexUpdater {
 
     if (logs.length > 0)
       console.log(`found ${logs.length} in ${chain.name}::from block ${fromBlock}`);
-
     const trxs = await Promise.all(logs.map(async (log) => web3.eth.getTransaction(log.transactionHash)))
-
     logs = logs.map((log, i) => ({
       ...log,
       trx: trxs[i]
@@ -57,14 +53,10 @@ export default class IndexUpdater {
     for (const log of logs) {
       const block = await web3.eth.getBlock(log.blockHash)
       const date = +block.timestamp * 1000;
-
       const createdAt = new Date(date);
-
       console.log(createdAt);
       const parsed = _contract.interface.parseLog(log);
-
       const args = parsed.args;
-
       let nftUrl = ''
 
       if (parsed.name.includes("Unfreeze")) {
@@ -77,10 +69,7 @@ export default class IndexUpdater {
         } else {
           nftUrl = String(args["tokenData"]).includes('{id}') ? String(args["tokenData"]).split("{")[0] + String(args["id"]) : String(args["tokenData"])
         }
-
       }
-
-
 
       eventHandler(orm.em)({
         actionId: String(args["actionId"]),
@@ -101,24 +90,17 @@ export default class IndexUpdater {
           : String(args["mintWith"]),
         createdAt
       })
-
-
     }
-
-
   }
 
   public async getDepTrxData(trx: string, chainName: string) {
     const node = config.web3.find((c) => c.name === chainName)?.node;
     const minter = config.web3.find((c) => c.name === chainName)?.contract;
-
     const provider = new JsonRpcProvider(node);
 
     try {
       const res = await provider.waitForTransaction(trx);
-
       const contract = Minter__factory.connect(minter!, provider);
-
       const descs = res.logs.flatMap((log) => {
         if (log.address != minter) {
           return [];
@@ -140,7 +122,6 @@ export default class IndexUpdater {
 
         };
       }
-
       return {
         tokenId: descs[0].args["id"].toString(),
         contractAddr: descs[0].args["contractAddr"].toString(),
@@ -160,17 +141,11 @@ export default class IndexUpdater {
     if (!node && !minter) return null;
 
     try {
-
-
       const wait = await provider.waitForTransaction(trx);
       console.log(wait.transactionHash, "trxHash");
       const res = await provider.getTransaction(trx);
-
-
       const contract = Minter__factory.connect(minter!, provider);
       const decoded = contract.interface.parseTransaction(res);
-
-
       console.log(decoded);
       const tokenId =
         decoded.name.includes('Transfer')
@@ -217,12 +192,8 @@ export default class IndexUpdater {
       "WNFT",
       "Wrapped NFT"
     );
-
     await this.repo.createNFT({ ents: [newNft] }).catch((e) => console.log(e));
   }
-
-
-
 
   public async update(updated: BridgeEvent) {
     const {
