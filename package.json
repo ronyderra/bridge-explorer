@@ -40,6 +40,7 @@
     "google-spreadsheet": "^3.2.0",
     "js-base64": "^3.7.2",
     "moment": "^2.29.1",
+    "mongodb": "^4.7.0",
     "node-cron": "^3.0.0",
     "sib-api-v3-sdk": "^8.2.1",
     "socket.io": "^4.4.1",
