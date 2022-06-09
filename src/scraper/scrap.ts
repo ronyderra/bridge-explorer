@@ -7,21 +7,16 @@ import cron from 'node-cron'
 import Web3 from "web3";
 import { getChain } from "../config";
 
-export const scrap = async (
-  em: EntityManager<IDatabaseDriver<Connection>>,
-  chain: string,
-) => {
+export const scrap = async (em: EntityManager<IDatabaseDriver<Connection>>,chain: string) => {
   const chainConfig = getChain(chain)!
 
   if (!chainConfig) return
 
   const provider = new JsonRpcProvider(chainConfig.node);
+  
   console.log(chainConfig);
-  const web3 = new Web3(
-    new Web3.providers.HttpProvider(chainConfig.node, {
-      timeout: 5000,
-    })
-  );
+
+  const web3 = new Web3(new Web3.providers.HttpProvider(chainConfig.node, {timeout: 5000}));
 
   const _contract = Minter__factory.connect(chainConfig.contract, provider);
   console.log('SCRAPING ', chainConfig.name);
@@ -76,7 +71,6 @@ export const scrap = async (
           } else {
             nftUrl = String(args["tokenData"]).includes('{id}') ? String(args["tokenData"]).split("{")[0] + String(args["id"]) : String(args["tokenData"])
           }
-
         }
 
         const eventData = {

@@ -17,7 +17,7 @@ const saveWallet = async  function (eventRepo:IEventRepo, senderAddress:string |
     }).catch((err) => console.log(err))
 }
 
-export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const captchaProtected = async (req:Request, res:Response, next:NextFunction) => {
     try {
@@ -48,6 +48,6 @@ function isBigNumberish(value: any): value is BigNumberish {
     );
 }
 
-export {saveWallet, captchaProtected, isBigNumberish}
+export {saveWallet, captchaProtected, isBigNumberish, delay}
 
 

@@ -16,7 +16,7 @@ import cron from "node-cron";
 import createNFTRepo from "./business-logic/indexerRepo";
 import IndexUpdater from "./services/indexUpdater";
 import { Server } from "socket.io";
-import { scrap } from './scraper/index'
+import { scrap } from './scraper/scrap'
 
 const app = express();
 app.use(cors());

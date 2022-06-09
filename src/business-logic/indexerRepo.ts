@@ -29,6 +29,5 @@ export default function createNFTRepo({em}: MikroORM<IDatabaseDriver<Connection>
     async removeNFT({ ents }) {
       await em.removeAndFlush(ents)
     }
-
   };
 }
