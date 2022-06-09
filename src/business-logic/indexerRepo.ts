@@ -1,37 +1,21 @@
-import {
-  MikroORM,
-  IDatabaseDriver,
-  Connection,
-  wrap,
-  QueryOrderKeys,
-} from "@mikro-orm/core";
+import {MikroORM,IDatabaseDriver,Connection,} from "@mikro-orm/core";
 import { EthNftDto } from '../entities/NftIndex'
 
 export interface IndexerRepo {
-  findNFT({
-    chainId,
-    address,
-    tokenId
-  }: {
+  findNFT({chainId,address,tokenId}: {
     chainId: string,
     address: string,
     tokenId?: string | undefined
   }): Promise<EthNftDto[] | null>;
-  createNFT({
-    ents
-  }: {
+  createNFT({ents}: {
     ents: EthNftDto[]
   }): Promise<void>
-  removeNFT({
-    ents
-  }: {
+  removeNFT({ents}: {
     ents: EthNftDto[]
   }): Promise<void>
 }
 
-export default function createNFTRepo({
-  em,
-}: MikroORM<IDatabaseDriver<Connection>>): IndexerRepo {
+export default function createNFTRepo({em,}: MikroORM<IDatabaseDriver<Connection>>): IndexerRepo {
   return {
     async findNFT({ chainId, address, tokenId }) {
       if (tokenId) {
