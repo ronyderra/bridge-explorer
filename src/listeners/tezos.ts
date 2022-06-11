@@ -54,14 +54,10 @@ export function tezosEventListener(
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
   const tezos = new TezosToolkit(rpc);
-  const sub = tezos.stream.subscribeOperation({
-    destination: contract,
-  });
 
-  async function getUriFa2(
-    fa2Address: string,
-    tokenId: string
-  ): Promise<string> {
+  const sub = tezos.stream.subscribeOperation({destination: contract,});
+
+  async function getUriFa2(fa2Address: string,tokenId: string): Promise<string> {
     const contract = await tezos.contract.at(fa2Address);
     const storage = await contract.storage<{
       token_metadata: BigMapAbstraction;
@@ -77,13 +73,8 @@ export function tezosEventListener(
   return {
     listen: async () => {
       console.log("listen tezos");
-      sub.on(
-        "data",
-        async (
-          data:
-            | OperationContent
-            | (OperationContentsAndResult & { hash: string })
-        ) => {
+
+      sub.on("data",async (data:| OperationContent|(OperationContentsAndResult & { hash: string })) => {
           if (
             !isTransactionResult(data) ||
             !data.parameters ||
@@ -95,15 +86,12 @@ export function tezosEventListener(
 
           switch (data.parameters.entrypoint) {
             case "freeze_fa2": {
-              const params = data.parameters
-                .value as MichelsonV1ExpressionExtended;
+              const params = data.parameters.value as MichelsonV1ExpressionExtended;
               const fullParmams = params.args as MichelsonV1ExpressionExtended[];
               const param1 = fullParmams[0] as MichelsonV1ExpressionExtended;
               const param2 = fullParmams[1] as MichelsonV1ExpressionExtended;
-
               const tchainNonce = param1.args![0] as MichelsonV1ExpressionBase;
               const fa2Address = param1.args![1] as MichelsonV1ExpressionBase;
-              console.log(fa2Address);
               const to = param2.args![0] as MichelsonV1ExpressionBase;
               const tokenId = param2.args![1] as MichelsonV1ExpressionBase;
               const actionId = getActionId(data.metadata.operation_result);
@@ -172,11 +160,8 @@ export function tezosEventListener(
             }
 
             case "withdraw_nft": {
-              console.log(
-                util.inspect(data, false, null, true /* enable colors */)
-              );
-              const params = data.parameters
-                .value as MichelsonV1ExpressionExtended;
+              console.log(util.inspect(data, false, null, true /* enable colors */));
+              const params = data.parameters.value as MichelsonV1ExpressionExtended;
               const to = params.args![0] as MichelsonV1ExpressionBase;
               //@ts-ignore
               const tokenId = params?.args[1]?.args[1]?.int; //data?.metadata?.operation_result?.storage[0][3]?.int;
@@ -212,8 +197,7 @@ export function tezosEventListener(
                 let [url, exchangeRate]:
                   | PromiseSettledResult<string>[]
                   | string[] = await Promise.allSettled([
-                    (async () =>
-                      await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
+                    (async () => await getUriFa2(config.tezos.xpnft, tokenId.int!))(),
                     (async () => {
                       const res = await axios(
                         `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
@@ -246,24 +230,9 @@ export function tezosEventListener(
         }
       );
 
-      executedSocket.on(
-        "tx_executed_event",
-        async (
-          fromChain: number,
-          toChain: number,
-          action_id: string,
-          hash: string
-        ) => {
-          if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "tezos:tx_executed_event"
-          );
+      executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
+        if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
+          console.log({toChain,fromChain,action_id,hash,},"tezos:tx_executed_event");
 
           try {
             const updated = await createEventRepo(em.fork()).updateEvent(
