@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es6",
     "module": "commonjs",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
     "strict": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "declaration": true,
+    "resolveJsonModule": true,
   },
   "exclude": [
     "node_modules",
     "lib",
     "build"
-    ]
+    ],
+    "include": ["src/*.ts", "src/config.ts", "./src/tests"]
 }
