@@ -31,21 +31,27 @@ describe("my awesome project", () => {
     clientSocket.close();
   });
 
-  it("should work", (done) => {
-    clientSocket.on("hello", (arg) => {
-      assert.equal(arg, "world");
-      done();
-    });
-    serverSocket.emit("hello", "world");
-  });
+  // it("should work", (done) => {
+  //   clientSocket.on("hello", (arg) => {
+  //     assert.equal(arg, "world");
+  //     done();
+  //   });
+  //   serverSocket.emit("hello", "world");
+  // });
 
   it("should work (with ack)", (done) => {
-    serverSocket.on("hi", (cb) => {
-      cb("hola");
+    serverSocket.on("web3:bridge_tx", (a) => {
+
+      
+      console.log(a);
     });
-    clientSocket.emit("hi", (arg) => {
-      assert.equal(arg, "hola");
-      done();
+
+    clientSocket.emit("web3:bridge_tx", {
+      fromChain: 7,
+      fromHash: "0x14ab335d1474355c6c713a2177ea0129383a3a2dfb3c1ca63534778a4ceb00d1",
+      actionId: "258",
+      type: "Unfreeze",
     });
   });
-})
+});
+
