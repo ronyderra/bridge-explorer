@@ -9,7 +9,6 @@
     "build": "tsc",
     "test": "env mongodb+srv://dimab:dGKUNKT7FRaPhm8@dev-bridge-explorer.e5g3i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority  TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/*.js' --recursive  --timeout 60000 --exit"
   },
-  "author": "Rishabh Kumar",
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/js-base64": "^3.3.1",
