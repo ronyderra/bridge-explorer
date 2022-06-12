@@ -34,7 +34,7 @@ export const clientAppSocket = new Server(server, {
 });
 
 clientAppSocket.on("connection", (socket) => {
-  console.log("a user connected ", socket.id);
+  console.log("a user connected to ", socket.id);
 });
 
 export default server.listen(config.port, async () => {
