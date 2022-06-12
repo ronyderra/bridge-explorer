@@ -37,7 +37,7 @@ clientAppSocket.on("connection", (socket) => {
   console.log("a user connected ", socket.id);
 });
 
-server.listen(config.port, async () => {
+export default server.listen(config.port, async () => {
   console.log(`Listening on port ${process.env.PORT}`);
 
   const orm = await MikroORM.init(explorerDB);
