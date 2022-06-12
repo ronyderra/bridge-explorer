@@ -9,7 +9,7 @@ import { IEvent } from "../entities/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-
+import { executedEventHandler } from "./handlers/index";
 const util = require("util");
 
 import {
@@ -234,6 +234,17 @@ export function tezosEventListener(
         if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
           console.log({toChain,fromChain,action_id,hash,},"tezos:tx_executed_event");
 
+        if (evmNonces.includes(String(toChain))) {
+          executedEventHandler(
+            em.fork(),
+            String(fromChain)
+          )({
+            fromChain,
+            toChain,
+            action_id,
+            hash,
+          });
+        } else {
           try {
             const updated = await createEventRepo(em.fork()).updateEvent(
               action_id,
