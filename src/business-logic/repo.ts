@@ -170,6 +170,8 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
             event?.toChainName?.includes(chainName.toUpperCase()) ||
             event?.fromChainName?.includes(chainName.toUpperCase()) ||
             event?.fromHash?.includes(chainName) ||
+            event?.toHash?.includes(chainName) ||
+            event?.collectionName?.includes(chainName) ||
             event?.type?.includes(chainName) ||
             event?.status?.includes(chainName) ||
             event?.senderAddress?.includes(chainName) ||
@@ -180,7 +182,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
       }
-      console.log(count);
+      console.log("number of results:"  , count);
 
       return { events, count };
     },
