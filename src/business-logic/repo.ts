@@ -18,7 +18,7 @@ export interface IEventRepo {
     toChain: string,
     fromChain: string,
     toHash: string,
-    statusFlag?:boolean|Promise<boolean | undefined>
+    statusFlag?:boolean
   ): Promise<BridgeEvent | undefined>;
   updateElrond(
     actionId: string,
