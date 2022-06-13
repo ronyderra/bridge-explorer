@@ -39,15 +39,15 @@ export const handleBridgeEvent = async ({
         const [trxData]: any = await Promise.allSettled([
             (async () => {
                 const fromChainName = config.web3.find((c) => c.nonce === String(fromChain))?.name;
-                const collectionName = fromChainName &&await getCollectionName(fromHash, fromChainName)
-                const contractAddress = fromChainName &&await getContractAddress(fromHash, fromChainName)
+                const collectionName = fromChainName && await getCollectionName(fromHash, fromChainName)
+                const contractAddress = fromChainName && await getContractAddress(fromHash, fromChainName)
                 if (eventTokenId && eventContract) {
                     console.log("evm.ts line 45", collectionName)
                     console.log("evm.ts line 46", contractAddress)
                     return {
                         tokenId: eventTokenId,
-                        collName:collectionName,
-                        contractAdd:contractAddress
+                        collName: collectionName,
+                        contractAdd: contractAddress
                     }
                 }
                 return await IndexUpdater.instance.getDepTrxData(
@@ -56,7 +56,7 @@ export const handleBridgeEvent = async ({
                 )
             })()
         ])
-
+        console.log("--------------TRXDATA-----------:", trxData)
         const res: IEventhandler = {
             actionId,
             from: String(fromChain),
@@ -68,10 +68,10 @@ export const handleBridgeEvent = async ({
             type,
             txFees: txFees?.toString() || '',
             uri: nftUri || '',
-            contract: trxData.contractAdd,
-            collectionName: trxData.collName
+            contract: trxData.value.contractAdd,
+            collectionName: trxData.value.collName
         }
-        console.log("evm.ts line 75" , res )
+        console.log("evm.ts line 75", res)
         return res
     }
 }
