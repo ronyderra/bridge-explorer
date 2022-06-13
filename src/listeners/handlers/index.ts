@@ -2,7 +2,7 @@ import axios from "axios";
 import config, { getChain, getTelegramTemplate } from "../../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
-import {  IEvent } from "../../entities/IEvent";
+import { IEvent } from "../../entities/IEvent";
 import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
@@ -27,7 +27,6 @@ export interface IEventhandler {
   createdAt?: Date
 }
 
-
 interface HanderOptions {
   notLive?: boolean
 }
@@ -36,12 +35,12 @@ const evmNonces = config.web3.map((c) => c.nonce);
 
 const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
 
-export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain:string) => {
+export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain: string) => {
   if (fromChain === config.algorand.nonce) {
-      return String(+txFees * exchangeRate)
+    return String(+txFees * exchangeRate)
   }
   if (fromChain === config.tron.nonce) {
-      return new BigNumber(txFees).shiftedBy(-6).multipliedBy(exchangeRate.toFixed(2)).toString()
+    return new BigNumber(txFees).shiftedBy(-6).multipliedBy(exchangeRate.toFixed(2)).toString()
   }
 
   return new BigNumber(ethers.utils.formatEther(txFees?.toString() || ""))
@@ -84,20 +83,25 @@ export const executedEventHandler = (
       },
       "tx_executed_event"
     );
-    const checkSuccess =async () =>{
-      if (evmNonces.includes(String(toChain))) {
-        const rpc = getChain(String(toChain))
-        const provider = new ethers.providers.JsonRpcProvider(rpc?.node);
-        const txReceipt = await provider?.waitForTransaction(hash);
-        console.log("txReceipt:", txReceipt)
-        const bool = (txReceipt) ? true : false;
-        console.log("status flag:", bool)
-        return bool;
-      }else{
-        return true;
-      }
-    }
-      const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
+
+    const evm = evmNonces.includes(String(toChain)) ? true : false
+
+    const rpc = evm && getChain(String(toChain))
+    const provider = rpc && new ethers.providers.JsonRpcProvider(rpc?.node);
+
+    const txReceipt = await Promise.all([
+      (async () => {
+        if (provider) {
+          const res = await provider?.waitForTransaction(hash);
+          return res;
+        }
+      })(),
+    ]);
+
+    const success = txReceipt ? true : false
+    console.log("index.ts - line 102 - success:", success)
+
+    const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
     try {
       const updated = await createEventRepo(em).updateEvent(
@@ -105,7 +109,7 @@ export const executedEventHandler = (
         toChain.toString(),
         fromChain.toString(),
         hash,
-        checkSuccess() 
+        evm ? success : true
       );
       if (!updated) return;
       console.log(updated, "updated");
@@ -145,10 +149,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   uri,
   contract,
   createdAt
-}: IEventhandler, 
-options?: HanderOptions ) => {
-
-
+}: IEventhandler, options?: HanderOptions) => {
 
   const event: IEvent = {
     chainName: chainNonceToName(from),
@@ -167,9 +168,8 @@ options?: HanderOptions ) => {
     nftUri: uri,
     contract,
     dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]], from) : '',
-    createdAt: createdAt? createdAt : moment().utcOffset(0).toDate()
+    createdAt: createdAt ? createdAt : moment().utcOffset(0).toDate()
   };
-
 
   const [doc] = await Promise.all([
     (async () => {
@@ -177,30 +177,25 @@ options?: HanderOptions ) => {
     })(),
     (async () => {
       return await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
-
     })(),
-
   ]);
 
   if (doc && !options?.notLive) {
+    console.log("TELEGRAM FUNCTION")
     console.log(doc);
 
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 
-    !setTimeout(async () => {
+    setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
-
-      if (updated) {
-        clientAppSocket.emit("updateEvent", updated);
-
-        try {
-          console.log("before telegram operation")
-          axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
+      clientAppSocket.emit("updateEvent", updated);
+      try {
+        console.log("before telegram operation")
+        axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
             /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate(doc)}&parse_mode=HTML`
-          );
-        } catch (err) {
-          console.log(err)
-        }
+        );
+      } catch (err) {
+        console.log(err)
       }
     }, 1000 * 60 * 20);
   }
