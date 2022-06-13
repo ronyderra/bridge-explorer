@@ -46,6 +46,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             nftUri,
             eventTokenId,
             eventContract)
+            
           const eventData = await handleBridgeEvent({
             fromChain,
             fromHash,

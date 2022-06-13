@@ -25,6 +25,7 @@ export interface IEventhandler {
   contract: string;
   dollarFees?: string;
   createdAt?: Date
+  collectionName?: string
 }
 
 interface HanderOptions {
@@ -99,7 +100,7 @@ export const executedEventHandler = (
     ]);
 
     const success = txReceipt ? true : false
-    console.log("index.ts - line 102 - success: " + hash + " " +  success)
+    console.log("index.ts - line 102 - success: " + hash + " " + success)
 
     const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 
@@ -148,7 +149,8 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   txFees,
   uri,
   contract,
-  createdAt
+  createdAt,
+  collectionName
 }: IEventhandler, options?: HanderOptions) => {
 
   const event: IEvent = {
@@ -168,9 +170,10 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     nftUri: uri,
     contract,
     dollarFees: exchangeRates ? calcDollarFees(txFees, exchangeRates[currency[from]], from) : '',
-    createdAt: createdAt ? createdAt : moment().utcOffset(0).toDate()
+    createdAt: createdAt ? createdAt : moment().utcOffset(0).toDate(),
+    collectionName
   };
-
+  console.log("index.ts line 176", event)
   const [doc] = await Promise.all([
     (async () => {
       return await createEventRepo(em.fork()).createEvent(event);

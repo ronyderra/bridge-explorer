@@ -6,6 +6,8 @@ import IndexUpdater from '../../services/indexUpdater'
 import { chainNonceToName } from '../../config'
 import { IERC721WrappedMeta } from '../../entities/ERCMeta'
 import { IEventhandler } from './index'
+import { getCollectionName, getContractAddress } from "../../services/getCollectionData"
+import config from '../../config'
 
 export const handleBridgeEvent = async ({
     fromChain,
@@ -31,15 +33,24 @@ export const handleBridgeEvent = async ({
     nftUri?: string
     eventTokenId?: string
     eventContract?: string
+    collectionName?: string
 }) => {
     if (actionId && type) {
         const [trxData]: any = await Promise.allSettled([
             (async () => {
-                if (eventTokenId && eventContract)
+                const fromChainName = config.web3.find((c) => c.name === String(fromChain))?.name;
+                const collectionName = fromChainName && getCollectionName(fromHash, fromChainName)
+                const contractAddress = fromChainName && getContractAddress(fromHash, fromChainName)
+                if (eventTokenId && eventContract) {
+                    console.log("evm.ts line 45", collectionName)
+                    console.log("evm.ts line 46", contractAddress)
                     return {
                         tokenId: eventTokenId,
-                        contractAddr: eventContract
+                        contractAddr: eventContract,
+                        collectionName,
+                        contractAddress
                     }
+                }
                 return await IndexUpdater.instance.getDepTrxData(
                     fromHash,
                     chainNonceToName(String(fromChain))
@@ -58,8 +69,10 @@ export const handleBridgeEvent = async ({
             type,
             txFees: txFees?.toString() || '',
             uri: nftUri || '',
-            contract: trxData.status === 'fulfilled' ? trxData.value.contractAddr : undefined,
+            contract: trxData.contractAddress,
+            collectionName: trxData.collectionName
         }
+        console.log("evm.ts line 75" , res )
         return res
     }
 }
