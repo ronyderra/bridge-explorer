@@ -39,8 +39,8 @@ export const handleBridgeEvent = async ({
         const [trxData]: any = await Promise.allSettled([
             (async () => {
                 const fromChainName = config.web3.find((c) => c.nonce === String(fromChain))?.name;
-                const collectionName = fromChainName && getCollectionName(fromHash, fromChainName)
-                const contractAddress = fromChainName && getContractAddress(fromHash, fromChainName)
+                const collectionName = fromChainName &&await getCollectionName(fromHash, fromChainName)
+                const contractAddress = fromChainName &&await getContractAddress(fromHash, fromChainName)
                 if (eventTokenId && eventContract) {
                     console.log("evm.ts line 45", collectionName)
                     console.log("evm.ts line 46", contractAddress)
