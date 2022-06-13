@@ -34,7 +34,6 @@ export const handleBridgeEvent = async ({
 }) => {
     if (actionId && type) {
         const [trxData]: any = await Promise.allSettled([
-
             (async () => {
                 if (eventTokenId && eventContract)
                     return {

@@ -81,7 +81,7 @@ export const executedEventHandler = (
         action_id,
         hash,
       },
-      "tx_executed_event"
+      "index.ts - line 84 tx_executed_event"
     );
 
     const evm = evmNonces.includes(String(toChain)) ? true : false
@@ -99,7 +99,7 @@ export const executedEventHandler = (
     ]);
 
     const success = txReceipt ? true : false
-    console.log("index.ts - line 102 - success:", success)
+    console.log("index.ts - line 102 - success: " + hash + " " +  success)
 
     const actionIdOffset = getChain(String(fromChain))?.actionIdOffset || 0;
 

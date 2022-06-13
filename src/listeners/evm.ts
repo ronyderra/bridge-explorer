@@ -34,7 +34,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           eventTokenId?: string,
           eventContract?: string
         ) => {
-          console.log("web3:bridge_tx")
+          console.log("evm.ts line 37 -web3:bridge_tx")
           console.log(fromChain,
             fromHash,
             actionId,
@@ -72,7 +72,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           action_id: string,
           hash: string
         ) => {
-          console.log("tx_executed_event")
+          console.log("evm.ts line 75 - tx_executed_event")
           console.log(fromChain,
             toChain,
             action_id,
