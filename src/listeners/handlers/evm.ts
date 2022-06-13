@@ -46,9 +46,8 @@ export const handleBridgeEvent = async ({
                     console.log("evm.ts line 46", contractAddress)
                     return {
                         tokenId: eventTokenId,
-                        contractAddr: eventContract,
-                        collectionName,
-                        contractAddress
+                        collName:collectionName,
+                        contractAdd:contractAddress
                     }
                 }
                 return await IndexUpdater.instance.getDepTrxData(
@@ -69,8 +68,8 @@ export const handleBridgeEvent = async ({
             type,
             txFees: txFees?.toString() || '',
             uri: nftUri || '',
-            contract: trxData.contractAddress,
-            collectionName: trxData.collectionName
+            contract: trxData.contractAdd,
+            collectionName: trxData.collName
         }
         console.log("evm.ts line 75" , res )
         return res
