@@ -34,6 +34,18 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           eventTokenId?: string,
           eventContract?: string
         ) => {
+          console.log("evm.ts line 37 -web3:bridge_tx")
+          console.log(fromChain,
+            fromHash,
+            actionId,
+            type,
+            toChain,
+            txFees,
+            senderAddress,
+            targetAddress,
+            nftUri,
+            eventTokenId,
+            eventContract)
           const eventData = await handleBridgeEvent({
             fromChain,
             fromHash,
@@ -60,6 +72,11 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           action_id: string,
           hash: string
         ) => {
+          console.log("evm.ts line 75 - tx_executed_event")
+          console.log(fromChain,
+            toChain,
+            action_id,
+            hash)
           if (!fromChain || !config.web3.map(c => c.nonce).includes(String(fromChain)))
             return;
 
