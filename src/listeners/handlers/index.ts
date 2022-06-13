@@ -191,8 +191,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
       clientAppSocket.emit("updateEvent", updated);
       try {
         console.log("before telegram operation")
-        axios.get(`https://api.telegram.org/bot${config.telegramBotToken}
-            /sendMessage?chat_id=${config.telChatId}&text=${getTelegramTemplate(doc)}&parse_mode=HTML`
+        axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text= Transaction is in Processing`
         );
       } catch (err) {
         console.log(err)
