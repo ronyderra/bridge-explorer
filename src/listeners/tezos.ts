@@ -237,6 +237,7 @@ export function tezosEventListener(
         const evmNonces = config.web3.map((c) => c.nonce);
 
         if (evmNonces.includes(String(toChain))) {
+          console.log("tezos line 240 - got to if")
           executedEventHandler(
             em.fork(),
             String(fromChain)
@@ -248,6 +249,7 @@ export function tezosEventListener(
           });
         } else {
           try {
+            console.log("tezos line 251 - got to else")
             const updated = await createEventRepo(em.fork()).updateEvent(
               action_id,
               toChain.toString(),
