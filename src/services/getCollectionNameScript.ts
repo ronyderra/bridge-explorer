@@ -3,25 +3,29 @@ import { ethers } from "ethers";
 import { Minter__factory } from "xpnet-web3-contracts";
 import config from "../config";
 
-export const connectToMongo = async () => {
-    const url = "mongodb+srv://dimab:dGKUNKT7FRaPhm8@dev-bridge-explorer.e5g3i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-    const client = new MongoClient(url);
-
-    const dbName = "myFirstDatabase";
-    const collectionName = "bridge-event";
-
-    await client.connect();
-    console.log("Connected successfully to server");
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
-
-    const withoutCollectionName = await collection
-        .find({ chainName: "ETHEREUM" })
-        .toArray();
-
-    console.log(withoutCollectionName.length);
-    await getAddressAndName(withoutCollectionName, collection)
-}
+// export const connectToMongo = async () => {
+//     try{
+//         const url = "mongodb+srv://dimab:dGKUNKT7FRaPhm8@dev-bridge-explorer.e5g3i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+//         const client = new MongoClient(url);
+    
+//         const dbName = "myFirstDatabase";
+//         const collectionName = "bridge-event";
+    
+//         await client.connect();
+//         console.log("Connected successfully to server");
+//         const db = client.db(dbName);
+//         const collection = db.collection(collectionName);
+    
+//         const withoutCollectionName = await collection
+//             .find({ chainName: "ETHEREUM" })
+//             .toArray();
+    
+//         console.log(withoutCollectionName.length);
+//         await getAddressAndName(withoutCollectionName, collection)
+//     }catch(err){
+//         console.log("get collection name error line - " , err)
+//     }
+// }
 
 const getAddressAndName = async (collectionData: any, collection: any) => {
 
