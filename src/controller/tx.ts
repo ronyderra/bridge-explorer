@@ -25,6 +25,7 @@ export const txRouter = (em: EntityManager<IDatabaseDriver<Connection>>): Router
         req.query.toHash?.toString(),
         req.query.chainName?.toString(),
         req.query.pendingSearch?.toString(),
+        req.query.targetAddress?.toString(),
         Number(req.query.offset)
       );
       res.status(200).json({ events: docs?.events, count: docs?.count });

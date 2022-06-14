@@ -44,6 +44,7 @@ export interface IEventRepo {
     toHash?:string,
     chainName?: string,
     pendingSearch?: string,
+    targetAddress?: string,
     offset?: number
   ): Promise<{ events: BridgeEvent[]; count: number } | null>;
   getMetrics(): Promise<{
@@ -92,8 +93,8 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       }
       return events;
     },
-    async getAllEvents( sort = "DESC",fromChain = undefined,status = undefined,fromHash = undefined,toHash = undefined,chainName = undefined,pendingSearch = undefined,
-      offset = 0
+    async getAllEvents(sort = "DESC", fromChain = undefined, status = undefined, fromHash = undefined, toHash = undefined, chainName = undefined, pendingSearch = undefined, 
+    targetAddress = undefined, offset = 0
     ) {
       let [events, count] = await em.findAndCount(
         BridgeEvent,
@@ -176,6 +177,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
             event?.status?.includes(chainName) ||
             event?.senderAddress?.includes(chainName) ||
             event?.toChain?.includes(chainName) ||
+            event?.targetAddress?.includes(chainName) ||
             event?.createdAt?.toDateString()?.includes(chainName)
           );
         });
