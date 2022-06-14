@@ -6,6 +6,7 @@ import { eventHandler, executedEventHandler } from "./handlers/index";
 import { handleBridgeEvent, handleNativeTransferEvent, handleNativeUnfreezeEvent } from "./handlers/evm";
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { ValidateEvmTransaction } from "../services/validateTransaction"
 
 interface IContractEventListener {
   listenBridge(): void;
@@ -46,7 +47,10 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             nftUri,
             eventTokenId,
             eventContract)
-            
+
+          const ifFromHashIsReal = await ValidateEvmTransaction(fromHash, fromChain)
+          if(!ifFromHashIsReal)return;
+
           const eventData = await handleBridgeEvent({
             fromChain,
             fromHash,
