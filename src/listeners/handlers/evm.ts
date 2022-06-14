@@ -68,8 +68,8 @@ export const handleBridgeEvent = async ({
             type,
             txFees: txFees?.toString() || '',
             uri: nftUri || '',
-            contract: trxData.value.contractAdd,
-            collectionName: trxData.value.collName
+            contract: trxData.status === 'fulfilled' ? trxData.value.contractAdd : undefined,
+            collectionName: trxData.status === 'fulfilled' ? trxData.value.collName : undefined
         }
         console.log("evm.ts line 75", res)
         return res
