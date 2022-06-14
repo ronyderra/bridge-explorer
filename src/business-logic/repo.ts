@@ -1,4 +1,4 @@
-import {IDatabaseDriver,Connection,wrap,EntityManager} from "@mikro-orm/core";
+import { IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
 import { BridgeEvent, IEvent } from "../entities/IEvent";
 import { IWallet, Wallet } from "../entities/IWallet";
 import { DailyData } from "../entities/IDailyData";
@@ -18,7 +18,7 @@ export interface IEventRepo {
     toChain: string,
     fromChain: string,
     toHash: string,
-    statusFlag?:boolean
+    statusFlag?: boolean
   ): Promise<BridgeEvent | undefined>;
   updateElrond(
     actionId: string,
@@ -41,7 +41,7 @@ export interface IEventRepo {
     fromChain?: string,
     toChain?: string,
     fromHash?: string,
-    toHash?:string,
+    toHash?: string,
     chainName?: string,
     pendingSearch?: string,
     targetAddress?: string,
@@ -59,7 +59,7 @@ export interface IEventRepo {
 export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connection>>): IEventRepo {
   return {
 
-    async getEventsForCSV(startDate = undefined,endDate = undefined,searchQuery = undefined) {
+    async getEventsForCSV(startDate = undefined, endDate = undefined, searchQuery = undefined) {
       let events = await em.find(BridgeEvent, {});
 
       if (startDate && endDate) {
@@ -126,7 +126,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         events = events.slice(offset * 50, offset * 50 + 50);
       } else if (fromHash) {
         events = await em.find
-        (BridgeEvent, { fromHash });
+          (BridgeEvent, { fromHash });
       } else if (toHash) {
         events = await em.find(BridgeEvent, { toHash });
       } else if (pendingSearch) {
@@ -184,7 +184,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
       }
-      console.log("number of results:"  , count);
+      console.log("number of results:", count);
 
       return { events, count };
     },
@@ -222,7 +222,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
     async findWallet(address) {
       return await em.findOne(Wallet, { address: address.toLowerCase() });
     },
-    async updateEvent(actionId, toChain, fromChain, toHash ,statusFlag = true) {
+    async updateEvent(actionId, toChain, fromChain, toHash, statusFlag = true) {
       console.log("before update - statusFlag:", statusFlag)
       const statusString = (statusFlag == true) ? "Completed" : "Failed";
       console.log("statusString:", statusString)
@@ -288,7 +288,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
     },
     async updateElrond(actionId, fromChain, fromHash, senderAddress, nftUri) {
 
-      console.log("update Elrond", { actionId,fromChain,fromHash,senderAddress,nftUri});
+      console.log("update Elrond", { actionId, fromChain, fromHash, senderAddress, nftUri });
 
       const waitEvent = await new Promise<BridgeEvent>(
         async (resolve, reject) => {
