@@ -56,9 +56,9 @@ export function tezosEventListener(
 ): IContractEventListener {
   const tezos = new TezosToolkit(rpc);
 
-  const sub = tezos.stream.subscribeOperation({destination: contract,});
+  const sub = tezos.stream.subscribeOperation({ destination: contract });
 
-  async function getUriFa2(fa2Address: string,tokenId: string): Promise<string> {
+  async function getUriFa2(fa2Address: string, tokenId: string): Promise<string> {
     const contract = await tezos.contract.at(fa2Address);
     const storage = await contract.storage<{
       token_metadata: BigMapAbstraction;
@@ -75,7 +75,7 @@ export function tezosEventListener(
     listen: async () => {
       console.log("listen tezos");
 
-      sub.on("data",async (data:| OperationContent | (OperationContentsAndResult & { hash: string })) => {
+      sub.on("data", async (data: | OperationContent | (OperationContentsAndResult & { hash: string })) => {
         if (
           !isTransactionResult(data) ||
           !data.parameters ||
@@ -96,6 +96,7 @@ export function tezosEventListener(
             const to = param2.args![0] as MichelsonV1ExpressionBase;
             const tokenId = param2.args![1] as MichelsonV1ExpressionBase;
             const actionId = getActionId(data.metadata.operation_result);
+
             const collectionData = await getTezosCollectionData(data.hash)
             console.log("collectionData" , collectionData)
 
@@ -232,6 +233,7 @@ export function tezosEventListener(
       }
       );
 
+      //executes if from chain is tezos , listens to destenation transaction , and if to chain is evm then goes to execute handler
       executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, hash: string) => {
         if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
         console.log({ toChain, fromChain, action_id, hash, }, "tezos:tx_executed_event");
