@@ -1,7 +1,7 @@
 import { Router } from "express";
 import issueSheet from "../services/issueSheet";
 import { Mailer } from "../services/mailer";
-import { captchaProtected } from "../business-logic/helpers";
+import { captchaProtected } from "../services/helpers";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
 import { generateCSV } from "../generateCSV";

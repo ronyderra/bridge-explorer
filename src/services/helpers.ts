@@ -1,5 +1,5 @@
 
-import { IEventRepo } from "./repo";
+import { IEventRepo } from "../business-logic/repo";
 import {Request, Response, NextFunction} from 'express'
 import axios from "axios";
 import config from "../config";
