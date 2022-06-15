@@ -1,10 +1,10 @@
 import BigNumber from "bignumber.js";
 import { Algodv2, Indexer } from "algosdk";
-import { EvResp } from "../Intrerfaces/EvResp";
+import { EvResp } from "./Intrerfaces/EvResp";
 import { AxiosError, AxiosInstance } from "axios";
 import { TransactionHash, ProxyProvider } from "@elrondnetwork/erdjs";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";
-import { Erc721Attrs } from "./elrond";
+import { Erc721Attrs } from "./listeners/Elrond/elrond";
 
 /// ALGORAND
 export async function assetUrlFromId(

@@ -1,9 +1,9 @@
 import express from "express";
-import { EvmEventService } from "./listeners/evm";
-import { elrondEventListener } from "./listeners/elrond";
-import { tezosEventListener } from "./listeners/tezos";
-import { AlgorandEventListener } from "./listeners/algorand";
-import { TronEventListener } from "./listeners/tron";
+import { EvmEventService } from "./listeners/Evm/evm";
+import { elrondEventListener } from "./listeners/Elrond/elrond";
+import { tezosEventListener } from "./listeners/Tezos/tezos";
+import { AlgorandEventListener } from "./listeners/Algorand/algorand";
+import { TronEventListener } from "./listeners/Tron/tron";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";

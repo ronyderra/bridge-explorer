@@ -1,14 +1,14 @@
 import axios from "axios";
-import config, { getChain, getTelegramTemplate } from "../../config";
+import config, { getChain, getTelegramTemplate } from "../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
-import { IEvent } from "../../Intrerfaces/IEvent";
-import { chainNonceToName } from "../../config";
-import { clientAppSocket } from "../../index";
+import { IEvent } from "../Intrerfaces/IEvent";
+import { chainNonceToName } from "../config";
+import { clientAppSocket } from "../index";
 import cron from 'node-cron'
-import { currency } from "../../config";
+import { currency } from "../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../../business-logic/repo";
+import createEventRepo from "../business-logic/repo";
 import moment from "moment";
 
 export interface IEventhandler {

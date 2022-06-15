@@ -1,16 +1,16 @@
 import { Base64 } from "js-base64";
-import { IContractEventListener } from "../Intrerfaces/IContractEventListener";
-import config, { chainNonceToName } from "../config";
+import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
+import config, { chainNonceToName } from "../../config";
 import axios from "axios";
-import { IERC721WrappedMeta } from "../Intrerfaces/ERCMeta";
-import { IEvent } from "../Intrerfaces/IEvent";
+import { IERC721WrappedMeta } from "../../Intrerfaces/ERCMeta";
+import { IEvent } from "../../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
-import { clientAppSocket } from "../index";
+import { clientAppSocket } from "../../index";
 import {Address,ProxyProvider,} from "@elrondnetwork/erdjs";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../business-logic/repo";
-import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helpers";
-import { executedEventHandler } from "./handlers";
+import createEventRepo from "../../business-logic/repo";
+import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "../../helpers";
+import { executedEventHandler } from "../../handlers";
 
 const elegantPair = require('elegant-pair');
 const util = require("util");
