@@ -74,8 +74,6 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 Multichain NFT Bridge Explorer gives the end client the ability to get an indication of what is happening with his transaction.
 By saving all the transactions data on our mongoDB we are able to serve and display the following information:
 
