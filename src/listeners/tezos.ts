@@ -10,6 +10,7 @@ import { io } from "socket.io-client";
 import createEventRepo from "../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import { executedEventHandler } from "./handlers/index";
+import { getTezosCollectionData } from "../services/getTezosData"
 const util = require("util");
 
 import {
@@ -95,15 +96,14 @@ export function tezosEventListener(
             const to = param2.args![0] as MichelsonV1ExpressionBase;
             const tokenId = param2.args![1] as MichelsonV1ExpressionBase;
             const actionId = getActionId(data.metadata.operation_result);
-            //@ts-ignore
-            console.log(tokenId?.args[1].int!);
-            console.log(tchainNonce);
+            const collectionData = await getTezosCollectionData(data.hash)
+            console.log("collectionData" , collectionData)
 
             const eventObj: IEvent = {
               actionId: actionId.toString(),
               chainName,
               //@ts-ignore
-              tokenId: tokenId.args[1].int.toString(),
+              tokenId: collectionData?.tokenId,
               fromChain: chainNonce,
               toChain: tchainNonce.int,
               fromChainName: chainNonceToName(chainNonce),
@@ -118,6 +118,8 @@ export function tezosEventListener(
               senderAddress: data.source,
               targetAddress: to.string,
               nftUri: "",
+              contract: collectionData?.contractAdd,
+              collectionName: collectionData?.collectionName,
               createdAt: new Date()
             };
 
