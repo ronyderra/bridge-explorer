@@ -4,7 +4,7 @@ import { IEventRepo } from "./business-logic/repo";
 import moment from "moment";
 import { ethers } from "ethers";
 import { currency, txExplorers, addressExplorers } from "./config";
-import { isBigNumberish } from "./business-logic/helpers";
+import { isBigNumberish } from "./services/helpers";
 
 export const generateCSV = async (
   eventRepo: IEventRepo,

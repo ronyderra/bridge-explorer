@@ -1,4 +1,4 @@
-import { IContractEventListener } from "./old";
+import { IContractEventListener } from "../entities/IContractEventListener";
 import config, { chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";

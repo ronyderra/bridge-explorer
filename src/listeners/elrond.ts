@@ -1,5 +1,5 @@
 import { Base64 } from "js-base64";
-import { IContractEventListener } from "./old";
+import { IContractEventListener } from "../entities/IContractEventListener";
 import config, { chainNonceToName } from "../config";
 import axios from "axios";
 import { IERC721WrappedMeta } from "../entities/ERCMeta";

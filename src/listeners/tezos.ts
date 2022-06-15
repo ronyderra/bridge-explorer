@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "./old";
+import { IContractEventListener } from "../entities/IContractEventListener";
 import { bytes2Char } from "@taquito/utils";
 import config, { chainNonceToName } from "../config";
 import axios from "axios";
@@ -11,8 +11,6 @@ import createEventRepo from "../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import { executedEventHandler } from "./handlers/index";
 import { getTezosCollectionData } from "../services/getTezosData"
-const util = require("util");
-
 import {
   MichelsonV1Expression,
   MichelsonV1ExpressionBase,
@@ -22,7 +20,6 @@ import {
   OperationResultTransaction,
   OpKind,
 } from "@taquito/rpc";
-
 import {
   BigMapAbstraction,
   MichelCodecPacker,
@@ -30,6 +27,8 @@ import {
   OperationContent,
   TezosToolkit,
 } from "@taquito/taquito";
+
+const util = require("util");
 
 const executedSocket = io(config.socketUrl);
 
@@ -98,7 +97,7 @@ export function tezosEventListener(
             const actionId = getActionId(data.metadata.operation_result);
 
             const collectionData = await getTezosCollectionData(data.hash)
-            console.log("collectionData" , collectionData)
+            console.log("collectionData", collectionData)
 
             const eventObj: IEvent = {
               actionId: actionId.toString(),
