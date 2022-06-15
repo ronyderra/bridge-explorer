@@ -27,7 +27,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="./rd.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Bridge Explorer</h3>
@@ -104,8 +104,6 @@ you will find A big file named "listenrs" wich is devided to EVM's and non EVM's
 
 ### Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
 - [Express](https://www.npmjs.com/package/express)
 - [Ethers](https://docs.ethers.io/v5/)
 - [Taquito- Tezos](https://tezostaquito.io/)
@@ -128,9 +126,9 @@ To get a local copy up and running follow these simple example steps.
 
 This is an example of how to list things you need to use the software and how to install them.
 
-- npm
+- yarn
   ```sh
-  npm install npm@latest -g
+ yarn install
   ```
 
 ### Installation
