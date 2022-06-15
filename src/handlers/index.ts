@@ -59,7 +59,6 @@ cron.schedule('*/3 * * * *', async () => {
   exchangeRates = (await getExchageRate())
 })
 
-
 export const executedEventHandler = (
   em: EntityManager<IDatabaseDriver<Connection>>,
   chain: string

@@ -8,7 +8,7 @@ import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./business-logic/repo";
-import { txRouter } from "./controller/tx";
+import { txRouter } from "./controller/routs";
 import { explorerDB, indexerDb } from "./mikro-orm.config";
 import http from "http";
 import bodyParser from "body-parser";

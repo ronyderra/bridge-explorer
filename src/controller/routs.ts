@@ -1,11 +1,12 @@
 import { Router } from "express";
 import issueSheet from "../services/issueSheet";
 import { Mailer } from "../services/mailer";
-import { captchaProtected } from "../services/helpers";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
 import { generateCSV } from "../services/generateCSV";
 import { Request, Response, NextFunction } from "express";
+import config from "../config";
+import axios from "axios";
 
 export const txRouter = (em: EntityManager<IDatabaseDriver<Connection>>): Router => {
   const router = Router();
@@ -13,6 +14,24 @@ export const txRouter = (em: EntityManager<IDatabaseDriver<Connection>>): Router
   const createContext = (req: Request, res: Response, next: NextFunction) => {
     res.locals.em = em.fork()
     next()
+  }
+
+  const captchaProtected = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.body.token && !req.query.token)
+        return res.status(401).json({ message: "Unauthtorized" });
+
+      const { data } = await axios(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${config.captcha_secret}&response=${req.body?.token || req.query.token}`
+      );
+
+      if (!data?.success)
+        return res.status(401).json({ message: "Unauthtorized" });
+
+      next();
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   router.get("/", createContext, async (req, res) => {
