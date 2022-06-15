@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 import createEventRepo from "../../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import { executedEventHandler } from "../../handlers/index";
-import { getTezosCollectionData } from "../../services/getTezosData"
+import { getTezosCollectionData } from "./getTezosData"
 import {
   MichelsonV1Expression,
   MichelsonV1ExpressionBase,

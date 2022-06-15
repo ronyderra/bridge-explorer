@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 import IndexUpdater from '../../services/indexUpdater'
 import { chainNonceToName } from '../../config'
 import { IEventhandler } from '../../handlers/index'
-import { getCollectionName, getContractAddress } from "../../services/getCollectionData"
+import { getCollectionName, getContractAddress } from "./getCollectionData"
 import config from '../../config'
 
 export const handleBridgeEvent = async ({

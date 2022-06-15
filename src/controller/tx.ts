@@ -4,7 +4,7 @@ import { Mailer } from "../services/mailer";
 import { captchaProtected } from "../services/helpers";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
-import { generateCSV } from "../generateCSV";
+import { generateCSV } from "../services/generateCSV";
 import { Request, Response, NextFunction } from "express";
 
 export const txRouter = (em: EntityManager<IDatabaseDriver<Connection>>): Router => {
