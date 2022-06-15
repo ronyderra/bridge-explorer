@@ -1,14 +1,14 @@
 import express from "express";
-import { EvmEventService } from "./listeners/evm";
-import { elrondEventListener } from "./listeners/elrond";
-import { tezosEventListener } from "./listeners/tezos";
-import { AlgorandEventListener } from "./listeners/algorand";
-import { TronEventListener } from "./listeners/tron";
+import { EvmEventService } from "./listeners/Evm/evm";
+import { elrondEventListener } from "./listeners/Elrond/elrond";
+import { tezosEventListener } from "./listeners/Tezos/tezos";
+import { AlgorandEventListener } from "./listeners/Algorand/algorand";
+import { TronEventListener } from "./listeners/Tron/tron";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
 import cors from "cors";
 import createEventRepo from "./business-logic/repo";
-import { txRouter } from "./controller/tx";
+import { txRouter } from "./controller/routs";
 import { explorerDB, indexerDb } from "./mikro-orm.config";
 import http from "http";
 import bodyParser from "body-parser";
@@ -16,7 +16,7 @@ import cron from "node-cron";
 import createNFTRepo from "./business-logic/indexerRepo";
 import IndexUpdater from "./services/indexUpdater";
 import { Server } from "socket.io";
-import { scrap } from './scraper/scrap'
+import { scrap } from './scraper/evmScraper'
 
 const app = express();
 app.use(cors());

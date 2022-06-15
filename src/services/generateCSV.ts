@@ -1,10 +1,10 @@
 import fs from "fs";
 import { stringify } from "csv-stringify/sync";
-import { IEventRepo } from "./business-logic/repo";
+import { IEventRepo } from "../business-logic/repo";
 import moment from "moment";
 import { ethers } from "ethers";
-import { currency, txExplorers, addressExplorers } from "./config";
-import { isBigNumberish } from "./business-logic/helpers";
+import { currency, txExplorers, addressExplorers } from "../config";
+import { isBigNumberish } from "./helpers";
 
 export const generateCSV = async (
   eventRepo: IEventRepo,

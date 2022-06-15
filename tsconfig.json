@@ -19,5 +19,5 @@
     "lib",
     "build"
     ],
-    "include": ["src/*.ts", "src/config.ts", "./src/tests"]
+    "include": ["src/*.ts", "src/config.ts", "./src/tests", "src/listeners/Algorand/helpers.ts", "src/services/generateCSV.ts"]
 }

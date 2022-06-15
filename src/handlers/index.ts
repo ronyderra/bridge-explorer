@@ -1,14 +1,14 @@
 import axios from "axios";
-import config, { getChain, getTelegramTemplate } from "../../config";
+import config, { getChain, getTelegramTemplate } from "../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
-import { IEvent } from "../../entities/IEvent";
-import { chainNonceToName } from "../../config";
-import { clientAppSocket } from "../../index";
+import { IEvent } from "../Intrerfaces/IEvent";
+import { chainNonceToName } from "../config";
+import { clientAppSocket } from "../index";
 import cron from 'node-cron'
-import { currency } from "../../config";
+import { currency } from "../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
-import createEventRepo from "../../business-logic/repo";
+import createEventRepo from "../business-logic/repo";
 import moment from "moment";
 
 export interface IEventhandler {
@@ -58,7 +58,6 @@ let exchangeRates: any = {};
 cron.schedule('*/3 * * * *', async () => {
   exchangeRates = (await getExchageRate())
 })
-
 
 export const executedEventHandler = (
   em: EntityManager<IDatabaseDriver<Connection>>,
@@ -184,8 +183,9 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   ]);
 
   if (doc && !options?.notLive) {
-    console.log("TELEGRAM FUNCTION")
-    console.log(doc);
+    console.log("------TELEGRAM FUNCTION-----")
+    console.log("doc: " , doc);
+    console.log("options: ",options?.notLive)
 
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 

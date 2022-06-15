@@ -1,12 +1,12 @@
-import { IContractEventListener } from "./old";
-import config, {getChain} from "../config";
+import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
+import config, {getChain} from "../../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
-import { eventHandler } from "./handlers";
-import { executedEventHandler } from "./handlers";
+import { eventHandler } from "../../handlers";
+import { executedEventHandler } from "../../handlers";
 import Bottleneck from "bottleneck";
-import { IEventhandler } from "./handlers";
+import { IEventhandler } from "../../handlers";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
 
 const executedSocket = io(config.socketUrl);

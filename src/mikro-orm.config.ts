@@ -1,10 +1,10 @@
 import { Options } from "@mikro-orm/core";
 import config from "./config";
-import { BridgeEvent } from "./entities/IEvent";
-import { Wallet } from "./entities/IWallet";
-import { DailyData } from "./entities/IDailyData";
-import { EthNftDto } from "./entities/NftIndex";
-import { BlockRepo } from "./entities/IBlockRepo";
+import { BridgeEvent } from "./Intrerfaces/IEvent";
+import { Wallet } from "./Intrerfaces/IWallet";
+import { DailyData } from "./Intrerfaces/IDailyData";
+import { EthNftDto } from "./Intrerfaces/NftIndex";
+import { BlockRepo } from "./Intrerfaces/IBlockRepo";
 
 export const explorerDB =  {
   clientUrl: config.db,

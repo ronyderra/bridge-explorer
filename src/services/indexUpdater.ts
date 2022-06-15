@@ -1,13 +1,13 @@
 import { IndexerRepo } from "../business-logic/indexerRepo";
-import { EthNftDto } from "../entities/NftIndex";
+import { EthNftDto } from "../Intrerfaces/NftIndex";
 import config, { ChainConfig } from "../config";
 import { Minter__factory, UserNftMinter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { MikroORM } from "@mikro-orm/core";
 import { explorerDB } from "../mikro-orm.config";
-import { BridgeEvent } from "../entities/IEvent";
+import { BridgeEvent } from "../Intrerfaces/IEvent";
 import Web3 from "web3";
-import { eventHandler } from "../listeners/handlers";
+import { eventHandler } from "../handlers";
 
 export default class IndexUpdater {
   public static instance: IndexUpdater;

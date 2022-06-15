@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Minter__factory } from "xpnet-web3-contracts";
-import config from "../config";
+import config from "../../config";
 
 export const getContractAddress = async (fromHash: string, fromChainName: string) => {
     try {
