@@ -1,5 +1,5 @@
 import {MikroORM,IDatabaseDriver,Connection,} from "@mikro-orm/core";
-import { EthNftDto } from '../entities/NftIndex'
+import { EthNftDto } from '../Intrerfaces/NftIndex'
 
 export interface IndexerRepo {
   findNFT({chainId,address,tokenId}: {

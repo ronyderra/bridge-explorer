@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import config from "../config";
 
+//validates evm Departure transaction 
 export const ValidateEvmTransaction = async (fromHash: string, fromChainNumber: number) => {
     try {
         console.log("ValidateEvmTransaction Line 7 from Hash:", fromHash)

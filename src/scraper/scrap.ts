@@ -1,7 +1,7 @@
 import { IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { BlockRepo } from "../entities/IBlockRepo";
+import { BlockRepo } from "../Intrerfaces/IBlockRepo";
 import { eventHandler } from "../listeners/handlers";
 import cron from 'node-cron'
 import Web3 from "web3";

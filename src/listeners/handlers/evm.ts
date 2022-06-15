@@ -4,7 +4,7 @@ import { providers, BigNumber as BN } from 'ethers'
 import axios from 'axios'
 import IndexUpdater from '../../services/indexUpdater'
 import { chainNonceToName } from '../../config'
-import { IERC721WrappedMeta } from '../../entities/ERCMeta'
+import { IERC721WrappedMeta } from '../../Intrerfaces/ERCMeta'
 import { IEventhandler } from './index'
 import { getCollectionName, getContractAddress } from "../../services/getCollectionData"
 import config from '../../config'

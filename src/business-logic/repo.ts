@@ -1,7 +1,7 @@
 import { IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/core";
-import { BridgeEvent, IEvent } from "../entities/IEvent";
-import { IWallet, Wallet } from "../entities/IWallet";
-import { DailyData } from "../entities/IDailyData";
+import { BridgeEvent, IEvent } from "../Intrerfaces/IEvent";
+import { IWallet, Wallet } from "../Intrerfaces/IWallet";
+import { DailyData } from "../Intrerfaces/IDailyData";
 import { chainNonceToName } from "../config";
 import moment from "moment";
 import config from "../config";

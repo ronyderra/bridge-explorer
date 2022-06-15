@@ -1,11 +1,11 @@
 import BigNumber from "bignumber.js";
-import { IContractEventListener } from "../entities/IContractEventListener";
+import { IContractEventListener } from "../Intrerfaces/IContractEventListener";
 import { bytes2Char } from "@taquito/utils";
 import config, { chainNonceToName } from "../config";
 import axios from "axios";
 import { clientAppSocket } from "../index";
 import { ethers, BigNumber as bs } from "ethers";
-import { IEvent } from "../entities/IEvent";
+import { IEvent } from "../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";

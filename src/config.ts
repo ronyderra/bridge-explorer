@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import {BridgeEvent} from './entities/IEvent'
+import {BridgeEvent} from './Intrerfaces/IEvent'
 dotenv.config();
 
 export const currency: any = {

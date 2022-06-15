@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Algodv2, Indexer } from "algosdk";
-import { EvResp } from "../entities/EvResp";
+import { EvResp } from "../Intrerfaces/EvResp";
 import { AxiosError, AxiosInstance } from "axios";
 import { TransactionHash, ProxyProvider } from "@elrondnetwork/erdjs";
 import { TransactionWatcher } from "@elrondnetwork/erdjs/out/transactionWatcher";

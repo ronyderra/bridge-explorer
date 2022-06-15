@@ -1,4 +1,4 @@
-import { IContractEventListener } from "../entities/IContractEventListener";
+import { IContractEventListener } from "../Intrerfaces/IContractEventListener";
 import config, {getChain} from "../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope

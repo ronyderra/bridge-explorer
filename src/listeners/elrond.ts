@@ -1,9 +1,9 @@
 import { Base64 } from "js-base64";
-import { IContractEventListener } from "../entities/IContractEventListener";
+import { IContractEventListener } from "../Intrerfaces/IContractEventListener";
 import config, { chainNonceToName } from "../config";
 import axios from "axios";
-import { IERC721WrappedMeta } from "../entities/ERCMeta";
-import { IEvent } from "../entities/IEvent";
+import { IERC721WrappedMeta } from "../Intrerfaces/ERCMeta";
+import { IEvent } from "../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
 import {Address,ProxyProvider,} from "@elrondnetwork/erdjs";

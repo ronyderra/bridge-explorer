@@ -2,7 +2,7 @@ import axios from "axios";
 import config, { getChain, getTelegramTemplate } from "../../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
-import { IEvent } from "../../entities/IEvent";
+import { IEvent } from "../../Intrerfaces/IEvent";
 import { chainNonceToName } from "../../config";
 import { clientAppSocket } from "../../index";
 import cron from 'node-cron'
@@ -184,8 +184,9 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
   ]);
 
   if (doc && !options?.notLive) {
-    console.log("TELEGRAM FUNCTION")
-    console.log(doc);
+    console.log("------TELEGRAM FUNCTION-----")
+    console.log("doc: " , doc);
+    console.log("options: ",options?.notLive)
 
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 

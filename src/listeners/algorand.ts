@@ -1,8 +1,8 @@
-import { IContractEventListener } from "../entities/IContractEventListener";
+import { IContractEventListener } from "../Intrerfaces/IContractEventListener";
 import config, { chainNonceToName } from "../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../index";
-import { IEvent } from "../entities/IEvent";
+import { IEvent } from "../Intrerfaces/IEvent";
 import {b64Decode,bigIntFromBe,getAlgodClient,getAlgodIndexer,assetUrlFromId,} from "./helpers";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
