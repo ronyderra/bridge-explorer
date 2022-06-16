@@ -28,8 +28,7 @@ export interface IEventRepo {
     nftUri: string
   ): Promise<BridgeEvent>;
   errorEvent(
-    actionId: string,
-    fromChain: string
+   hash:string
   ): Promise<BridgeEvent | undefined>;
   getEventsForCSV(
     startDate?: string,
@@ -326,12 +325,9 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       await em.flush();
       return waitEvent;
     },
-    async errorEvent(actionId, fromChain) {
+    async errorEvent(hash) {
       const event = await em.findOne(BridgeEvent, {
-        $and: [
-          { actionId: actionId.toString() },
-          { fromChain: fromChain.toString() },
-        ],
+        fromHash: hash
       });
 
       if (event && event.status === "Pending") {
