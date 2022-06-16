@@ -331,12 +331,11 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       });
 
       if (event && event.status === "Pending") {
-        console.log('timeout', event);
+        console.log('changing status to Failed', event);
         wrap(event).assign({ status: "Failed" }, { em });
         await em.flush();
         return event;
       }
-
       return undefined;
     },
     async getMetrics() {
