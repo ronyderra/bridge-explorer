@@ -193,7 +193,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
       if (updated) {
         try {
           console.log("before telegram operation")
-          axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+         await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
         } catch (err) {
           console.log(err)
         }
