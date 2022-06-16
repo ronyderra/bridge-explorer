@@ -1,11 +1,12 @@
 import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
-import config, { chainNonceToName } from "../../config";
+import config, { chainNonceToName, getTelegramTemplate } from "../../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../../index";
 import { IEvent } from "../../Intrerfaces/IEvent";
-import {b64Decode,bigIntFromBe,getAlgodClient,getAlgodIndexer,assetUrlFromId,} from "./helper";
+import { b64Decode, bigIntFromBe, getAlgodClient, getAlgodIndexer, assetUrlFromId, } from "./helper";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../../business-logic/repo";
+import axios from "axios";
 
 const util = require("util");
 
@@ -15,7 +16,8 @@ const algoSocket = io(config.web3socketUrl);
 
 export function AlgorandEventListener(em: EntityManager<IDatabaseDriver<Connection>>,): IContractEventListener {
   return {
-    listen: async () => {const indexerClient = getAlgodIndexer(config.algorand.indexerNode,config.algorand.apiKey);
+    listen: async () => {
+      const indexerClient = getAlgodIndexer(config.algorand.indexerNode, config.algorand.apiKey);
       const algodClient = getAlgodClient(
         config.algorand.node,
         config.algorand.apiKey
@@ -92,48 +94,63 @@ export function AlgorandEventListener(em: EntityManager<IDatabaseDriver<Connecti
             createdAt: new Date()
           };
 
-          Promise.all([
+          const [doc] = await Promise.all([
             (async () => {
               return await createEventRepo(em.fork()).createEvent(event);
             })(),
-            (async () => await createEventRepo(em.fork()).saveWallet(event.senderAddress, event.targetAddress!)
-            )(),
-          ]).then(([doc]) => {
-            console.log(doc, "doc");
-            clientAppSocket.emit("incomingEvent", doc);
-          });
+            (async () => { })(),
+          ])
+          if (doc) {
+            console.log("------TELEGRAM FUNCTION-----")
+            console.log("doc: ", doc);
+
+            setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
+
+            setTimeout(async () => {
+              const updated = await createEventRepo(em.fork()).errorEvent(hash);
+              clientAppSocket.emit("updateEvent", updated);
+              if (updated) {
+                try {
+                  console.log("before telegram operation")
+                 await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+                } catch (err) {
+                  console.log(err)
+                }
+              }
+            }, 1000 * 60 * 20);
+          }
         }
       });
 
-      executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
-          if (!fromChain || fromChain.toString() !== config.algorand.nonce)
-            return;
+      executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, hash: string) => {
+        if (!fromChain || fromChain.toString() !== config.algorand.nonce)
+          return;
 
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "algo:tx_executed_event"
+        console.log(
+          {
+            toChain,
+            fromChain,
+            action_id,
+            hash,
+          },
+          "algo:tx_executed_event"
+        );
+
+        try {
+          const updated = await createEventRepo(em.fork()).updateEvent(
+            action_id,
+            toChain.toString(),
+            fromChain.toString(),
+            hash
           );
+          if (!updated) return;
+          console.log(updated, "updated");
 
-          try {
-            const updated = await createEventRepo(em.fork()).updateEvent(
-              action_id,
-              toChain.toString(),
-              fromChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e) {
-            console.error(e);
-          }
+          clientAppSocket.emit("updateEvent", updated);
+        } catch (e) {
+          console.error(e);
         }
+      }
       );
     },
   };
