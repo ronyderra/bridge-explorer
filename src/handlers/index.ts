@@ -190,7 +190,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 
     setTimeout(async () => {
-      const updated = await createEventRepo(em.fork()).errorEvent(actionId, from);
+      const updated = await createEventRepo(em.fork()).errorEvent(hash);
       clientAppSocket.emit("updateEvent", updated);
       try {
         console.log("before telegram operation")
