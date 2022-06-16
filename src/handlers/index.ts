@@ -32,7 +32,7 @@ interface HanderOptions {
   notLive?: boolean
 }
 
-const evmNonces = config.web3.map((c) => c.nonce);
+const evmChainNumbers = config.web3.map((c) => c.nonce);
 
 const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
 
@@ -84,7 +84,7 @@ export const executedEventHandler = (
       "index.ts - line 84 tx_executed_event"
     );
 
-    const evm = evmNonces.includes(String(toChain)) ? true : false
+    const evm = evmChainNumbers.includes(String(toChain)) ? true : false
 
     const rpc = evm && getChain(String(toChain))
     const provider = rpc && new ethers.providers.JsonRpcProvider(rpc?.node);
@@ -117,7 +117,7 @@ export const executedEventHandler = (
       if (
         updated.status === "Completed" &&
         updated.toChain &&
-        evmNonces.includes(updated.toChain)
+        evmChainNumbers.includes(updated.toChain)
       ) {
       }
 
