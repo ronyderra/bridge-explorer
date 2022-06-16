@@ -74,21 +74,25 @@
 
 ## About The Project
 
-Multichain NFT Bridge Explorer gives the end client the ability to get an indication of what is happening with his transaction.
+Multichain NFT Bridge Explorer gives the end client an indication of what is happening with his transaction.
+</br>
 By saving all the transactions data on our mongoDB we are able to serve and display the following information:
 
-- departure chain name
-- destenation chain name
-- departure hash
-- destenation hash
-- tx fees
-- status
-- sender address
-- target address
-- nft uri
-- collection name
-- collection contract address
-- token id
+- Departure chain name
+- Destenation chain name
+- Departure hash
+- Destenation hash
+- Tx-fees
+- Tx-value
+- Age
+- Method
+- Status
+- Sender address
+- Target address
+- Nft uri
+- Collection name
+- Collection contract address
+- Token-id
 
 and more....
 
