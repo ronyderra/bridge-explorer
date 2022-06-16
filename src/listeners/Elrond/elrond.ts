@@ -1,6 +1,6 @@
 import { Base64 } from "js-base64";
 import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
-import config, { chainNonceToName } from "../../config";
+import config, { chainNonceToName, getTelegramTemplate } from "../../config";
 import axios from "axios";
 import { IERC721WrappedMeta } from "../../Intrerfaces/ERCMeta";
 import { IEvent } from "../../Intrerfaces/IEvent";
@@ -129,20 +129,32 @@ export  function elrondEventListener(
 
               console.log("transfer event: ", eventObj);
 
-              Promise.all([
-                (async () => {
-                  return await createEventRepo(em.fork()).createEvent(eventObj);
-                })(),
-                (async () => { })(),
-              ]).then(([doc]) => {
-                console.log(doc, "doc");
-                clientAppSocket.emit("incomingEvent", doc);
-              });
-            });
-        } catch (e) {
-          console.log(e, "elrond Error");
-        }
-      });
+                            const [doc] = await Promise.all([
+                                (async () => {
+                                    return await createEventRepo(em.fork()).createEvent(eventObj);
+                                })(),
+                                (async () => { })(),
+                            ])
+                            if (doc) {
+                                console.log("------TELEGRAM FUNCTION-----")
+                                console.log("doc: ", doc);
+
+                                setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
+
+                                setTimeout(async () => {
+                                    const updated = await createEventRepo(em.fork()).errorEvent(fromHash);
+                                    clientAppSocket.emit("updateEvent", updated);
+                                    if (updated) {
+                                        try {
+                                            console.log("before telegram operation")
+                                            axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+                                        } catch (err) {
+                                            console.log(err)
+                                        }
+                                    }
+                                }, 1000 * 60 * 20);
+                            }
+                        });
 
       executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
           if (!fromChain || fromChain.toString() !== config.elrond.nonce)
