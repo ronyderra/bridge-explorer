@@ -148,6 +148,7 @@ export function tezosEventListener(
             } catch (e) {
               console.log(e);
             }
+            console.log("hree-----------")
             console.log(eventObj);
             Promise.all([
               (async () => {
@@ -155,7 +156,8 @@ export function tezosEventListener(
               })(),
               (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
             ]).then(([doc]) => {
-              console.log("end");
+              console.log("DOC!!!!!!!!!!!!!!!!!!!!!!!")
+              console.log(doc)
               clientAppSocket.emit("incomingEvent", doc);
             });
             break;
