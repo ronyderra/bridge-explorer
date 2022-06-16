@@ -3,7 +3,7 @@ import config, { chainNonceToName, getTelegramTemplate } from "../../config";
 import { io } from "socket.io-client";
 import { clientAppSocket } from "../../index";
 import { IEvent } from "../../Intrerfaces/IEvent";
-import {b64Decode,bigIntFromBe,getAlgodClient,getAlgodIndexer,assetUrlFromId,} from "./helper";
+import { b64Decode, bigIntFromBe, getAlgodClient, getAlgodIndexer, assetUrlFromId, } from "./helper";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../../business-logic/repo";
 import axios from "axios";
@@ -16,7 +16,8 @@ const algoSocket = io(config.web3socketUrl);
 
 export function AlgorandEventListener(em: EntityManager<IDatabaseDriver<Connection>>,): IContractEventListener {
   return {
-    listen: async () => {const indexerClient = getAlgodIndexer(config.algorand.indexerNode,config.algorand.apiKey);
+    listen: async () => {
+      const indexerClient = getAlgodIndexer(config.algorand.indexerNode, config.algorand.apiKey);
       const algodClient = getAlgodClient(
         config.algorand.node,
         config.algorand.apiKey
@@ -121,35 +122,35 @@ export function AlgorandEventListener(em: EntityManager<IDatabaseDriver<Connecti
         }
       });
 
-      executedSocket.on("tx_executed_event",async (fromChain: number,toChain: number,action_id: string,hash: string) => {
-          if (!fromChain || fromChain.toString() !== config.algorand.nonce)
-            return;
+      executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, hash: string) => {
+        if (!fromChain || fromChain.toString() !== config.algorand.nonce)
+          return;
 
-          console.log(
-            {
-              toChain,
-              fromChain,
-              action_id,
-              hash,
-            },
-            "algo:tx_executed_event"
+        console.log(
+          {
+            toChain,
+            fromChain,
+            action_id,
+            hash,
+          },
+          "algo:tx_executed_event"
+        );
+
+        try {
+          const updated = await createEventRepo(em.fork()).updateEvent(
+            action_id,
+            toChain.toString(),
+            fromChain.toString(),
+            hash
           );
+          if (!updated) return;
+          console.log(updated, "updated");
 
-          try {
-            const updated = await createEventRepo(em.fork()).updateEvent(
-              action_id,
-              toChain.toString(),
-              fromChain.toString(),
-              hash
-            );
-            if (!updated) return;
-            console.log(updated, "updated");
-
-            clientAppSocket.emit("updateEvent", updated);
-          } catch (e) {
-            console.error(e);
-          }
+          clientAppSocket.emit("updateEvent", updated);
+        } catch (e) {
+          console.error(e);
         }
+      }
       );
     },
   };
