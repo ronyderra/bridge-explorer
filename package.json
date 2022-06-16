@@ -7,11 +7,12 @@
     "start": "node build/index.js",
     "dev": "tsc && nodemon src/index.ts",
     "build": "tsc",
-    "test": "env mongodb+srv://dimab:dGKUNKT7FRaPhm8@dev-bridge-explorer.e5g3i.mongodb.net/myFirstDatabase?retryWrites=true&w=majority  TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/*.js' --recursive  --timeout 60000 --exit"
+    "test": "NODE_ENV=dev mocha --check-leaks -r tsconfig-paths/register -r ts-node/register \"test/**/*.spec.ts\""
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/js-base64": "^3.3.1",
+    "@types/mocha": "^9.1.1",
     "@types/ws": "^8.2.2",
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
