@@ -184,19 +184,21 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
 
   if (doc && !options?.notLive) {
     console.log("------TELEGRAM FUNCTION-----")
-    console.log("doc: " , doc);
-    console.log("options: ",options?.notLive)
+    console.log("doc: ", doc);
+    console.log("options: ", options?.notLive)
 
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 
     setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(hash);
       clientAppSocket.emit("updateEvent", updated);
-      try {
-        console.log("before telegram operation")
-        axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
-      } catch (err) {
-        console.log(err)
+      if (updated) {
+        try {
+          console.log("before telegram operation")
+          axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+        } catch (err) {
+          console.log(err)
+        }
       }
     }, 1000 * 60 * 20);
   }
