@@ -226,6 +226,8 @@ export function tezosEventListener(
               })(),
               (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
             ]).then(([doc]) => {
+              console.log("this DOC!!!!!!!!!!!!!!!!!!!!!!!")
+              console.log(doc)
               clientAppSocket.emit("incomingEvent", doc);
             });
             break;
