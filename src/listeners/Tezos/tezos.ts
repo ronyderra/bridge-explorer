@@ -75,33 +75,9 @@ export function tezosEventListener(
     listen: async () => {
       console.log("listen tezos");
 
-      web3socket.on(
-        "web3:bridge_tx",
-        async (
-          fromChain: number,
-          fromHash: string,
-          actionId?: string,
-          type?: "Transfer" | "Unfreeze",
-          toChain?: number,
-          txFees?: BigNumber,
-          senderAddress?: string,
-          targetAddress?: string,
-          nftUri?: string,
-          eventTokenId?: string,
-          eventContract?: string
-        ) => {
+      web3socket.on("tezos:bridge_tx", async (txHash: string) => {
           console.log("TEZOS.ts line 93 -web3:bridge_tx")
-          console.log(fromChain,
-            fromHash,
-            actionId,
-            type,
-            toChain,
-            txFees,
-            senderAddress,
-            targetAddress,
-            nftUri,
-            eventTokenId,
-            eventContract)
+          console.log(txHash)
         }
       );
 
