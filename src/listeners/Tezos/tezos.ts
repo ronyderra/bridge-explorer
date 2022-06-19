@@ -81,8 +81,6 @@ export function tezosEventListener(
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
 
-          if (!data.data[0].parameters || !data.data[0].storage || !data.data[0].target) {return}
-
           const parameter = data.data[0].parameter;
           const storage = data.data[0].storage;
           const target = data.data[0].target
