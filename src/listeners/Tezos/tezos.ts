@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
 import { bytes2Char } from "@taquito/utils";
-import config, { chainNonceToName } from "../../config";
+import config, { chainNonceToName, getTelegramTemplate } from "../../config";
 import axios from "axios";
 import { clientAppSocket } from "../../index";
 import { ethers, BigNumber as bs } from "ethers";
@@ -81,6 +81,8 @@ export function tezosEventListener(
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
 
+          if (!data.data[0].parameters || !data.data[0].storage || !data.data[0].target) {return}
+
           const parameter = data.data[0].parameter;
           const storage = data.data[0].storage;
           const target = data.data[0].target
@@ -114,11 +116,10 @@ export function tezosEventListener(
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
               eventObj.toChainName = target.alias;
-              eventObj.txFees = new BigNumber(target.amount).multipliedBy(1e12).toString();
+              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Transfer";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
-              eventObj.nftUri = "";
               eventObj.contract = target.address;
               eventObj.collectionName = data.data[1].target.alias;
               break;
@@ -128,11 +129,10 @@ export function tezosEventListener(
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
               eventObj.toChainName = target.alias;
-              eventObj.txFees = target.amount;
+              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Unfreez";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
-              eventObj.nftUri = "";
               eventObj.contract = target.address;
               eventObj.collectionName = data.data[1].target.alias;
               break;
@@ -166,13 +166,32 @@ export function tezosEventListener(
             console.log(e);
           }
 
-          Promise.all([
-            (async () => { return await createEventRepo(em.fork()).createEvent(eventObj) })(),
-            (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
-          ]).then(([doc]) => {
-            console.log("If we got here good", doc)
-            clientAppSocket.emit("incomingEvent", doc);
-          });
+
+          const [doc] = await Promise.all([
+            (async () => {
+              return await createEventRepo(em.fork()).createEvent(eventObj);
+            })(),
+            (async () => { })(),
+          ])
+          if (doc) {
+            console.log("------TELEGRAM FUNCTION-----")
+            console.log("doc: ", doc);
+
+            setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
+
+            setTimeout(async () => {
+              const updated = await createEventRepo(em.fork()).errorEvent(txHash);
+              clientAppSocket.emit("updateEvent", updated);
+              if (updated) {
+                try {
+                  console.log("before telegram operation")
+                  await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+                } catch (err) {
+                  console.log(err)
+                }
+              }
+            }, 1000 * 60 * 20);
+          }
 
         } catch (err) {
           console.log(err)
