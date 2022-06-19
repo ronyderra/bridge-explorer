@@ -75,6 +75,7 @@ export function tezosEventListener(
       console.log("listen tezos");
 
       sub.on("data", async (data: | OperationContent | (OperationContentsAndResult & { hash: string })) => {
+        console.log("Tezos Got Data Line 78:" , data)
         if (
           !isTransactionResult(data) ||
           !data.parameters ||
