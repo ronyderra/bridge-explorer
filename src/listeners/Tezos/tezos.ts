@@ -81,6 +81,8 @@ export function tezosEventListener(
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
 
+          if (!data.data[0].parameters || !data.data[0].storage || !data.data[0].target) {return}
+
           const parameter = data.data[0].parameter;
           const storage = data.data[0].storage;
           const target = data.data[0].target
@@ -107,7 +109,6 @@ export function tezosEventListener(
             contract: "",
             createdAt: new Date()
           };
-          console.log("!!!!!!target amount", target.amount)
 
           switch (entrypoint) {
             case "freeze_fa2": {
@@ -115,7 +116,7 @@ export function tezosEventListener(
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
               eventObj.toChainName = target.alias;
-              eventObj.txFees = new BigNumber(target.amount).multipliedBy(1e12).toString();
+              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Transfer";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
@@ -128,7 +129,7 @@ export function tezosEventListener(
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
               eventObj.toChainName = target.alias;
-              eventObj.txFees = target.amount;
+              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Unfreez";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
