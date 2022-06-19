@@ -44,6 +44,7 @@ function getActionId(opRes: OperationResultTransaction): BigNumber {
   const val = pair[0].args![0] as MichelsonV1ExpressionBase;
   return new BigNumber(val.int!);
 }
+const web3socket = io(config.web3socketUrl);
 
 export function tezosEventListener(
   rpc: string,
@@ -73,6 +74,36 @@ export function tezosEventListener(
   return {
     listen: async () => {
       console.log("listen tezos");
+
+      web3socket.on(
+        "web3:bridge_tx",
+        async (
+          fromChain: number,
+          fromHash: string,
+          actionId?: string,
+          type?: "Transfer" | "Unfreeze",
+          toChain?: number,
+          txFees?: BigNumber,
+          senderAddress?: string,
+          targetAddress?: string,
+          nftUri?: string,
+          eventTokenId?: string,
+          eventContract?: string
+        ) => {
+          console.log("TEZOS.ts line 93 -web3:bridge_tx")
+          console.log(fromChain,
+            fromHash,
+            actionId,
+            type,
+            toChain,
+            txFees,
+            senderAddress,
+            targetAddress,
+            nftUri,
+            eventTokenId,
+            eventContract)
+        }
+      );
 
       sub.on("data", async (data: | OperationContent | (OperationContentsAndResult & { hash: string })) => {
         console.log("Tezos Got Data Line 78:" , data)
