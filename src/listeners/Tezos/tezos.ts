@@ -74,19 +74,19 @@ export function tezosEventListener(
   return {
     listen: async () => {
       console.log("listen tezos");
-      
+
       web3socket.on("tezos:bridge_tx", async (txHash: string) => {
-        try{
+        try {
           console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
-  
+
           const parameter = data.data[0].parameter;
           const storage = data.data[0].storage;
           const target = data.data[0].target
-  
+
           const entrypoint = parameter.entrypoint;
-  
+
           const eventObj: IEvent = {
             actionId: "",
             chainName: "TEZOS",
@@ -99,7 +99,7 @@ export function tezosEventListener(
             txFees: "",
             type: "",
             status: "Pending",
-            toHash: "",
+            toHash: undefined,
             senderAddress: "",
             targetAddress: "",
             nftUri: "",
@@ -107,14 +107,14 @@ export function tezosEventListener(
             contract: "",
             createdAt: new Date()
           };
-  
+
           switch (entrypoint) {
             case "freeze_fa2": {
               eventObj.actionId = storage.action_cnt;
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
               eventObj.toChainName = target.alias;
-              eventObj.txFees = target.amount;
+              eventObj.txFees = new BigNumber(target.amount).multipliedBy(1e12).toString();
               eventObj.type = "Transfer";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
@@ -138,16 +138,43 @@ export function tezosEventListener(
               break;
             }
           }
-  
+
+          try {
+            let [url, exchangeRate]:
+              | PromiseSettledResult<string>[]
+              | string[] = await Promise.allSettled([
+                (async () =>
+                  parameter.value.fa2_address &&
+                  eventObj.tokenId &&
+                  (await getUriFa2(parameter.value.fa2_address, eventObj.tokenId)))(),
+                (async () => {
+                  const res = await axios(
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                  );
+                  return res.data[chainId].usd;
+                })(),
+              ]);
+
+            eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
+            eventObj.dollarFees =
+              exchangeRate.status === "fulfilled"
+                ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
+                  .multipliedBy(exchangeRate.value)
+                  .toString()
+                : "";
+          } catch (e) {
+            console.log(e);
+          }
+
           Promise.all([
-            (async () => {return await createEventRepo(em.fork()).createEvent(eventObj)})(),
+            (async () => { return await createEventRepo(em.fork()).createEvent(eventObj) })(),
             (async () => await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!))(),
           ]).then(([doc]) => {
             console.log("If we got here good", doc)
             clientAppSocket.emit("incomingEvent", doc);
           });
 
-        }catch(err){
+        } catch (err) {
           console.log(err)
         }
       });
@@ -316,10 +343,10 @@ export function tezosEventListener(
       // );
 
       //executes if from chain is tezos , listens to destenation transaction , and if to chain is evm then goes to execute handler
-      
-      
-      
-      
+
+
+
+
       executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, hash: string) => {
         if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
         console.log({ toChain, fromChain, action_id, hash, }, "tezos:tx_executed_event");
