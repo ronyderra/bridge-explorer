@@ -4,7 +4,7 @@ import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import { BigNumber } from "bignumber.js";
 import { eventHandler, executedEventHandler } from "../../handlers/index";
 import { handleBridgeEvent } from "./handleBridgeEvent";
-import { validateEvmTransaction } from "./validateTransaction"
+// import { validateEvmTransaction } from "./validateTransaction"
 
 interface IContractEventListener {
   listenBridge(): void;
@@ -45,8 +45,8 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             eventTokenId,
             eventContract)
 
-          const ifFromHashIsReal = await validateEvmTransaction(fromHash, fromChain)
-          if(!ifFromHashIsReal)return;
+          // const ifFromHashIsReal = await validateEvmTransaction(fromHash, fromChain)
+          // if(!ifFromHashIsReal)return;
 
           const eventData = await handleBridgeEvent({
             fromChain,
