@@ -82,10 +82,10 @@ export const executedEventHandler = (em: EntityManager<IDatabaseDriver<Connectio
       "index.ts - line 84 tx_executed_event"
     );
 
-    const evm = evmChainNumbers.includes(String(toChain)) ? true : false
+    const isToChainEvm = evmChainNumbers.includes(String(toChain)) ? true : false
 
-    const rpc = evm && getChain(String(toChain))
-    const provider = rpc && new ethers.providers.JsonRpcProvider(rpc?.node);
+    const chainData = isToChainEvm && getChain(String(toChain))
+    const provider = chainData && new ethers.providers.JsonRpcProvider(chainData?.node);
 
     const txReceipt = await Promise.all([
       (async () => {
@@ -107,7 +107,7 @@ export const executedEventHandler = (em: EntityManager<IDatabaseDriver<Connectio
         toChain.toString(),
         fromChain.toString(),
         hash,
-        evm ? success : true
+        isToChainEvm ? success : true
       );
       if (!updated) return;
       console.log(updated, "updated");
