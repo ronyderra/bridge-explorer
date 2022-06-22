@@ -113,26 +113,25 @@ export function tezosEventListener(
               eventObj.actionId = storage.action_cnt;
               eventObj.tokenId = parameter.value.token_id;
               eventObj.toChain = parameter.value.chain_nonce;
-              eventObj.toChainName = target.alias;
               eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Transfer";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
-              eventObj.contract = target.address;
-              eventObj.collectionName = data.data[1].target.alias;
+              eventObj.contract = parameter.value.fa2_address;
+              eventObj.collectionName = data.data[1]?.target?.alias;
+              eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
               break;
             }
             case "withdraw_nft": {
               eventObj.actionId = storage.action_cnt;
               eventObj.tokenId = parameter.value.token_id;
-              eventObj.toChain = parameter.value.chain_nonce;
-              eventObj.toChainName = target.alias;
               eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Unfreez";
               eventObj.senderAddress = data.data[0].sender.address;
               eventObj.targetAddress = parameter.value.to;
               eventObj.contract = target.address;
               eventObj.collectionName = data.data[1].target.alias;
+              eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
               break;
             }
           }
