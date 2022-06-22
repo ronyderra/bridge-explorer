@@ -68,7 +68,10 @@ export function tezosEventListener(
       token_info: MichelsonMap<string, string>;
     }>(tokenId);
 
-    return bytes2Char(tokenStorage!.token_info.get("")!);
+    const uriFa2 = bytes2Char(tokenStorage!.token_info.get("")!);
+    console.log("tezos.ts Line 72 - Uri:", uriFa2)
+
+    return uriFa2;
   }
 
   return {
@@ -81,11 +84,11 @@ export function tezosEventListener(
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
 
-          const parameter = data.data[0].parameter;
-          const storage = data.data[0].storage;
-          const target = data.data[0].target
+          const parameter = data.data[0]?.parameter;
+          const storage = data.data[0]?.storage;
+          const target = data.data[0]?.target
 
-          const entrypoint = parameter.entrypoint;
+          const entrypoint = parameter?.entrypoint;
 
           const eventObj: IEvent = {
             actionId: "",
@@ -116,8 +119,8 @@ export function tezosEventListener(
               eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Transfer";
               eventObj.senderAddress = data.data[0].sender.address;
-              eventObj.targetAddress = parameter.value.to;
-              eventObj.contract = parameter.value.fa2_address;
+              eventObj.targetAddress = parameter.value?.to;
+              eventObj.contract = parameter?.value.fa2_address;
               eventObj.collectionName = data.data[1]?.target?.alias;
               eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
               break;
@@ -127,7 +130,7 @@ export function tezosEventListener(
               eventObj.tokenId = parameter.value.token_id;
               eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
               eventObj.type = "Unfreez";
-              eventObj.senderAddress = data.data[0].sender.address;
+              eventObj.senderAddress = data.data[0].sender?.address;
               eventObj.targetAddress = parameter.value.to;
               eventObj.contract = target.address;
               eventObj.collectionName = data.data[1].target.alias;
@@ -363,9 +366,9 @@ export function tezosEventListener(
 
 
 
-      executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, hash: string) => {
+      executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, destanationHash: string) => {
         if (!fromChain || fromChain.toString() !== config.tezos.nonce) return;
-        console.log({ toChain, fromChain, action_id, hash, }, "tezos:tx_executed_event");
+        console.log({ toChain, fromChain, action_id, destanationHash, }, "tezos:tx_executed_event");
 
         const evmNonces = config.web3.map((c) => c.nonce);
 
@@ -378,7 +381,7 @@ export function tezosEventListener(
             fromChain,
             toChain,
             action_id,
-            hash,
+            hash: destanationHash,
           });
         } else {
           try {
@@ -387,7 +390,7 @@ export function tezosEventListener(
               action_id,
               toChain.toString(),
               fromChain.toString(),
-              hash
+              destanationHash
             );
             if (!updated) return;
             console.log(updated, "updated");
