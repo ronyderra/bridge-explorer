@@ -1,5 +1,5 @@
 import { IContractEventListener } from "../../Intrerfaces/IContractEventListener";
-import config, {getChain} from "../../config";
+import config, { getChain } from "../../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
@@ -28,7 +28,6 @@ export function TronEventListener(
 
   return {
     async listen() {
-     
       const provider = new TronWeb({
         fullHost: config.tron.node,
         privateKey: "111",
@@ -68,7 +67,7 @@ export function TronEventListener(
       notifier.on("tron:bridge_tx", async (hash: string) => {
         console.log(hash, "tron hash");
         const evs = await txToEvent(hash);
-
+        console.log("TRON:" , evs)
         if (evs.length) {
           for (const ev of evs) {
             const trx = await provider.trx.getTransaction(hash);
@@ -77,7 +76,6 @@ export function TronEventListener(
               trx["raw_data"]?.contract[0]?.parameter?.value["owner_address"];
 
             const evData: IEventhandler = {
-      
               actionId: String(ev.result["actionId"]),
               from: config.tron.nonce,
               to: String(ev.result["chainNonce"]),
@@ -91,7 +89,7 @@ export function TronEventListener(
               type: ev.name.includes("Unfreeze") ? "Unfreeze" : "Transfer",
               uri: ev.name.includes("Unfreeze")
                 ? String(ev.result["baseURI"]).split("{")[0] +
-                  String(ev.result["tokenId"])
+                String(ev.result["tokenId"])
                 : String(ev.result["tokenData"]),
               contract: ev.name.includes("Unfreeze")
                 ? String(ev.result["burner"])
