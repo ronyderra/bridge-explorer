@@ -83,11 +83,9 @@ export function tezosEventListener(
           console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
 
           const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
-
           const parameter = data.data[0]?.parameter;
           const storage = data.data[0]?.storage;
           const target = data.data[0]?.target
-
           const entrypoint = parameter?.entrypoint;
 
           const eventObj: IEvent = {
@@ -166,19 +164,19 @@ export function tezosEventListener(
             console.log(e);
           }
 
-
           const [doc] = await Promise.all([
             (async () => {
               return await createEventRepo(em.fork()).createEvent(eventObj);
             })(),
-            (async () => { })(),
+            (async () => {
+              return await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!)
+            })(),
           ])
           if (doc) {
             console.log("------TELEGRAM FUNCTION-----")
             console.log("doc: ", doc);
 
             setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
-
             setTimeout(async () => {
               const updated = await createEventRepo(em.fork()).errorEvent(txHash);
               clientAppSocket.emit("updateEvent", updated);
