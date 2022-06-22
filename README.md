@@ -54,12 +54,6 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -113,6 +107,9 @@ these entry point are defined on the contract itself.
 - [Tron Web](https://www.npmjs.com/package/tronweb)
 - [xpnet-web3-contracts](https://github.com/XP-NETWORK/XP.network-HECO-Migration#dist-erc1155)
 - [Mikro Orm](https://mikro-orm.io/)
+- [MongoDB](https://www.mongodb.com/)
+- [Compass](https://www.mongodb.com/products/compass)
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -128,6 +125,7 @@ This is an example of how to list things you need to use the software and how to
 
 - nodeJs
 - yarn
+- recommended compass
 - .env File
 
 ### Installation
