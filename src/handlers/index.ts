@@ -180,7 +180,7 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
     })(),
   ]);
 
-  if (doc && !options?.notLive) {
+  if (doc) {
     console.log("------TELEGRAM FUNCTION-----")
     console.log("doc: ", doc);
     console.log("options: ", options?.notLive)
