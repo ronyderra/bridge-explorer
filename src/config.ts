@@ -270,7 +270,7 @@ export const getChain = (nonce: string) => {
 };
 
 export const getTelegramTemplate = (doc:BridgeEvent) => {
-  return `<strong> Txn: <a href="${doc.fromChain && txExplorers[doc.fromChain] + doc.fromHash}">${doc.fromHash}</a></strong><strong> From: ${doc.fromChainName}</strong><strong> TO: ${doc.toChainName}</strong><strong> IN PROCESSING</strong>`;
+  return `<strong> Txn: <a href="${doc.fromChain && txExplorers[doc.fromChain] + doc.toHash ? doc.toHash : doc.fromHash}">${doc.fromHash}</a></strong><strong> From: ${doc.fromChainName}</strong><strong> TO: ${doc.toChainName}</strong><strong> IN PROCESSING</strong>`;
 };
 
 export default config;
