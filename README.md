@@ -98,8 +98,14 @@ and more....
 
 <strong>THIS IS THE SERVER SIDE</strong>
 
-<p>On this repo you will find a controller that routs by urls working with a buisness-logic file that connects directly to the DB,
+<p>
+On this repo you will find a controller that routs by urls working with a buisness-logic file that connects directly to the DB,
 you will find A big file named "listenrs" wich is devided to EVM's and non EVM's.
+Each file holds a document that is manages his relevant socket.
+
+there are 2 main socket listeners on each file :
+One that is listening to a Freez entry point and another that is listening to a Withdraw, 
+these entry point are defined on the contract itself.
 </p>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -121,17 +127,14 @@ you will find A big file named "listenrs" wich is devided to EVM's and non EVM's
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Make sure to go by the following instructions:
 
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
 
 - yarn
-  ```sh
- yarn install
-  ```
+  ```sh yarn install```
 
 ### Installation
 
