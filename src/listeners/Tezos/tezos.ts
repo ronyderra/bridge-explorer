@@ -47,7 +47,7 @@ export function tezosEventListener(
           const lastTransactionOnContract = dataBCD.data.operations[0];
           let blocks = await em.findOne(BlockRepo, { chain: "18" });
 
-          if (blocks && lastTransactionOnContract.id > 1) {
+          if (blocks && lastTransactionOnContract.id > blocks.lastBlock) {
             wrap(blocks).assign(
               {
                 lastBlock: lastTransactionOnContract.id,
