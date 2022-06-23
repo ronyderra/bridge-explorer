@@ -38,7 +38,7 @@ export function tezosEventListener(
 
   return {
     listen: async () => {
-      console.log("listen tezos");
+      console.log("listen tezos ");
 
       setInterval(async () => {
         console.log("listen tezos2");
