@@ -28,7 +28,7 @@ export interface IEventRepo {
     nftUri: string
   ): Promise<BridgeEvent>;
   errorEvent(
-   hash:string
+  hash:string
   ): Promise<BridgeEvent | undefined>;
   getEventsForCSV(
     startDate?: string,
@@ -53,6 +53,7 @@ export interface IEventRepo {
   saveDailyData(): void;
   getDashboard(period: number | undefined): Promise<DailyData[]>;
   saveWallet(senderAddress: string, to: string): Promise<void>
+  getLastEvent(chainName: string): Promise<BridgeEvent | undefined>
 }
 
 export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connection>>): IEventRepo {
@@ -420,7 +421,12 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         if (!walletFrom && senderAddress) await this.createWallet({ address: senderAddress });
         if (!walletTo && to && senderAddress !== to) await this.createWallet({ address: to! });
       }).catch((err) => console.log(err))
+    },
+    async getLastEvent(chainName: string) {
+      console.log(chainName)
+      const event = await em.find(BridgeEvent, { chainName: chainName },{orderBy: { createdAt: -1}  , limit: 1}) ;
+      return event ? event[0] : undefined
     }
-  };
-}
+  }
+};
 
