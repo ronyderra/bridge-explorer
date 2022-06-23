@@ -33,7 +33,7 @@ export function elrondEventListener(
         listen: async () => {
             elrondSocket.on("elrond:bridge_tx", async (fromHash: string) => {
                 try {
-                    console.log(fromHash, "fromHash");
+                    console.log(fromHash, "Elron fromHash");
                     const event = await eventFromTxn(fromHash, provider, providerRest);
 
                     if (!event) return;
@@ -60,7 +60,7 @@ export function elrondEventListener(
                                 tx_fees: tx_fees.toString(),
                             });
 
-                            console.log(e.topics);
+                            console.log("e.topics", e.topics);
                             const to = Base64.atob(e.topics[3]); //
                             const nftMinterContact = Base64.decode(e.topics[4]); //
                             let uri = "";
@@ -70,7 +70,7 @@ export function elrondEventListener(
                             )[0]; //
                             const nonce = bigIntFromBeElrd(Base64.toUint8Array(e.topics[6]));
 
-                            console.log({
+                            console.log("Elrond", {
                                 chain_nonce,
                                 nftMinterContact,
                                 nonce,
@@ -99,7 +99,7 @@ export function elrondEventListener(
                                         nonce
                                     );
 
-                                    console.log({
+                                    console.log("Elrond2" ,{
                                         name,
                                         metadataUrl,
                                         attrs,
@@ -146,7 +146,7 @@ export function elrondEventListener(
                                     if (updated) {
                                         try {
                                             console.log("before telegram operation")
-                                          await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+                                            await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
                                         } catch (err) {
                                             console.log(err)
                                         }
