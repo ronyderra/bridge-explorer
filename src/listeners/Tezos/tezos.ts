@@ -8,9 +8,10 @@ import { ethers, BigNumber as bs } from "ethers";
 import { IEvent } from "../../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../../business-logic/repo";
-import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
+import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
 import { executedEventHandler } from "../../handlers/index";
 import { getTezosCollectionData } from "./getTezosData"
+import { BlockRepo } from "../../Intrerfaces/IBlockRepo";
 import {
   MichelsonV1Expression,
   MichelsonV1ExpressionBase,
@@ -78,123 +79,139 @@ export function tezosEventListener(
     listen: async () => {
       console.log("listen tezos");
 
-      web3socket.on("tezos:bridge_tx", async (txHash: string) => {
+      setInterval(async () => {
         try {
-          console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
+          const dataBCD = await axios.get(`https://api.better-call.dev/v1/contract/mainnet/KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu/operations?entrypoints=freeze_fa2,withdraw_nft`)
+          const lastTransactionOnContract = dataBCD.data.operations[0];
+          let blocks = await em.findOne(BlockRepo, { chain: "18" });
 
-          const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
-          const parameter = data.data[0]?.parameter;
-          const storage = data.data[0]?.storage;
-          const target = data.data[0]?.target
-          const entrypoint = parameter?.entrypoint;
+          if (blocks && lastTransactionOnContract.id > 1) {
+            wrap(blocks).assign(
+              {
+                lastBlock: lastTransactionOnContract.id,
+                timestamp: Math.floor(+new Date() / 1000),
+              },
+              { em }
+            );
+            await em.flush();
+            const txHash = lastTransactionOnContract.hash;
 
-          const eventObj: IEvent = {
-            actionId: "",
-            chainName: "TEZOS",
-            tokenId: "",
-            fromChain: "18",
-            toChain: "",
-            fromChainName: "TEZOS",
-            toChainName: "",
-            fromHash: txHash,
-            txFees: "",
-            type: "",
-            status: "Pending",
-            toHash: undefined,
-            senderAddress: "",
-            targetAddress: "",
-            nftUri: "",
-            collectionName: "",
-            contract: "",
-            createdAt: new Date()
-          };
+            console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
 
-          switch (entrypoint) {
-            case "freeze_fa2": {
-              eventObj.actionId = storage.action_cnt;
-              eventObj.tokenId = parameter.value.token_id;
-              eventObj.toChain = parameter.value.chain_nonce;
-              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
-              eventObj.type = "Transfer";
-              eventObj.senderAddress = data.data[0].sender.address;
-              eventObj.targetAddress = parameter.value?.to;
-              eventObj.contract = parameter?.value.fa2_address;
-              eventObj.collectionName = data.data[1]?.target?.alias;
-              eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
-              break;
-            }
-            case "withdraw_nft": {
-              eventObj.actionId = storage.action_cnt;
-              eventObj.tokenId = parameter.value.token_id;
-              eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
-              eventObj.type = "Unfreez";
-              eventObj.senderAddress = data.data[0].sender?.address;
-              eventObj.targetAddress = parameter.value.to;
-              eventObj.contract = target.address;
-              eventObj.collectionName = data.data[1].target.alias;
-              eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
-              break;
-            }
-          }
+            const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
+            const parameter = data.data[0]?.parameter;
+            const storage = data.data[0]?.storage;
+            const target = data.data[0]?.target
+            const entrypoint = parameter?.entrypoint;
 
-          try {
-            let [url, exchangeRate]:
-              | PromiseSettledResult<string>[]
-              | string[] = await Promise.allSettled([
-                (async () =>
-                  parameter.value.fa2_address &&
-                  eventObj.tokenId &&
-                  (await getUriFa2(parameter.value.fa2_address, eventObj.tokenId)))(),
-                (async () => {
-                  const res = await axios(
-                    `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
-                  );
-                  return res.data[chainId].usd;
-                })(),
-              ]);
+            const eventObj: IEvent = {
+              actionId: "",
+              chainName: "TEZOS",
+              tokenId: "",
+              fromChain: "18",
+              toChain: "",
+              fromChainName: "TEZOS",
+              toChainName: "",
+              fromHash: txHash,
+              txFees: "",
+              type: "",
+              status: "Pending",
+              toHash: undefined,
+              senderAddress: "",
+              targetAddress: "",
+              nftUri: "",
+              collectionName: "",
+              contract: "",
+              createdAt: new Date()
+            };
 
-            eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
-            eventObj.dollarFees =
-              exchangeRate.status === "fulfilled"
-                ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
-                  .multipliedBy(exchangeRate.value)
-                  .toString()
-                : "";
-          } catch (e) {
-            console.log(e);
-          }
-
-          const [doc] = await Promise.all([
-            (async () => {
-              return await createEventRepo(em.fork()).createEvent(eventObj);
-            })(),
-            (async () => {
-              return await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!)
-            })(),
-          ])
-          if (doc) {
-            console.log("------TELEGRAM FUNCTION-----")
-            console.log("doc: ", doc);
-
-            setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
-            setTimeout(async () => {
-              const updated = await createEventRepo(em.fork()).errorEvent(txHash);
-              clientAppSocket.emit("updateEvent", updated);
-              if (updated) {
-                try {
-                  console.log("before telegram operation")
-                  await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
-                } catch (err) {
-                  console.log(err)
-                }
+            switch (entrypoint) {
+              case "freeze_fa2": {
+                eventObj.actionId = storage.action_cnt;
+                eventObj.tokenId = parameter.value.token_id;
+                eventObj.toChain = parameter.value.chain_nonce;
+                eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
+                eventObj.type = "Transfer";
+                eventObj.senderAddress = data.data[0].sender.address;
+                eventObj.targetAddress = parameter.value?.to;
+                eventObj.contract = parameter?.value.fa2_address;
+                eventObj.collectionName = data.data[1]?.target?.alias;
+                eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
+                break;
               }
-            }, 1000 * 60 * 20);
-          }
+              case "withdraw_nft": {
+                eventObj.actionId = storage.action_cnt;
+                eventObj.tokenId = parameter.value.token_id;
+                eventObj.txFees = new BigNumber(data.data[0].amount).multipliedBy(1e12).toString();
+                eventObj.type = "Unfreez";
+                eventObj.senderAddress = data.data[0].sender?.address;
+                eventObj.targetAddress = parameter.value.to;
+                eventObj.contract = target.address;
+                eventObj.collectionName = data.data[1].target.alias;
+                eventObj.toChainName = chainNonceToName(parameter.value.chain_nonce.toString());
+                break;
+              }
+            }
 
+            try {
+              let [url, exchangeRate]:
+                | PromiseSettledResult<string>[]
+                | string[] = await Promise.allSettled([
+                  (async () =>
+                    parameter.value.fa2_address &&
+                    eventObj.tokenId &&
+                    (await getUriFa2(parameter.value.fa2_address, eventObj.tokenId)))(),
+                  (async () => {
+                    const res = await axios(
+                      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId}&vs_currencies=usd`
+                    );
+                    return res.data[chainId].usd;
+                  })(),
+                ]);
+
+              eventObj.nftUri = url.status === "fulfilled" ? url.value : "";
+              eventObj.dollarFees =
+                exchangeRate.status === "fulfilled"
+                  ? new BigNumber(ethers.utils.formatEther(eventObj.txFees))
+                    .multipliedBy(exchangeRate.value)
+                    .toString()
+                  : "";
+            } catch (e) {
+              console.log(e);
+            }
+
+            const [doc] = await Promise.all([
+              (async () => {
+                return await createEventRepo(em.fork()).createEvent(eventObj);
+              })(),
+              (async () => {
+                return await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!)
+              })(),
+            ])
+            if (doc) {
+              console.log("------TELEGRAM FUNCTION-----")
+              console.log("doc: ", doc);
+
+              setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
+              setTimeout(async () => {
+                const updated = await createEventRepo(em.fork()).errorEvent(txHash);
+                clientAppSocket.emit("updateEvent", updated);
+                if (updated) {
+                  try {
+                    console.log("before telegram operation")
+                    await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+                  } catch (err) {
+                    console.log(err)
+                  }
+                }
+              }, 1000 * 60 * 20);
+            }
+          }
         } catch (err) {
           console.log(err)
         }
-      });
+      }, 10000)
+
 
       // sub.on("data", async (data: | OperationContent | (OperationContentsAndResult & { hash: string })) => {
       //   console.log("Tezos Got Data Line 78:", data)
