@@ -18,7 +18,6 @@ export function tezosEventListener(
   chainId: string,
   em: EntityManager<IDatabaseDriver<Connection>>,
 ): IContractEventListener {
-
   // const tezos = new TezosToolkit(rpc);
 
   // async function getUriFa2(fa2Address: string, tokenId: string): Promise<string> {
@@ -42,12 +41,15 @@ export function tezosEventListener(
       console.log("listen tezos");
 
       setInterval(async () => {
+        console.log("listen tezos2");
         try {
           const dataBCD = await axios.get(`https://api.better-call.dev/v1/contract/mainnet/KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu/operations?entrypoints=freeze_fa2,withdraw_nft`)
           const lastTransactionOnContract = dataBCD.data.operations[0];
           let blocks = await em.findOne(BlockRepo, { chain: "18" });
+          console.log("listen tezos3");
 
           if (blocks && lastTransactionOnContract.id > blocks.lastBlock) {
+            console.log("listen tezos7");
             wrap(blocks).assign(
               {
                 lastBlock: lastTransactionOnContract.id,
@@ -57,6 +59,7 @@ export function tezosEventListener(
             );
             await em.flush();
             const txHash = lastTransactionOnContract.hash;
+            console.log("listen tezos5");
 
             console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
 
