@@ -55,9 +55,6 @@ export default server.listen(config.port, async () => {
 
   listen && tezosEventListener(
           config.tezos.socket,
-          config.tezos.contract,
-          config.tezos.name,
-          config.tezos.nonce,
           config.tezos.id,
           orm.em.fork()
           ).listen();
