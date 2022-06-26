@@ -110,7 +110,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
         }
       );
 
-      if (fromChain) {
+      if (fromChain && !fromHash) {
         events = await em.find(BridgeEvent, { fromChain });
       } else if (status) {
         events = await em.find(
