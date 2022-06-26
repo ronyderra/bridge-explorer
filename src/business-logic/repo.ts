@@ -124,7 +124,12 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
 
         count = events.length;
         events = events.slice(offset * 50, offset * 50 + 50);
-      } else if (fromHash) {
+      }
+      else if (fromHash && fromChain) {
+        events = await em.find
+          (BridgeEvent, { $and: [{ fromHash }, { fromChain }] });
+      }
+      else if (fromHash) {
         events = await em.find
           (BridgeEvent, { fromHash });
       } else if (toHash) {
