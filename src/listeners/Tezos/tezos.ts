@@ -46,6 +46,8 @@ export function tezosEventListener(
         try {
           const dataBCD = await axios.get(`https://api.better-call.dev/v1/contract/mainnet/KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu/operations?entrypoints=freeze_fa2,withdraw_nft`)
           const lastTransactionOnContract = dataBCD.data.operations[0];
+          console.log("lastTransactionOnContract", lastTransactionOnContract.id);
+
           let blocks = await em.findOne(BlockRepo, { chain: "18" });
 
           if (blocks && lastTransactionOnContract.id > blocks.lastBlock) {
