@@ -193,7 +193,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
 
       return { events, count };
     },
-    async createEvent(e, functionName) {
+    async createEvent(e, functionName=undefined) {
       const event = new BridgeEvent(e);
       const same = await em.findOne(BridgeEvent, {
         fromHash: event.fromHash,
