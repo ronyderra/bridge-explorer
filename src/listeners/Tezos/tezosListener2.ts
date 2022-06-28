@@ -30,8 +30,6 @@ import {
 
 const util = require("util");
 
-const executedSocket = io(config.socketUrl);
-
 function isTransactionResult(
     data: OperationContent | OperationContentsAndResult
 ): data is OperationContentsAndResultTransaction {
@@ -151,7 +149,7 @@ export function tezosEventListener2(
                         console.log("tezoslistener2", eventObj);
                         const [doc] = await Promise.all([
                             (async () => {
-                                return await createEventRepo(em.fork()).createEvent(eventObj);
+                                return await createEventRepo(em.fork()).createEvent(eventObj, "tezosListener2");
                             })(),
                             (async () => {
                                 return await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!)
@@ -159,7 +157,7 @@ export function tezosEventListener2(
                         ])
                         if (doc) {
                             console.log("TezosListener2------TELEGRAM FUNCTION-----")
-                            console.log("doc: ", doc);
+                            console.log("doc2: ", doc);
 
                             setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
                             setTimeout(async () => {
