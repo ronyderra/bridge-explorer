@@ -15,7 +15,7 @@ import { BigMapAbstraction, MichelsonMap, TezosToolkit } from "@taquito/taquito"
 
 const executedSocket = io(config.socketUrl);
 
-export function tezosEventListener(
+export function tezosEventListener1(
   rpc: string,
   chainId: string,
   em: EntityManager<IDatabaseDriver<Connection>>,
@@ -46,7 +46,7 @@ export function tezosEventListener(
         try {
           const dataBCD = await axios.get(`https://api.better-call.dev/v1/contract/mainnet/KT1WKtpe58XPCqNQmPmVUq6CZkPYRms5oLvu/operations?entrypoints=freeze_fa2,withdraw_nft`)
           const lastTransactionOnContract = dataBCD.data.operations[0];
-          console.log("lastTransactionOnContract", lastTransactionOnContract.id);
+          console.log("TezosListener1 lastTransactionOnContract", lastTransactionOnContract.id);
 
           let blocks = await em.findOne(BlockRepo, { chain: "18" });
 
@@ -61,7 +61,7 @@ export function tezosEventListener(
             await em.flush();
             const txHash = lastTransactionOnContract.hash;
 
-            console.log("TEZOS.ts line 93 -web3:bridge_tx", txHash)
+            console.log("TEZOS1.ts line 93 -web3:bridge_tx", txHash)
 
             const data = await axios.get(`https://api.tzkt.io/v1/operations/${txHash}`)
             const parameter = data.data[0]?.parameter;
@@ -147,14 +147,14 @@ export function tezosEventListener(
 
             const [doc] = await Promise.all([
               (async () => {
-                return await createEventRepo(em.fork()).createEvent(eventObj);
+                return await createEventRepo(em.fork()).createEvent(eventObj, "tezosListener1");
               })(),
               (async () => {
                 return await createEventRepo(em.fork()).saveWallet(eventObj.senderAddress, eventObj.targetAddress!)
               })(),
             ])
             if (doc) {
-              console.log("------TELEGRAM FUNCTION-----")
+              console.log("TezosListener1 ------TELEGRAM FUNCTION-----")
               console.log("doc: ", doc);
 
               setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)

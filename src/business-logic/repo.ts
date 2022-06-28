@@ -7,7 +7,7 @@ import moment from "moment";
 import config from "../config";
 
 export interface IEventRepo {
-  createEvent(e: IEvent): Promise<BridgeEvent | undefined>;
+  createEvent(e: IEvent, functionName?: string): Promise<BridgeEvent | undefined>;
   createWallet(e: IWallet): Promise<Wallet | null>;
   findEvent(targetAddress: string): Promise<BridgeEvent | null>;
   findEventByHash(fromHash: string): Promise<BridgeEvent | null>;
@@ -193,7 +193,7 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
 
       return { events, count };
     },
-    async createEvent(e) {
+    async createEvent(e, functionName) {
       const event = new BridgeEvent(e);
       const same = await em.findOne(BridgeEvent, {
         fromHash: event.fromHash,
@@ -201,6 +201,9 @@ export default function createEventRepo(em: EntityManager<IDatabaseDriver<Connec
       });
       if (same) return undefined;
       await em.persistAndFlush(event);
+      if (functionName && !same) {
+        console.log(functionName, e)
+      }
       return event;
     },
     async createWallet(e) {

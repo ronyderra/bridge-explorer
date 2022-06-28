@@ -1,7 +1,9 @@
 import express from "express";
 import { EvmEventService } from "./listeners/Evm/evm";
 import { elrondEventListener } from "./listeners/Elrond/elrond";
-import { tezosEventListener } from "./listeners/Tezos/tezos";
+import { tezosEventListener1 } from "./listeners/Tezos/tezosListener1";
+import { tezosEventListener2 } from "./listeners/Tezos/tezosListener2";
+import { tezosEventListener3 } from "./listeners/Tezos/tezosListener3";
 import { AlgorandEventListener } from "./listeners/Algorand/algorand";
 import { TronEventListener } from "./listeners/Tron/tron";
 import config from "./config";
@@ -53,11 +55,26 @@ export default server.listen(config.port, async () => {
 
   listen && elrondEventListener(orm.em.fork()).listen();
 
-  listen && tezosEventListener(
-          config.tezos.socket,
-          config.tezos.id,
-          orm.em.fork()
-          ).listen();
+  listen && tezosEventListener1(
+    config.tezos.socket,
+    config.tezos.id,
+    orm.em.fork()
+  ).listen();
+
+  listen && tezosEventListener2(
+    config.tezos.socket,
+    config.tezos.contract,
+    config.tezos.name,
+    config.tezos.nonce,
+    config.tezos.id,
+    orm.em.fork()
+  ).listen();
+
+  listen && tezosEventListener3(
+    config.tezos.socket,
+    config.tezos.id,
+    orm.em.fork()
+  ).listen();
 
   listen && AlgorandEventListener(orm.em.fork()).listen();
   
