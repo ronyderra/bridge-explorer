@@ -8,53 +8,57 @@ import { Erc721Attrs } from "../Elrond/elrond";
 export async function getFrozenTokenAttrs(
     token: string,
     nonce: BigNumber
-): Promise<[Erc721Attrs[] | undefined, string | undefined]> {
-    //@ts-ignore
-    const tokenInfo = await provider.getAddressNft(minterAddr, token, nonce);
-    let metadataUrl: undefined | string = tokenInfo.uris[1];
-    if (!tokenInfo.attributes?.length) {
-        return [undefined, metadataUrl];
-    }
-    const attrs = Buffer.from(tokenInfo.attributes, "base64").toString("utf-8");
-    if (attrs.includes("\ufffd")) {
-        return [
-            [
-                {
-                    trait_type: "Base64 Attributes",
-                    value: tokenInfo.attributes,
-                },
-            ],
-            metadataUrl,
-        ];
-    }
-    const splitAttrs: Erc721Attrs[] = attrs.split(";").map((v: string, i) => {
-        const res: Array<string> = v.split(":");
-        if (res.length == 2) {
-            if (res[0] == "metadata") {
-                if (res[1].startsWith("http") || res[1].startsWith("ipfs")) {
-                    metadataUrl = res[1];
-                } else {
-                    metadataUrl = `ipfs://${res[1]}`;
-                }
-            }
-            return {
-                trait_type: res[0],
-                value: res[1],
-            };
-        } else if (res.length == 1) {
-            return {
-                trait_type: `Attr #${i}`,
-                value: res[0],
-            };
-        } else {
-            return {
-                trait_type: res[0],
-                value: res.slice(1).join(":"),
-            };
+): Promise<any> {
+    try {
+        //@ts-ignore
+        const tokenInfo = await provider.getAddressNft(minterAddr, token, nonce);
+        let metadataUrl: undefined | string = tokenInfo.uris[1];
+        if (!tokenInfo.attributes?.length) {
+            return [undefined, metadataUrl];
         }
-    });
+        const attrs = Buffer.from(tokenInfo.attributes, "base64").toString("utf-8");
+        if (attrs.includes("\ufffd")) {
+            return [
+                [
+                    {
+                        trait_type: "Base64 Attributes",
+                        value: tokenInfo.attributes,
+                    },
+                ],
+                metadataUrl,
+            ];
+        }
+        const splitAttrs: Erc721Attrs[] = attrs.split(";").map((v: string, i) => {
+            const res: Array<string> = v.split(":");
+            if (res.length == 2) {
+                if (res[0] == "metadata") {
+                    if (res[1].startsWith("http") || res[1].startsWith("ipfs")) {
+                        metadataUrl = res[1];
+                    } else {
+                        metadataUrl = `ipfs://${res[1]}`;
+                    }
+                }
+                return {
+                    trait_type: res[0],
+                    value: res[1],
+                };
+            } else if (res.length == 1) {
+                return {
+                    trait_type: `Attr #${i}`,
+                    value: res[0],
+                };
+            } else {
+                return {
+                    trait_type: res[0],
+                    value: res.slice(1).join(":"),
+                };
+            }
+        });
 
-    return [splitAttrs, metadataUrl];
+        return [splitAttrs, metadataUrl];
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 export async function eventFromTxn(
