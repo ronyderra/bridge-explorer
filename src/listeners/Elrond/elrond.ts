@@ -94,15 +94,15 @@ export function elrondEventListener(
 
                                     const name = Base64.decode(e.topics[7]);
                                     uri = Base64.decode(e.topics[8]);
-                                    const [attrs, metadataUrl] = await getFrozenTokenAttrs(
-                                        tokenId,
-                                        nonce
-                                    );
+                                    // const [attrs, metadataUrl] = await getFrozenTokenAttrs(
+                                    //     tokenId,
+                                    //     nonce
+                                    // );
 
                                     console.log("Elrond2" ,{
                                         name,
-                                        metadataUrl,
-                                        attrs,
+                                        // metadataUrl,
+                                        // attrs,
                                     });
                                     break;
                                 }
