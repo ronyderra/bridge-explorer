@@ -5,6 +5,7 @@ import { tezosEventListener1 } from "./listeners/Tezos/tezosListener1";
 import { tezosEventListener2 } from "./listeners/Tezos/tezosListener2";
 import { tezosEventListener3 } from "./listeners/Tezos/tezosListener3";
 import { AlgorandEventListener } from "./listeners/Algorand/algorand";
+import {vechainListener} from "./listeners/Vechain/vechain"
 import { TronEventListener } from "./listeners/Tron/tron";
 import config from "./config";
 import { MikroORM } from "@mikro-orm/core";
@@ -76,6 +77,7 @@ export default server.listen(config.port, async () => {
     orm.em.fork()
   ).listen();
 
+   vechainListener(orm.em.fork()).listen();
   listen && AlgorandEventListener(orm.em.fork()).listen();
   
   listen && TronEventListener(orm.em.fork()).listen();
