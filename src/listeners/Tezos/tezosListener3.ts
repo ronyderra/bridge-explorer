@@ -40,7 +40,7 @@ export function tezosEventListener3(
         listen: async () => {
             console.log("listen tezos 3");
 
-            web3socket.on("tezos3:bridge_tx", async (txHash: string) => {
+            web3socket.on("tezos:bridge_tx", async (txHash: string) => {
                 try {
                     console.log("TEZOS3.ts line 93 -web3:bridge_tx", txHash)
 
