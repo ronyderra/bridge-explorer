@@ -122,7 +122,7 @@ export function vechainListener(
 
 
             executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, destanationHash: string) => {
-                if (!fromChain || !config.web3.map(c => c.nonce).includes("VECHAIN"))
+                if (!fromChain || fromChain !== 2)
                 return;
                 console.log({ toChain, fromChain, action_id, destanationHash, }, "VECHAIN:tx_executed_event");
 
