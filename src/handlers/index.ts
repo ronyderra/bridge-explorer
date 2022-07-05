@@ -82,7 +82,7 @@ export const executedEventHandler = (em: EntityManager<IDatabaseDriver<Connectio
       "index.ts - line 84 tx_executed_event"
     );
 
-    const isToChainEvm = evmChainNumbers.includes(String(toChain)) && toChain !== 2 ? true : false
+    const isToChainEvm = evmChainNumbers.includes(String(toChain)) && toChain !== 25 ? true : false
 
     const chainData = isToChainEvm && getChain(String(toChain))
     const provider = chainData && new ethers.providers.JsonRpcProvider(chainData?.node);

@@ -122,7 +122,7 @@ export function vechainListener(
 
 
             executedSocket.on("tx_executed_event", async (fromChain: number, toChain: number, action_id: string, destanationHash: string) => {
-                if (!fromChain || fromChain !== 2)
+                if (!fromChain || fromChain !== 25)
                 return;
                 console.log({ toChain, fromChain, action_id, destanationHash, }, "VECHAIN:tx_executed_event");
 
