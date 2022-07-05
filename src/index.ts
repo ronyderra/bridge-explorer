@@ -77,7 +77,7 @@ export default server.listen(config.port, async () => {
     orm.em.fork()
   ).listen();
 
-  listen && vechainListener(orm.em.fork()).listen();
+  // listen && vechainListener(orm.em.fork()).listen();
 
    listen && AlgorandEventListener(orm.em.fork()).listen();
   
