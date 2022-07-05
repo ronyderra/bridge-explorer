@@ -28,7 +28,7 @@ export function vechainListener(
             try {
                 const checkForNewBlock = async () => {
                     const lastBlockOnChain = await axios.get("https://region3.xp.network/vechain/blocks/best?expanded=true")
-                    let BlockNumberInDB = await em.findOne(BlockRepo, { chain: "2" });
+                    let BlockNumberInDB = await em.findOne(BlockRepo, { chain: "25" });
 
                     if (BlockNumberInDB && BlockNumberInDB.lastBlock < lastBlockOnChain.data.number) {
                         wrap(BlockNumberInDB).assign(
@@ -65,7 +65,7 @@ export function vechainListener(
                                     actionId: "",
                                     chainName: "VECHAIN",
                                     tokenId: "",
-                                    fromChain: "2",
+                                    fromChain: "25",
                                     toChain: "",
                                     fromChainName: "VECHAIN",
                                     toChainName: "",
