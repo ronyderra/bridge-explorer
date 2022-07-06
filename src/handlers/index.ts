@@ -197,8 +197,8 @@ export const eventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) =>
         } catch (err) {
           console.log(err)
         }
-      }else{
-        console.log("There was no response from error event" , updated)
+      } else {
+        console.log("There was no response from error event", updated)
       }
     }, 1000 * 60 * 20);
   }
