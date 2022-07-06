@@ -178,6 +178,7 @@ export default class IndexUpdater {
 
   private getMinterContract = (chainName: string) =>
     config.web3.find((c) => c.name === chainName)?.contract;
+
   private getNodeRpc = (chainName: string) =>
     config.web3.find((c) => c.name === chainName)?.node;
 
