@@ -6,7 +6,7 @@ import TronWeb from "tronweb";
 import { departureEventHandler } from "../../EventHandler/departure";
 import { destinationEventHandler } from "../../EventHandler/destination";
 import Bottleneck from "bottleneck";
-import { IEventhandler } from "../../EventHandler/departure";
+import { IEventhandler } from "../../Intrerfaces/IEventhandler";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
 
 const executedSocket = io(config.socketUrl);

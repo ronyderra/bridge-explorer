@@ -3,6 +3,7 @@ import config, { getChain, getTelegramTemplate } from "../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
 import { IEvent } from "../Intrerfaces/IEvent";
+import {IEventhandler} from "../Intrerfaces/IEventhandler"
 import { chainNonceToName } from "../config";
 import { clientAppSocket } from "../index";
 import cron from 'node-cron'
@@ -10,22 +11,7 @@ import { currency } from "../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
 import moment from "moment";
-export interface IEventhandler {
-  actionId: string;
-  from: string;
-  to: string;
-  sender: string;
-  target: string;
-  hash: string;
-  tokenId: string;
-  type: "Transfer" | "Unfreeze";
-  txFees: string;
-  uri: string;
-  contract: string;
-  dollarFees?: string;
-  createdAt?: Date
-  collectionName?: string
-}
+
 
 const evmChainNumbers = config.web3.map((c) => c.nonce);
 
