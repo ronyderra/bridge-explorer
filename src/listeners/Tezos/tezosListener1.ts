@@ -9,7 +9,7 @@ import { IEvent } from "../../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
-import { destinationEventHandler } from "../../EventHandler/index";
+import { destinationEventHandler } from "../../EventHandler/destination";
 import { BlockRepo } from "../../Intrerfaces/IBlockRepo";
 import { BigMapAbstraction, MichelsonMap, TezosToolkit } from "@taquito/taquito";
 

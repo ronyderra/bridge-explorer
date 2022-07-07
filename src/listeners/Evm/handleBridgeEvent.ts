@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import IndexUpdater from '../../services/indexUpdater'
 import { chainNonceToName } from '../../config'
-import { IEventhandler } from '../../EventHandler/index'
+import { IEventhandler } from '../../EventHandler/departure'
 import { getCollectionName, getContractAddress } from "./getCollectionData"
 import config from '../../config'
 

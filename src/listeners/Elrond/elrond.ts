@@ -10,7 +10,7 @@ import { Address, ProxyProvider, } from "@elrondnetwork/erdjs";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../../business-logic/repo";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helper";
-import { destinationEventHandler } from "../../EventHandler";
+import { destinationEventHandler } from "../../EventHandler/destination";
 
 const elegantPair = require('elegant-pair');
 const util = require("util");
