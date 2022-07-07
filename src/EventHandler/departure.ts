@@ -1,9 +1,9 @@
 import axios from "axios";
-import config, { getChain, getTelegramTemplate } from "../config";
+import config, { getTelegramTemplate } from "../config";
 import { ethers } from "ethers";
 import BigNumber from "bignumber.js";
 import { IEvent } from "../Intrerfaces/IEvent";
-import {IEventhandler} from "../Intrerfaces/IEventhandler"
+import { IEventhandler } from "../Intrerfaces/IEventhandler"
 import { chainNonceToName } from "../config";
 import { clientAppSocket } from "../index";
 import cron from 'node-cron'
@@ -90,7 +90,7 @@ export const departureEventHandler = (em: EntityManager<IDatabaseDriver<Connecti
   if (doc) {
     console.log("------TELEGRAM FUNCTION-----")
     console.log("doc: ", doc);
-   
+
 
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
 
@@ -100,7 +100,7 @@ export const departureEventHandler = (em: EntityManager<IDatabaseDriver<Connecti
       if (updated) {
         try {
           console.log("before telegram operation")
-         await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
+          await axios.get(`https://api.telegram.org/bot5524815525:AAEEoaLVnMigELR-dl01hgHzwSkbonM1Cxc/sendMessage?chat_id=-553970779&text=${getTelegramTemplate(doc)}&parse_mode=HTML`);
         } catch (err) {
           console.log(err)
         }
