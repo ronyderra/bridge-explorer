@@ -1,60 +1,27 @@
 import axios from "axios";
-import config, { getTelegramTemplate } from "../config";
-import { ethers } from "ethers";
-import BigNumber from "bignumber.js";
+import { getTelegramTemplate } from "../config";
 import { IEvent } from "../Intrerfaces/IEvent";
 import { IEventhandler } from "../Intrerfaces/IEventhandler"
 import { chainNonceToName } from "../config";
 import { clientAppSocket } from "../index";
-import cron from 'node-cron'
 import { currency } from "../config";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../business-logic/repo";
 import moment from "moment";
-
-
-const evmChainNumbers = config.web3.map((c) => c.nonce);
-
-const getExchageRate = async () => (await axios('https://xp-exchange-rates.herokuapp.com/exchange/batch_data')).data;
-
-export const calcDollarFees = (txFees: any, exchangeRate: number, fromChain: string) => {
-  if (fromChain === config.algorand.nonce) {
-    return String(+txFees * exchangeRate)
-  }
-  if (fromChain === config.tron.nonce) {
-    return new BigNumber(txFees).shiftedBy(-6).multipliedBy(exchangeRate.toFixed(2)).toString()
-  }
-
-  return new BigNumber(ethers.utils.formatEther(txFees?.toString() || ""))
-    .multipliedBy(exchangeRate.toFixed(2))
-    .toString();
-};
-
-//getting exchange rate api every 3 mins
-let exchangeRates: any = {};
-
-(async () => {
-  exchangeRates = (await getExchageRate())
-})()
-cron.schedule('*/3 * * * *', async () => {
-  exchangeRates = (await getExchageRate())
-})
+import { calcDollarFees, getExchageRate } from "./eventHandlerHelper"
+import cron from 'node-cron'
 
 export const departureEventHandler = (em: EntityManager<IDatabaseDriver<Connection>>,) => async ({
-  actionId,
-  from,
-  to,
-  sender,
-  target,
-  hash,
-  tokenId,
-  type,
-  txFees,
-  uri,
-  contract,
-  createdAt,
-  collectionName
-}: IEventhandler) => {
+  actionId, from,
+  to, sender,
+  target, hash,
+  tokenId, type,
+  txFees, uri,
+  contract, createdAt, collectionName }: IEventhandler) => {
+
+  let exchangeRates: any = {};
+  (async () => { exchangeRates = (await getExchageRate()) })()
+  cron.schedule('*/3 * * * *', async () => { exchangeRates = (await getExchageRate()) })
 
   const event: IEvent = {
     chainName: chainNonceToName(from),
@@ -76,7 +43,7 @@ export const departureEventHandler = (em: EntityManager<IDatabaseDriver<Connecti
     createdAt: createdAt ? createdAt : moment().utcOffset(0).toDate(),
     collectionName
   };
-  console.log("index.ts line 176", event)
+  console.log("departure.ts line 54", event)
 
   const [doc] = await Promise.all([
     (async () => {
@@ -91,9 +58,7 @@ export const departureEventHandler = (em: EntityManager<IDatabaseDriver<Connecti
     console.log("------TELEGRAM FUNCTION-----")
     console.log("doc: ", doc);
 
-
     setTimeout(() => clientAppSocket.emit("incomingEvent", doc), Math.random() * 3 * 1000)
-
     setTimeout(async () => {
       const updated = await createEventRepo(em.fork()).errorEvent(hash);
       clientAppSocket.emit("updateEvent", updated);
