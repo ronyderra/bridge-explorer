@@ -3,10 +3,10 @@ import config, { getChain } from "../../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
-import { departureEventHandler } from "../../handlers";
-import { destinationEventHandler } from "../../handlers";
+import { departureEventHandler } from "../../EventHandler";
+import { destinationEventHandler } from "../../EventHandler";
 import Bottleneck from "bottleneck";
-import { IEventhandler } from "../../handlers";
+import { IEventhandler } from "../../EventHandler";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
 
 const executedSocket = io(config.socketUrl);
