@@ -2,7 +2,7 @@ import config from "../../config";
 import { io } from "socket.io-client";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import { BigNumber } from "bignumber.js";
-import { eventHandler, executedEventHandler } from "../../handlers/index";
+import { departureEventHandler, destinationEventHandler } from "../../handlers/index";
 import { handleBridgeEvent } from "./handleBridgeEvent";
 // import { validateEvmTransaction } from "./validateTransaction"
 
@@ -62,7 +62,7 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
             eventContract,
           });
 
-          eventData && eventHandler(em.fork())(eventData);
+          eventData && departureEventHandler(em.fork())(eventData);
         }
       );
 
@@ -74,15 +74,16 @@ export function EvmEventService(em: EntityManager<IDatabaseDriver<Connection>>):
           action_id: string,
           hash: string
         ) => {
+          if (!fromChain || !config.web3.map(c => c.nonce).includes(String(fromChain)))
+            return;
+
           console.log("evm.ts line 75 - tx_executed_event")
           console.log(fromChain,
             toChain,
             action_id,
             hash)
-          if (!fromChain || !config.web3.map(c => c.nonce).includes(String(fromChain)))
-            return;
 
-          executedEventHandler(
+          destinationEventHandler(
             em.fork(),
             String(fromChain)
           )({

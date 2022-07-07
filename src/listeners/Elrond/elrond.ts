@@ -10,7 +10,7 @@ import { Address, ProxyProvider, } from "@elrondnetwork/erdjs";
 import { IDatabaseDriver, Connection, EntityManager } from "@mikro-orm/core";
 import createEventRepo from "../../business-logic/repo";
 import { eventFromTxn, bigIntFromBeElrd, getFrozenTokenAttrs } from "./helper";
-import { executedEventHandler } from "../../handlers";
+import { destinationEventHandler } from "../../handlers";
 
 const elegantPair = require('elegant-pair');
 const util = require("util");
@@ -164,7 +164,7 @@ export function elrondEventListener(
                     return;
 
                 console.log({ toChain, fromChain, action_id, hash, }, "elrond:tx_executed_event");
-                executedEventHandler(em.fork(), fromChain.toString())({ toChain, fromChain, action_id, hash, })
+                destinationEventHandler(em.fork(), fromChain.toString())({ toChain, fromChain, action_id, hash, })
             }
             );
 

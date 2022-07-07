@@ -3,8 +3,8 @@ import config, { getChain } from "../../config";
 import { io } from "socket.io-client";
 //@ts-expect-error no types, cope
 import TronWeb from "tronweb";
-import { eventHandler } from "../../handlers";
-import { executedEventHandler } from "../../handlers";
+import { departureEventHandler } from "../../handlers";
+import { destinationEventHandler } from "../../handlers";
 import Bottleneck from "bottleneck";
 import { IEventhandler } from "../../handlers";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
@@ -98,7 +98,7 @@ export function TronEventListener(
 
             console.log(evData, "evData");
 
-            eventHandler(em.fork())(evData);
+            departureEventHandler(em.fork())(evData);
           }
         }
       });
@@ -111,7 +111,7 @@ export function TronEventListener(
           action_id: string,
           hash: string
         ) => {
-          executedEventHandler(
+          destinationEventHandler(
             em.fork(),
             config.tron.nonce
           )({

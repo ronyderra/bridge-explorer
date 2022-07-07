@@ -9,7 +9,7 @@ import { IEvent } from "../../Intrerfaces/IEvent";
 import { io } from "socket.io-client";
 import createEventRepo from "../../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
-import { executedEventHandler } from "../../handlers/index";
+import { destinationEventHandler } from "../../handlers/index";
 import { BlockRepo } from "../../Intrerfaces/IBlockRepo";
 import { BigMapAbstraction, MichelsonMap, TezosToolkit } from "@taquito/taquito";
 
@@ -185,7 +185,7 @@ export function tezosEventListener1(
 
         if (evmNonces.includes(String(toChain))) {
           console.log("tezos line 240 - got to if")
-          executedEventHandler(
+          destinationEventHandler(
             em.fork(),
             String(fromChain)
           )({

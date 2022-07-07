@@ -2,7 +2,7 @@ import { IDatabaseDriver, Connection, wrap, EntityManager } from "@mikro-orm/cor
 import { Minter__factory } from "xpnet-web3-contracts";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BlockRepo } from "../Intrerfaces/IBlockRepo";
-import { eventHandler } from "../handlers";
+import { departureEventHandler } from "../handlers";
 import cron from 'node-cron'
 import Web3 from "web3";
 import { getChain } from "../config";
@@ -91,7 +91,7 @@ export const scrap = async (em: EntityManager<IDatabaseDriver<Connection>>,chain
             ? String(args["burner"])
             : String(args["mintWith"]),
         };
-        eventData && eventHandler(em.fork())(eventData)
+        eventData && departureEventHandler(em.fork())(eventData)
       } catch (_) {
         console.log(_);
         return [];

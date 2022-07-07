@@ -4,7 +4,7 @@ import { clientAppSocket } from "../../index";
 import { io } from "socket.io-client";
 import createEventRepo from "../../business-logic/repo";
 import { IDatabaseDriver, Connection, EntityManager, wrap } from "@mikro-orm/core";
-import { executedEventHandler } from "../../handlers/index";
+import { destinationEventHandler } from "../../handlers/index";
 import { Framework } from '@vechain/connex-framework'
 import { Driver, SimpleNet } from '@vechain/connex-driver'
 import axios from "axios"
@@ -130,7 +130,7 @@ export function vechainListener(
 
                 if (evmNonces.includes(String(toChain))) {
                     console.log("Vechain line 240 - got to if")
-                    executedEventHandler(
+                    destinationEventHandler(
                         em.fork(),
                         String(fromChain)
                     )({
